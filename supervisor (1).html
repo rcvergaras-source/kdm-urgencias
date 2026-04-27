@@ -1,0 +1,1138 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Supervisor BHP — Gestión de Urgencias</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bhp-orange: #E05E1B;
+      --bhp-dark: #1A1A1A;
+      --bhp-gray: #6B6B6B;
+      --bhp-light: #F5F4F1;
+      --bhp-white: #FFFFFF;
+      --bhp-border: #E0DDD8;
+      --bhp-success: #2D7D46;
+      --bhp-error: #C0392B;
+      --bhp-warning: #B45309;
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bhp-light);
+      color: var(--bhp-dark);
+      min-height: 100vh;
+    }
+
+    /* LOGIN SCREEN */
+    .login-screen {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+      background: var(--bhp-light);
+    }
+
+    .login-card {
+      background: var(--bhp-white);
+      border: 1px solid var(--bhp-border);
+      border-radius: 12px;
+      padding: 2.5rem 2rem;
+      width: 100%;
+      max-width: 400px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.07);
+    }
+
+    .login-header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .login-logo {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .logo-escondida { font-weight: 600; font-size: 1rem; color: var(--bhp-dark); letter-spacing: -0.02em; }
+    .logo-sep { width: 1px; height: 24px; background: var(--bhp-border); }
+    .logo-bhp { font-weight: 600; font-size: 1rem; color: var(--bhp-orange); letter-spacing: 0.05em; }
+
+    .login-header h2 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--bhp-dark);
+      margin-bottom: 0.3rem;
+    }
+
+    .login-header p {
+      font-size: 0.82rem;
+      color: var(--bhp-gray);
+    }
+
+    .login-role-badge {
+      display: inline-block;
+      background: #FFF0E8;
+      color: var(--bhp-orange);
+      font-size: 0.7rem;
+      font-weight: 600;
+      padding: 0.2rem 0.7rem;
+      border-radius: 20px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 0.75rem;
+      border: 1px solid #F5C8A8;
+    }
+
+    .field { display: flex; flex-direction: column; gap: 0.35rem; margin-bottom: 1rem; }
+    label { font-size: 0.78rem; font-weight: 500; color: var(--bhp-dark); }
+
+    input[type="email"], input[type="password"], input[type="text"], textarea, select {
+      width: 100%;
+      padding: 0.65rem 0.85rem;
+      border: 1.5px solid var(--bhp-border);
+      border-radius: 6px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.875rem;
+      color: var(--bhp-dark);
+      background: var(--bhp-white);
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+
+    input:focus, textarea:focus, select:focus {
+      outline: none;
+      border-color: var(--bhp-orange);
+      box-shadow: 0 0 0 3px rgba(224,94,27,0.1);
+    }
+
+    textarea { resize: vertical; min-height: 90px; }
+
+    .btn-primary {
+      width: 100%;
+      background: var(--bhp-orange);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 0.85rem;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s;
+      margin-top: 0.5rem;
+    }
+
+    .btn-primary:hover { background: #C94E10; }
+    .btn-primary:disabled { background: #C4B8B0; cursor: not-allowed; }
+
+    .login-error {
+      background: #FEE;
+      border: 1px solid #F5C6C6;
+      border-radius: 6px;
+      padding: 0.65rem 0.85rem;
+      font-size: 0.8rem;
+      color: var(--bhp-error);
+      margin-bottom: 1rem;
+      display: none;
+    }
+
+    .login-error.visible { display: block; }
+
+    /* MAIN APP */
+    .app { display: none; }
+    .app.visible { display: block; }
+
+    /* HEADER */
+    .header {
+      background: var(--bhp-white);
+      border-bottom: 3px solid var(--bhp-orange);
+      padding: 0.9rem 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    }
+
+    .header-logo {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .header-divider { width: 1px; height: 24px; background: var(--bhp-border); }
+
+    .header-section {
+      font-size: 0.78rem;
+      font-weight: 500;
+      color: var(--bhp-gray);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .header-right {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .user-avatar {
+      width: 30px;
+      height: 30px;
+      background: var(--bhp-orange);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 0.7rem;
+      font-weight: 600;
+    }
+
+    .user-name {
+      font-size: 0.82rem;
+      font-weight: 500;
+      color: var(--bhp-dark);
+    }
+
+    .btn-logout {
+      background: transparent;
+      border: 1px solid var(--bhp-border);
+      border-radius: 6px;
+      padding: 0.35rem 0.75rem;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.75rem;
+      color: var(--bhp-gray);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .btn-logout:hover { border-color: var(--bhp-error); color: var(--bhp-error); }
+
+    /* NOTIFICATION BANNER */
+    .notif-banner {
+      background: var(--bhp-orange);
+      color: white;
+      padding: 0.75rem 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 0.85rem;
+      font-weight: 500;
+    }
+
+    .notif-banner.hidden { display: none; }
+
+    .notif-dot {
+      width: 28px;
+      height: 28px;
+      background: white;
+      color: var(--bhp-orange);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    /* CONTAINER */
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem;
+    }
+
+    /* TABS */
+    .tabs {
+      display: flex;
+      gap: 0.25rem;
+      margin-bottom: 1.5rem;
+      border-bottom: 2px solid var(--bhp-border);
+    }
+
+    .tab {
+      padding: 0.6rem 1.1rem;
+      font-size: 0.82rem;
+      font-weight: 500;
+      color: var(--bhp-gray);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -2px;
+      transition: all 0.15s;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .tab:hover { color: var(--bhp-dark); }
+    .tab.active { color: var(--bhp-orange); border-bottom-color: var(--bhp-orange); }
+
+    .tab-badge {
+      background: var(--bhp-orange);
+      color: white;
+      font-size: 0.65rem;
+      font-weight: 700;
+      padding: 0.1rem 0.45rem;
+      border-radius: 20px;
+      min-width: 18px;
+      text-align: center;
+    }
+
+    .tab-badge.gray { background: var(--bhp-border); color: var(--bhp-gray); }
+
+    /* URGENCIAS LIST */
+    .urgencias-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.85rem;
+    }
+
+    .urgencia-card {
+      background: var(--bhp-white);
+      border: 1.5px solid var(--bhp-border);
+      border-radius: 10px;
+      padding: 1.25rem 1.5rem;
+      cursor: pointer;
+      transition: border-color 0.15s, box-shadow 0.15s;
+      display: flex;
+      align-items: center;
+      gap: 1.25rem;
+    }
+
+    .urgencia-card:hover {
+      border-color: var(--bhp-orange);
+      box-shadow: 0 2px 12px rgba(224,94,27,0.1);
+    }
+
+    .urgencia-card.pendiente { border-left: 4px solid var(--bhp-orange); }
+    .urgencia-card.en_correccion { border-left: 4px solid #B45309; }
+    .urgencia-card.aprobada { border-left: 4px solid var(--bhp-success); }
+    .urgencia-card.rechazada { border-left: 4px solid var(--bhp-error); }
+
+    .urg-num {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--bhp-dark);
+      white-space: nowrap;
+    }
+
+    .urg-info { flex: 1; min-width: 0; }
+
+    .urg-proveedor {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--bhp-dark);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .urg-meta {
+      font-size: 0.75rem;
+      color: var(--bhp-gray);
+      margin-top: 0.2rem;
+    }
+
+    .urg-status {
+      flex-shrink: 0;
+    }
+
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 0.25rem 0.7rem;
+      border-radius: 20px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      white-space: nowrap;
+    }
+
+    .status-pill.pendiente { background: #FFF0E8; color: var(--bhp-orange); }
+    .status-pill.en_correccion { background: #FFFBEB; color: var(--bhp-warning); }
+    .status-pill.aprobada { background: #EDFAF3; color: var(--bhp-success); }
+    .status-pill.rechazada { background: #FEE; color: var(--bhp-error); }
+
+    .urg-arrow {
+      color: var(--bhp-border);
+      font-size: 1.1rem;
+      flex-shrink: 0;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 3rem 1rem;
+      color: var(--bhp-gray);
+    }
+
+    .empty-state .icon { font-size: 2.5rem; margin-bottom: 0.75rem; }
+    .empty-state p { font-size: 0.9rem; }
+
+    /* DETAIL MODAL */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.45);
+      z-index: 200;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 1.5rem;
+      overflow-y: auto;
+    }
+
+    .modal-overlay.visible { display: flex; }
+
+    .modal {
+      background: var(--bhp-white);
+      border-radius: 12px;
+      width: 100%;
+      max-width: 680px;
+      margin: auto;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.18);
+      overflow: hidden;
+    }
+
+    .modal-header {
+      background: var(--bhp-dark);
+      padding: 1.1rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .modal-header-left {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .modal-urg-num {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.9rem;
+      color: white;
+      font-weight: 500;
+    }
+
+    .modal-close {
+      background: transparent;
+      border: none;
+      color: rgba(255,255,255,0.6);
+      font-size: 1.3rem;
+      cursor: pointer;
+      line-height: 1;
+      padding: 0.2rem;
+      transition: color 0.15s;
+    }
+
+    .modal-close:hover { color: white; }
+
+    .modal-body { padding: 1.5rem; }
+
+    .detail-section {
+      margin-bottom: 1.5rem;
+    }
+
+    .detail-section-title {
+      font-size: 0.72rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--bhp-gray);
+      margin-bottom: 0.85rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--bhp-border);
+    }
+
+    .detail-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+    }
+
+    .detail-field { display: flex; flex-direction: column; gap: 0.2rem; }
+
+    .detail-label {
+      font-size: 0.7rem;
+      color: var(--bhp-gray);
+      font-weight: 500;
+    }
+
+    .detail-value {
+      font-size: 0.875rem;
+      color: var(--bhp-dark);
+      font-weight: 400;
+    }
+
+    .detail-value.mono {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.8rem;
+    }
+
+    .detail-value.empty { color: var(--bhp-border); font-style: italic; }
+
+    /* ACTIONS */
+    .modal-actions {
+      border-top: 1px solid var(--bhp-border);
+      padding: 1.25rem 1.5rem;
+      background: #FAFAF8;
+    }
+
+    .actions-title {
+      font-size: 0.72rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--bhp-gray);
+      margin-bottom: 1rem;
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+
+    .btn-aprobar {
+      background: var(--bhp-success);
+      color: white;
+      border: none;
+      border-radius: 7px;
+      padding: 0.7rem 1.25rem;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .btn-aprobar:hover { background: #236037; }
+
+    .btn-correccion {
+      background: #FFFBEB;
+      color: var(--bhp-warning);
+      border: 1.5px solid #FCD34D;
+      border-radius: 7px;
+      padding: 0.7rem 1.25rem;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .btn-correccion:hover { background: #FEF3C7; }
+
+    .btn-rechazar {
+      background: #FEE;
+      color: var(--bhp-error);
+      border: 1.5px solid #F5C6C6;
+      border-radius: 7px;
+      padding: 0.7rem 1.25rem;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .btn-rechazar:hover { background: #FECACA; }
+
+    /* COMMENT BOX */
+    .comment-box {
+      display: none;
+      margin-top: 1rem;
+      padding: 1rem;
+      background: var(--bhp-white);
+      border: 1.5px solid var(--bhp-border);
+      border-radius: 8px;
+    }
+
+    .comment-box.visible { display: block; }
+
+    .comment-box label {
+      font-size: 0.78rem;
+      font-weight: 500;
+      color: var(--bhp-dark);
+      display: block;
+      margin-bottom: 0.4rem;
+    }
+
+    .comment-box textarea {
+      width: 100%;
+      padding: 0.65rem 0.85rem;
+      border: 1.5px solid var(--bhp-border);
+      border-radius: 6px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.85rem;
+      color: var(--bhp-dark);
+      resize: vertical;
+      min-height: 90px;
+    }
+
+    .comment-box textarea:focus {
+      outline: none;
+      border-color: var(--bhp-orange);
+      box-shadow: 0 0 0 3px rgba(224,94,27,0.1);
+    }
+
+    .comment-actions {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 0.75rem;
+      justify-content: flex-end;
+    }
+
+    .btn-cancelar {
+      background: transparent;
+      border: 1px solid var(--bhp-border);
+      border-radius: 6px;
+      padding: 0.55rem 1rem;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.82rem;
+      color: var(--bhp-gray);
+      cursor: pointer;
+    }
+
+    .btn-confirmar {
+      background: var(--bhp-dark);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      padding: 0.55rem 1rem;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .btn-confirmar:hover { background: #333; }
+
+    /* LOADING */
+    .loading-state {
+      text-align: center;
+      padding: 3rem;
+      color: var(--bhp-gray);
+      font-size: 0.9rem;
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 600px) {
+      .container { padding: 1.25rem 1rem; }
+      .detail-grid { grid-template-columns: 1fr; }
+      .action-buttons { flex-direction: column; }
+      .header { padding: 0.75rem 1rem; }
+      .user-name { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- LOGIN -->
+  <div class="login-screen" id="loginScreen">
+    <div class="login-card">
+      <div class="login-header">
+        <div class="login-logo">
+          <span class="logo-escondida">ESCONDIDA</span>
+          <div class="logo-sep"></div>
+          <span class="logo-bhp">BHP</span>
+        </div>
+        <div class="login-role-badge">Supervisor de Logística</div>
+        <h2>Acceso al sistema</h2>
+        <p>Ingrese sus credenciales para continuar</p>
+      </div>
+      <div class="login-error" id="loginError">Correo o contraseña incorrectos. Intente nuevamente.</div>
+      <div class="field">
+        <label for="loginEmail">Correo electrónico</label>
+        <input type="email" id="loginEmail" placeholder="correo@bhp.com" />
+      </div>
+      <div class="field">
+        <label for="loginPassword">Contraseña</label>
+        <input type="password" id="loginPassword" placeholder="••••••••" />
+      </div>
+      <button class="btn-primary" id="btnLogin">Ingresar</button>
+    </div>
+  </div>
+
+  <!-- APP -->
+  <div class="app" id="app">
+
+    <header class="header">
+      <div class="header-logo">
+        <span class="logo-escondida" style="font-size:0.9rem;">ESCONDIDA</span>
+        <div style="width:1px;height:20px;background:var(--bhp-border);"></div>
+        <span class="logo-bhp" style="font-size:0.9rem;">BHP</span>
+      </div>
+      <div class="header-divider"></div>
+      <span class="header-section">Supervisor de Logística</span>
+      <div class="header-right">
+        <div class="user-info">
+          <div class="user-avatar" id="userAvatar">--</div>
+          <span class="user-name" id="userName">--</span>
+        </div>
+        <button class="btn-logout" onclick="logout()">Cerrar sesión</button>
+      </div>
+    </header>
+
+    <!-- NOTIF BANNER -->
+    <div class="notif-banner hidden" id="notifBanner">
+      <div class="notif-dot" id="notifCount">0</div>
+      <span id="notifText">urgencias pendientes de validación</span>
+    </div>
+
+    <div class="container">
+
+      <!-- TABS -->
+      <div class="tabs">
+        <div class="tab active" onclick="switchTab('pendiente_aprobacion')" id="tab_pendiente">
+          Pendientes
+          <span class="tab-badge" id="badge_pendiente">0</span>
+        </div>
+        <div class="tab" onclick="switchTab('en_correccion')" id="tab_correccion">
+          En corrección
+          <span class="tab-badge gray" id="badge_correccion">0</span>
+        </div>
+        <div class="tab" onclick="switchTab('aprobada')" id="tab_aprobada">
+          Aprobadas
+          <span class="tab-badge gray" id="badge_aprobada">0</span>
+        </div>
+        <div class="tab" onclick="switchTab('rechazada')" id="tab_rechazada">
+          Rechazadas
+          <span class="tab-badge gray" id="badge_rechazada">0</span>
+        </div>
+      </div>
+
+      <!-- LIST -->
+      <div id="urgenciasList">
+        <div class="loading-state">Cargando urgencias...</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- MODAL DETALLE -->
+  <div class="modal-overlay" id="modalOverlay" onclick="closeModalOutside(event)">
+    <div class="modal" id="modal">
+      <div class="modal-header">
+        <div class="modal-header-left">
+          <span class="modal-urg-num" id="modalUrgNum">URG-0000</span>
+          <span class="status-pill pendiente" id="modalStatus">Pendiente</span>
+        </div>
+        <button class="modal-close" onclick="closeModal()">✕</button>
+      </div>
+
+      <div class="modal-body" id="modalBody">
+        <!-- Filled dynamically -->
+      </div>
+
+      <div class="modal-actions" id="modalActions">
+        <div class="actions-title">Acciones</div>
+        <div class="action-buttons" id="actionButtons">
+          <!-- Filled dynamically -->
+        </div>
+        <div class="comment-box" id="commentBox">
+          <label id="commentLabel">Comentario</label>
+          <textarea id="commentText" placeholder="Escriba el motivo..."></textarea>
+          <div class="comment-actions">
+            <button class="btn-cancelar" onclick="cancelComment()">Cancelar</button>
+            <button class="btn-confirmar" id="btnConfirmar" onclick="confirmAction()">Confirmar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const SUPABASE_URL = 'https://dnsijobpjnirbfrlkwfq.supabase.co';
+    const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRuc2lqb2Jwam5pcmJmcmxrd2ZxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzczMjAzNDQsImV4cCI6MjA5Mjg5NjM0NH0.MRPIvr32iqoYMsh00cQ9PZq5_M9XJUKZtbfII8cMC8A';
+
+    let currentUser = null;
+    let currentTab = 'pendiente_aprobacion';
+    let allUrgencias = [];
+    let currentUrgencia = null;
+    let pendingAction = null;
+
+    // ─── AUTH ───────────────────────────────────────────────
+    document.getElementById('btnLogin').addEventListener('click', login);
+    document.getElementById('loginPassword').addEventListener('keydown', e => { if (e.key === 'Enter') login(); });
+
+    async function login() {
+      const email = document.getElementById('loginEmail').value.trim();
+      const password = document.getElementById('loginPassword').value;
+      const btn = document.getElementById('btnLogin');
+      const errEl = document.getElementById('loginError');
+
+      btn.disabled = true;
+      btn.textContent = 'Ingresando...';
+      errEl.classList.remove('visible');
+
+      try {
+        const res = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON },
+          body: JSON.stringify({ email, password })
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) throw new Error(data.error_description || 'Error de autenticación');
+
+        // Verify role
+        const roleRes = await fetch(`${SUPABASE_URL}/rest/v1/usuarios?email=eq.${encodeURIComponent(email)}&select=*`, {
+          headers: { 'apikey': SUPABASE_ANON, 'Authorization': `Bearer ${data.access_token}` }
+        });
+
+        const roleData = await roleRes.json();
+
+        if (!roleData.length || roleData[0].rol !== 'supervisor_bhp') {
+          throw new Error('No tienes acceso a esta sección.');
+        }
+
+        currentUser = { ...roleData[0], token: data.access_token };
+        showApp();
+
+      } catch (err) {
+        errEl.textContent = err.message;
+        errEl.classList.add('visible');
+        btn.disabled = false;
+        btn.textContent = 'Ingresar';
+      }
+    }
+
+    function showApp() {
+      document.getElementById('loginScreen').style.display = 'none';
+      document.getElementById('app').classList.add('visible');
+
+      const initials = currentUser.nombre.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+      document.getElementById('userAvatar').textContent = initials;
+      document.getElementById('userName').textContent = currentUser.nombre;
+
+      loadUrgencias();
+    }
+
+    function logout() {
+      currentUser = null;
+      allUrgencias = [];
+      document.getElementById('loginScreen').style.display = 'flex';
+      document.getElementById('app').classList.remove('visible');
+      document.getElementById('loginEmail').value = '';
+      document.getElementById('loginPassword').value = '';
+    }
+
+    // ─── LOAD DATA ───────────────────────────────────────────
+    async function loadUrgencias() {
+      document.getElementById('urgenciasList').innerHTML = '<div class="loading-state">Cargando urgencias...</div>';
+
+      try {
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/urgencias?select=*&order=created_at.desc`, {
+          headers: {
+            'apikey': SUPABASE_ANON,
+            'Authorization': `Bearer ${currentUser.token}`
+          }
+        });
+
+        allUrgencias = await res.json();
+        updateBadges();
+        renderList();
+
+      } catch (err) {
+        document.getElementById('urgenciasList').innerHTML = '<div class="loading-state">Error al cargar. Recargue la página.</div>';
+      }
+    }
+
+    function updateBadges() {
+      const counts = { pendiente_aprobacion: 0, en_correccion: 0, aprobada: 0, rechazada: 0 };
+      allUrgencias.forEach(u => {
+        if (counts[u.estado] !== undefined) counts[u.estado]++;
+      });
+
+      document.getElementById('badge_pendiente').textContent = counts.pendiente_aprobacion;
+      document.getElementById('badge_correccion').textContent = counts.en_correccion;
+      document.getElementById('badge_aprobada').textContent = counts.aprobada;
+      document.getElementById('badge_rechazada').textContent = counts.rechazada;
+
+      // Notification banner
+      const pending = counts.pendiente_aprobacion;
+      const banner = document.getElementById('notifBanner');
+      if (pending > 0) {
+        banner.classList.remove('hidden');
+        document.getElementById('notifCount').textContent = pending;
+        document.getElementById('notifText').textContent = pending === 1 ? 'urgencia pendiente de validación' : 'urgencias pendientes de validación';
+      } else {
+        banner.classList.add('hidden');
+      }
+    }
+
+    function renderList() {
+      const filtered = allUrgencias.filter(u => u.estado === currentTab);
+      const container = document.getElementById('urgenciasList');
+
+      if (!filtered.length) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <div class="icon">📋</div>
+            <p>No hay urgencias en este estado.</p>
+          </div>`;
+        return;
+      }
+
+      container.innerHTML = filtered.map(u => `
+        <div class="urgencia-card ${u.estado}" onclick="openModal('${u.id}')">
+          <span class="urg-num">${u.numero_urg}</span>
+          <div class="urg-info">
+            <div class="urg-proveedor">${u.nombre_proveedor}</div>
+            <div class="urg-meta">${u.gerencia} · ${u.superintendencia} · ${formatDate(u.created_at)}</div>
+          </div>
+          <div class="urg-status">
+            <span class="status-pill ${u.estado}">${statusLabel(u.estado)}</span>
+          </div>
+          <span class="urg-arrow">›</span>
+        </div>
+      `).join('');
+    }
+
+    function switchTab(tab) {
+      currentTab = tab;
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.getElementById('tab_' + tab.split('_')[0]).classList.add('active');
+
+      // Fix tab IDs
+      const tabMap = {
+        pendiente_aprobacion: 'tab_pendiente',
+        en_correccion: 'tab_correccion',
+        aprobada: 'tab_aprobada',
+        rechazada: 'tab_rechazada'
+      };
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.getElementById(tabMap[tab]).classList.add('active');
+      renderList();
+    }
+
+    // ─── MODAL ───────────────────────────────────────────────
+    function openModal(id) {
+      currentUrgencia = allUrgencias.find(u => u.id === id);
+      if (!currentUrgencia) return;
+
+      const u = currentUrgencia;
+      document.getElementById('modalUrgNum').textContent = u.numero_urg;
+
+      const statusEl = document.getElementById('modalStatus');
+      statusEl.textContent = statusLabel(u.estado);
+      statusEl.className = `status-pill ${u.estado}`;
+
+      // Build detail body
+      document.getElementById('modalBody').innerHTML = `
+        <div class="detail-section">
+          <div class="detail-section-title">Datos de la SI que activa la Urgencia</div>
+          <div class="detail-grid">
+            <div class="detail-field"><span class="detail-label">Fecha solicitud</span><span class="detail-value">${formatDate(u.fecha_solicitud)}</span></div>
+            <div class="detail-field"><span class="detail-label">Gerencia</span><span class="detail-value">${u.gerencia}</span></div>
+            <div class="detail-field"><span class="detail-label">Superintendencia</span><span class="detail-value">${u.superintendencia}</span></div>
+            <div class="detail-field"><span class="detail-label">Nombre Superintendente(a)</span><span class="detail-value">${u.nombre_superintendente}</span></div>
+            <div class="detail-field"><span class="detail-label">Centro de Costo / WBS</span><span class="detail-value mono">${u.centro_costo_wbs}</span></div>
+            <div class="detail-field"><span class="detail-label">Firma / Autorización</span><span class="detail-value">${u.firma_nombre} ${u.firma_autoriza ? '✅' : '❌'}</span></div>
+          </div>
+        </div>
+
+        <div class="detail-section">
+          <div class="detail-section-title">Datos de la Urgencia</div>
+          <div class="detail-grid">
+            <div class="detail-field"><span class="detail-label">Proveedor</span><span class="detail-value">${u.nombre_proveedor}</span></div>
+            <div class="detail-field"><span class="detail-label">Focal Proveedor</span><span class="detail-value">${u.focal_proveedor}</span></div>
+            <div class="detail-field"><span class="detail-label">Contacto Proveedor</span><span class="detail-value">${u.contacto_proveedor}</span></div>
+            <div class="detail-field"><span class="detail-label">PO / Ítems</span><span class="detail-value mono">${u.po_items}</span></div>
+            <div class="detail-field"><span class="detail-label">Código Stock</span><span class="detail-value ${u.codigo_stock ? '' : 'empty'}">${u.codigo_stock || 'No aplica'}</span></div>
+            <div class="detail-field"><span class="detail-label">N° Reserva</span><span class="detail-value ${u.numero_reserva ? '' : 'empty'}">${u.numero_reserva || 'No aplica'}</span></div>
+          </div>
+        </div>
+
+        <div class="detail-section">
+          <div class="detail-section-title">Datos para Entrega en el Sitio</div>
+          <div class="detail-grid">
+            <div class="detail-field"><span class="detail-label">Supervisor MEL 1</span><span class="detail-value">${u.nombre_supervisor_mel}</span></div>
+            <div class="detail-field"><span class="detail-label">Correo Supervisor MEL 1</span><span class="detail-value">${u.correo_supervisor_mel || '—'}</span></div>
+            <div class="detail-field"><span class="detail-label">Contacto Supervisor MEL 1</span><span class="detail-value">${u.contacto_supervisor_mel}</span></div>
+            <div class="detail-field"><span class="detail-label">UP — Punto de entrega</span><span class="detail-value mono">${u.up_punto_entrega}</span></div>
+            ${u.nombre_supervisor_mel2 ? `
+            <div class="detail-field"><span class="detail-label">Supervisor MEL 2</span><span class="detail-value">${u.nombre_supervisor_mel2}</span></div>
+            <div class="detail-field"><span class="detail-label">Correo Supervisor MEL 2</span><span class="detail-value">${u.correo_supervisor_mel2 || '—'}</span></div>
+            <div class="detail-field"><span class="detail-label">Contacto Supervisor MEL 2</span><span class="detail-value">${u.contacto_supervisor_mel2 || '—'}</span></div>
+            ` : ''}
+          </div>
+        </div>
+
+        ${u.comentario_supervisor ? `
+        <div class="detail-section">
+          <div class="detail-section-title">Comentario del Supervisor</div>
+          <div style="background:#FAFAF8;border:1px solid var(--bhp-border);border-radius:6px;padding:0.85rem 1rem;font-size:0.85rem;color:var(--bhp-dark);line-height:1.5;">
+            ${u.comentario_supervisor}
+          </div>
+        </div>` : ''}
+      `;
+
+      // Build actions based on status
+      const actionsEl = document.getElementById('actionButtons');
+      if (u.estado === 'pendiente_aprobacion' || u.estado === 'en_correccion') {
+        actionsEl.innerHTML = `
+          <button class="btn-aprobar" onclick="doAction('aprobada')">✓ Aprobar</button>
+          <button class="btn-correccion" onclick="doAction('en_correccion')">✎ Solicitar corrección</button>
+          <button class="btn-rechazar" onclick="doAction('rechazada')">✕ Rechazar</button>
+        `;
+        document.getElementById('modalActions').style.display = 'block';
+      } else {
+        document.getElementById('modalActions').style.display = 'none';
+      }
+
+      document.getElementById('commentBox').classList.remove('visible');
+      document.getElementById('commentText').value = '';
+      document.getElementById('modalOverlay').classList.add('visible');
+    }
+
+    function closeModal() {
+      document.getElementById('modalOverlay').classList.remove('visible');
+      currentUrgencia = null;
+      pendingAction = null;
+    }
+
+    function closeModalOutside(e) {
+      if (e.target === document.getElementById('modalOverlay')) closeModal();
+    }
+
+    // ─── ACTIONS ─────────────────────────────────────────────
+    function doAction(action) {
+      pendingAction = action;
+
+      if (action === 'aprobada') {
+        // No comment needed — confirm directly
+        updateUrgenciaStatus('aprobada', null);
+        return;
+      }
+
+      // Show comment box
+      const commentBox = document.getElementById('commentBox');
+      commentBox.classList.add('visible');
+      document.getElementById('commentLabel').textContent = action === 'en_correccion'
+        ? 'Indique qué debe corregir el solicitante (obligatorio)'
+        : 'Indique el motivo del rechazo (obligatorio)';
+      document.getElementById('commentText').focus();
+    }
+
+    function cancelComment() {
+      document.getElementById('commentBox').classList.remove('visible');
+      document.getElementById('commentText').value = '';
+      pendingAction = null;
+    }
+
+    async function confirmAction() {
+      const comment = document.getElementById('commentText').value.trim();
+      if (!comment) {
+        document.getElementById('commentText').style.borderColor = 'var(--bhp-error)';
+        setTimeout(() => document.getElementById('commentText').style.borderColor = '', 1500);
+        return;
+      }
+      await updateUrgenciaStatus(pendingAction, comment);
+    }
+
+    async function updateUrgenciaStatus(newStatus, comment) {
+      const btn = document.getElementById('btnConfirmar');
+      if (btn) btn.disabled = true;
+
+      const payload = {
+        estado: newStatus,
+        comentario_supervisor: comment,
+        aprobado_por: currentUser.nombre,
+        fecha_aprobacion: newStatus === 'aprobada' ? new Date().toISOString() : null
+      };
+
+      try {
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/urgencias?id=eq.${currentUrgencia.id}`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': SUPABASE_ANON,
+            'Authorization': `Bearer ${currentUser.token}`,
+            'Prefer': 'return=representation'
+          },
+          body: JSON.stringify(payload)
+        });
+
+        if (!res.ok) throw new Error('Error al actualizar');
+
+        // Register in history
+        await fetch(`${SUPABASE_URL}/rest/v1/historial_estados`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': SUPABASE_ANON,
+            'Authorization': `Bearer ${currentUser.token}`
+          },
+          body: JSON.stringify({
+            urgencia_id: currentUrgencia.id,
+            estado_anterior: currentUrgencia.estado,
+            estado_nuevo: newStatus,
+            comentario: comment,
+            actor: currentUser.nombre
+          })
+        });
+
+        closeModal();
+        await loadUrgencias();
+
+      } catch (err) {
+        alert('Error al actualizar la urgencia. Intente nuevamente.');
+        if (btn) btn.disabled = false;
+      }
+    }
+
+    // ─── HELPERS ─────────────────────────────────────────────
+    function formatDate(d) {
+      if (!d) return '—';
+      return new Date(d).toLocaleDateString('es-CL', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    }
+
+    function statusLabel(s) {
+      const labels = {
+        pendiente_aprobacion: 'Pendiente',
+        en_correccion: 'En corrección',
+        aprobada: 'Aprobada',
+        rechazada: 'Rechazada',
+        en_transito_p3: 'En tránsito P3',
+        en_transito_cd: 'En tránsito CD',
+        cerrada: 'Cerrada'
+      };
+      return labels[s] || s;
+    }
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,973 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Solicitud de Urgencia — Escondida | BHP</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bhp-orange: #E05E1B;
+      --bhp-dark: #1A1A1A;
+      --bhp-gray: #6B6B6B;
+      --bhp-light: #F5F4F1;
+      --bhp-white: #FFFFFF;
+      --bhp-border: #E0DDD8;
+      --bhp-success: #2D7D46;
+      --bhp-error: #C0392B;
+      --section-gap: 2.5rem;
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bhp-light);
+      color: var(--bhp-dark);
+      min-height: 100vh;
+      padding: 0;
+    }
+
+    /* HEADER */
+    .header {
+      background: var(--bhp-white);
+      border-bottom: 3px solid var(--bhp-orange);
+      padding: 1.25rem 2rem;
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    }
+
+    .header-logo {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .logo-escondida {
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 600;
+      font-size: 1.1rem;
+      color: var(--bhp-dark);
+      letter-spacing: -0.02em;
+    }
+
+    .logo-sep {
+      width: 1px;
+      height: 28px;
+      background: var(--bhp-border);
+    }
+
+    .logo-bhp {
+      font-weight: 600;
+      font-size: 1.1rem;
+      color: var(--bhp-orange);
+      letter-spacing: 0.05em;
+    }
+
+    .header-title {
+      margin-left: auto;
+      font-size: 0.8rem;
+      color: var(--bhp-gray);
+      font-weight: 400;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    /* MAIN CONTAINER */
+    .container {
+      max-width: 780px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 4rem;
+    }
+
+    /* PAGE TITLE */
+    .page-title {
+      margin-bottom: 2rem;
+    }
+
+    .page-title h1 {
+      font-size: 1.65rem;
+      font-weight: 600;
+      color: var(--bhp-dark);
+      letter-spacing: -0.03em;
+      line-height: 1.2;
+    }
+
+    .page-title p {
+      margin-top: 0.5rem;
+      color: var(--bhp-gray);
+      font-size: 0.9rem;
+      font-weight: 400;
+    }
+
+    .urg-badge {
+      display: inline-block;
+      background: var(--bhp-orange);
+      color: white;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.7rem;
+      padding: 0.2rem 0.6rem;
+      border-radius: 3px;
+      margin-bottom: 0.75rem;
+      letter-spacing: 0.05em;
+    }
+
+    /* NOTA INFORMATIVA */
+    .nota-rutas {
+      background: #FFF8F5;
+      border: 1px solid #F0C8B0;
+      border-left: 4px solid var(--bhp-orange);
+      border-radius: 6px;
+      padding: 1rem 1.25rem;
+      margin-bottom: 2rem;
+      font-size: 0.82rem;
+      color: #5A3820;
+    }
+
+    .nota-rutas strong {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 0.4rem;
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--bhp-orange);
+    }
+
+    .nota-rutas table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 0.5rem;
+      font-size: 0.8rem;
+    }
+
+    .nota-rutas th {
+      text-align: left;
+      font-weight: 500;
+      padding: 0.3rem 0.5rem;
+      border-bottom: 1px solid #F0C8B0;
+      color: #5A3820;
+    }
+
+    .nota-rutas td {
+      padding: 0.3rem 0.5rem;
+      color: #5A3820;
+    }
+
+    /* SECTION CARD */
+    .section-card {
+      background: var(--bhp-white);
+      border: 1px solid var(--bhp-border);
+      border-radius: 10px;
+      margin-bottom: 1.5rem;
+      overflow: hidden;
+    }
+
+    .section-header {
+      background: var(--bhp-dark);
+      padding: 0.85rem 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .section-number {
+      width: 22px;
+      height: 22px;
+      background: var(--bhp-orange);
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.7rem;
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+
+    .section-title {
+      color: var(--bhp-white);
+      font-size: 0.82rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .section-body {
+      padding: 1.5rem;
+    }
+
+    /* GRID */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    .grid-1 {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1rem;
+    }
+
+    .span-2 { grid-column: span 2; }
+
+    /* FIELD */
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+
+    label {
+      font-size: 0.78rem;
+      font-weight: 500;
+      color: var(--bhp-dark);
+      letter-spacing: 0.01em;
+    }
+
+    label .optional {
+      font-weight: 400;
+      color: var(--bhp-gray);
+      font-size: 0.72rem;
+      margin-left: 0.3rem;
+    }
+
+    input[type="text"],
+    input[type="date"],
+    input[type="tel"],
+    input[type="email"],
+    select,
+    textarea {
+      width: 100%;
+      padding: 0.65rem 0.85rem;
+      border: 1.5px solid var(--bhp-border);
+      border-radius: 6px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.875rem;
+      color: var(--bhp-dark);
+      background: var(--bhp-white);
+      transition: border-color 0.15s, box-shadow 0.15s;
+      -webkit-appearance: none;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: var(--bhp-orange);
+      box-shadow: 0 0 0 3px rgba(224, 94, 27, 0.1);
+    }
+
+    input.error, select.error, textarea.error {
+      border-color: var(--bhp-error);
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+
+    .field-hint {
+      font-size: 0.72rem;
+      color: var(--bhp-gray);
+    }
+
+    .field-error {
+      font-size: 0.72rem;
+      color: var(--bhp-error);
+      display: none;
+    }
+
+    .field-error.visible { display: block; }
+
+    /* FIRMA SECTION */
+    .firma-box {
+      background: #FAFAF8;
+      border: 1.5px solid var(--bhp-border);
+      border-radius: 8px;
+      padding: 1.25rem;
+      margin-top: 0.5rem;
+    }
+
+    .firma-box p {
+      font-size: 0.82rem;
+      color: var(--bhp-gray);
+      margin-bottom: 1rem;
+      line-height: 1.5;
+    }
+
+    .checkbox-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      margin-top: 1rem;
+    }
+
+    .checkbox-row input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      flex-shrink: 0;
+      margin-top: 1px;
+      accent-color: var(--bhp-orange);
+      cursor: pointer;
+    }
+
+    .checkbox-row label {
+      font-size: 0.82rem;
+      color: var(--bhp-dark);
+      cursor: pointer;
+      line-height: 1.5;
+    }
+
+    /* NOTA 24H */
+    .nota-24h {
+      background: #FFF8F0;
+      border: 1px solid #F5D5B8;
+      border-radius: 6px;
+      padding: 0.85rem 1rem;
+      font-size: 0.78rem;
+      color: #7A4010;
+      margin-top: 1rem;
+      line-height: 1.5;
+    }
+
+    .nota-24h strong { font-weight: 600; }
+
+    /* NOTA RECEPCION */
+    .nota-recepcion {
+      display: flex;
+      gap: 1rem;
+      background: #FFF3ED;
+      border: 2px solid var(--bhp-orange);
+      border-radius: 8px;
+      padding: 1.25rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .nota-recepcion-icon {
+      font-size: 1.4rem;
+      flex-shrink: 0;
+      line-height: 1;
+    }
+
+    .nota-recepcion-body strong {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #8B3A0A;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.5rem;
+    }
+
+    .nota-recepcion-body p {
+      font-size: 0.82rem;
+      color: #6B2E08;
+      line-height: 1.55;
+      margin-bottom: 0.75rem;
+    }
+
+    .nota-recepcion-body ul {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .nota-recepcion-body ul li {
+      font-size: 0.82rem;
+      color: #6B2E08;
+      line-height: 1.4;
+    }
+
+    .nota-recepcion-body ul li strong {
+      display: inline;
+      font-weight: 600;
+      text-transform: none;
+      letter-spacing: 0;
+      color: #6B2E08;
+    }
+
+    .nota-24h-inline {
+      font-size: 0.78rem !important;
+      color: #8B3A0A !important;
+      background: rgba(224,94,27,0.1);
+      border-radius: 4px;
+      padding: 0.5rem 0.65rem;
+      margin-bottom: 0 !important;
+    }
+
+    /* SUPERVISOR BLOCKS */
+    .supervisor-block {
+      border: 1.5px solid var(--bhp-border);
+      border-radius: 8px;
+      padding: 1.1rem;
+      margin-bottom: 1rem;
+    }
+
+    .optional-block {
+      border-style: dashed;
+      background: #FAFAF8;
+    }
+
+    .supervisor-label {
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--bhp-dark);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 0.85rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .req-badge {
+      background: var(--bhp-orange);
+      color: white;
+      font-size: 0.65rem;
+      padding: 0.15rem 0.5rem;
+      border-radius: 3px;
+      font-weight: 500;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+    }
+
+    .opt-badge {
+      background: var(--bhp-border);
+      color: var(--bhp-gray);
+      font-size: 0.65rem;
+      padding: 0.15rem 0.5rem;
+      border-radius: 3px;
+      font-weight: 500;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 1rem;
+    }
+
+    @media (max-width: 700px) {
+      .grid-3 { grid-template-columns: 1fr; }
+    }
+
+    /* SUBMIT */
+    .submit-area {
+      margin-top: 2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .btn-submit {
+      background: var(--bhp-orange);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 1rem 2rem;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s, transform 0.1s;
+      width: 100%;
+      letter-spacing: 0.01em;
+    }
+
+    .btn-submit:hover { background: #C94E10; }
+    .btn-submit:active { transform: scale(0.99); }
+    .btn-submit:disabled { background: #C4B8B0; cursor: not-allowed; }
+
+    .submit-note {
+      font-size: 0.75rem;
+      color: var(--bhp-gray);
+      text-align: center;
+      line-height: 1.5;
+    }
+
+    /* SUCCESS STATE */
+    .success-screen {
+      display: none;
+      text-align: center;
+      padding: 3rem 2rem;
+      background: var(--bhp-white);
+      border: 1px solid var(--bhp-border);
+      border-radius: 10px;
+    }
+
+    .success-screen.visible { display: block; }
+
+    .success-icon {
+      width: 56px;
+      height: 56px;
+      background: #E8F5EE;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1.25rem;
+    }
+
+    .success-icon svg { width: 28px; height: 28px; }
+
+    .success-screen h2 {
+      font-size: 1.3rem;
+      font-weight: 600;
+      color: var(--bhp-dark);
+      margin-bottom: 0.5rem;
+    }
+
+    .success-screen p {
+      color: var(--bhp-gray);
+      font-size: 0.9rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .success-urg {
+      display: inline-block;
+      background: var(--bhp-dark);
+      color: white;
+      font-family: 'DM Mono', monospace;
+      font-size: 1.1rem;
+      padding: 0.5rem 1.25rem;
+      border-radius: 6px;
+      letter-spacing: 0.05em;
+      margin-bottom: 1.5rem;
+    }
+
+    .btn-nueva {
+      background: transparent;
+      border: 1.5px solid var(--bhp-orange);
+      color: var(--bhp-orange);
+      border-radius: 8px;
+      padding: 0.75rem 1.5rem;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.875rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .btn-nueva:hover { background: #FFF3EE; }
+
+    /* LOADING */
+    .btn-submit .spinner {
+      display: none;
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255,255,255,0.4);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      margin: 0 auto;
+    }
+
+    .btn-submit.loading .btn-text { display: none; }
+    .btn-submit.loading .spinner { display: inline-block; }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* RESPONSIVE */
+    @media (max-width: 600px) {
+      .grid-2 { grid-template-columns: 1fr; }
+      .span-2 { grid-column: span 1; }
+      .header { padding: 1rem; }
+      .header-title { display: none; }
+      .container { padding: 1.5rem 1rem 3rem; }
+      .section-body { padding: 1.25rem 1rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="header">
+    <div class="header-logo">
+      <span class="logo-escondida">ESCONDIDA</span>
+      <div class="logo-sep"></div>
+      <span class="logo-bhp">BHP</span>
+    </div>
+    <span class="header-title">Gestión de Urgencias KDM</span>
+  </header>
+
+  <div class="container">
+
+    <!-- TÍTULO -->
+    <div class="page-title">
+      <div class="urg-badge">SOLICITUD DE URGENCIA</div>
+      <h1>Formulario de Solicitud<br>para Carga General</h1>
+      <p>Complete todos los campos obligatorios. El Supervisor de Logística será notificado automáticamente.</p>
+    </div>
+
+    <!-- NOTA RUTAS -->
+    <div class="nota-rutas">
+      <strong>📋 Información de rutas y horarios</strong>
+      <table>
+        <tr>
+          <th>Origen</th>
+          <th>Salida OL</th>
+          <th>Llegada Faena</th>
+          <th>Alcance</th>
+        </tr>
+        <tr>
+          <td>OL La Negra</td>
+          <td>12:00 hrs</td>
+          <td>16:00 hrs</td>
+          <td>Urgencias gestionadas día anterior hasta 18:00 hrs</td>
+        </tr>
+        <tr>
+          <td>OL Santiago</td>
+          <td>18:00 hrs</td>
+          <td>16:00 hrs (día +1)</td>
+          <td>Urgencias gestionadas día anterior hasta 15:00 hrs</td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- FORMULARIO -->
+    <form id="urgenciaForm" novalidate>
+
+      <!-- SECCIÓN 1 -->
+      <div class="section-card">
+        <div class="section-header">
+          <div class="section-number">1</div>
+          <span class="section-title">Datos de la SI que activa la Urgencia</span>
+        </div>
+        <div class="section-body">
+          <div class="grid-2">
+
+            <div class="field">
+              <label for="fecha_solicitud">Fecha Solicitud</label>
+              <input type="date" id="fecha_solicitud" name="fecha_solicitud" required />
+              <span class="field-error" id="err_fecha_solicitud">Campo obligatorio</span>
+            </div>
+
+            <div class="field">
+              <label for="gerencia">Gerencia</label>
+              <input type="text" id="gerencia" name="gerencia" placeholder="Ej: GMEM" required />
+              <span class="field-error" id="err_gerencia">Campo obligatorio</span>
+            </div>
+
+            <div class="field">
+              <label for="superintendencia">Superintendencia</label>
+              <input type="text" id="superintendencia" name="superintendencia" placeholder="Ej: Mantención Palas" required />
+              <span class="field-error" id="err_superintendencia">Campo obligatorio</span>
+            </div>
+
+            <div class="field">
+              <label for="nombre_superintendente">Nombre Superintendente(a)</label>
+              <input type="text" id="nombre_superintendente" name="nombre_superintendente" placeholder="Nombre completo" required />
+              <span class="field-error" id="err_nombre_superintendente">Campo obligatorio</span>
+            </div>
+
+            <div class="field span-2">
+              <label for="centro_costo_wbs">Centro de Costo o WBS</label>
+              <input type="text" id="centro_costo_wbs" name="centro_costo_wbs" placeholder="Ej: CC-4500 o WBS-12345" required />
+              <span class="field-error" id="err_centro_costo_wbs">Campo obligatorio</span>
+            </div>
+
+          </div>
+
+          <!-- FIRMA ELECTRÓNICA -->
+          <div class="firma-box" style="margin-top:1rem;">
+            <p>La firma electrónica corresponde a la autorización del/la Superintendente(a) sobre esta solicitud de urgencia.</p>
+            <div class="field">
+              <label for="firma_nombre">Nombre completo del/la Superintendente(a) que autoriza</label>
+              <input type="text" id="firma_nombre" name="firma_nombre" placeholder="Ingrese su nombre completo como firma" required />
+              <span class="field-error" id="err_firma_nombre">Debe ingresar su nombre para autorizar</span>
+            </div>
+            <div class="checkbox-row">
+              <input type="checkbox" id="firma_autoriza" name="firma_autoriza" required />
+              <label for="firma_autoriza">Confirmo que autorizo esta solicitud de urgencia y que la información ingresada es correcta y verificable.</label>
+            </div>
+            <span class="field-error" id="err_firma_autoriza" style="margin-top:0.35rem;">Debe confirmar la autorización para continuar</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECCIÓN 2 -->
+      <div class="section-card">
+        <div class="section-header">
+          <div class="section-number">2</div>
+          <span class="section-title">Datos de la Urgencia</span>
+        </div>
+        <div class="section-body">
+          <div class="grid-2">
+
+            <div class="field">
+              <label for="nombre_proveedor">Nombre Proveedor</label>
+              <input type="text" id="nombre_proveedor" name="nombre_proveedor" placeholder="Razón social del proveedor" required />
+              <span class="field-error" id="err_nombre_proveedor">Campo obligatorio</span>
+            </div>
+
+            <div class="field">
+              <label for="focal_proveedor">Focal Proveedor</label>
+              <input type="text" id="focal_proveedor" name="focal_proveedor" placeholder="Nombre del contacto en proveedor" required />
+              <span class="field-error" id="err_focal_proveedor">Campo obligatorio</span>
+            </div>
+
+            <div class="field">
+              <label for="contacto_proveedor">Número de Contacto <span style="font-size:0.75rem;color:#6B6B6B;">(Celular)</span></label>
+              <input type="tel" id="contacto_proveedor" name="contacto_proveedor" placeholder="+56 9 XXXX XXXX" required />
+              <span class="field-error" id="err_contacto_proveedor">Campo obligatorio</span>
+            </div>
+
+            <div class="field">
+              <label for="po_items">PO / Ítems</label>
+              <input type="text" id="po_items" name="po_items" placeholder="Ej: 4518009549" required />
+              <span class="field-error" id="err_po_items">Campo obligatorio</span>
+            </div>
+
+            <div class="field">
+              <label for="codigo_stock">Código Stock de Material <span class="optional">(si aplica)</span></label>
+              <input type="text" id="codigo_stock" name="codigo_stock" placeholder="Código de stock SAP" />
+            </div>
+
+            <div class="field">
+              <label for="numero_reserva">N° Reserva / Ítems <span class="optional">(si aplica)</span></label>
+              <input type="text" id="numero_reserva" name="numero_reserva" placeholder="Número de reserva SAP" />
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- SECCIÓN 3 -->
+      <div class="section-card">
+        <div class="section-header">
+          <div class="section-number">3</div>
+          <span class="section-title">Datos para Entrega en el Sitio</span>
+        </div>
+        <div class="section-body">
+
+          <div class="nota-recepcion">
+            <div class="nota-recepcion-icon">⚠️</div>
+            <div class="nota-recepcion-body">
+              <strong>Responsabilidad de recepción</strong>
+              <p>Los Supervisores MEL indicados a continuación son los <strong>responsables directos de recepcionar físicamente la carga</strong> en el punto de entrega señalado. Deben estar presentes al momento de la llegada y contar obligatoriamente con:</p>
+              <ul>
+                <li>🚛 <strong>Equipo para traslado:</strong> camión rampla disponible</li>
+                <li>🏗️ <strong>Equipo para descarga:</strong> grúa horquilla disponible</li>
+              </ul>
+              <p class="nota-24h-inline">Si la carga se recepciona en Patio de Logística (Patio 3), no podrá permanecer más de <strong>24 horas</strong>. En su defecto será escalado a la Gerencia correspondiente.</p>
+            </div>
+          </div>
+
+          <!-- SUPERVISOR 1 -->
+          <div class="supervisor-block">
+            <div class="supervisor-label">Supervisor MEL 1 <span class="req-badge">Obligatorio</span></div>
+            <div class="grid-3">
+              <div class="field">
+                <label for="nombre_supervisor_mel">Nombre completo</label>
+                <input type="text" id="nombre_supervisor_mel" name="nombre_supervisor_mel" placeholder="Nombre completo" required />
+                <span class="field-error" id="err_nombre_supervisor_mel">Campo obligatorio</span>
+              </div>
+              <div class="field">
+                <label for="correo_supervisor_mel">Correo electrónico</label>
+                <input type="email" id="correo_supervisor_mel" name="correo_supervisor_mel" placeholder="correo@bhp.com" required />
+                <span class="field-error" id="err_correo_supervisor_mel">Campo obligatorio</span>
+              </div>
+              <div class="field">
+                <label for="contacto_supervisor_mel">Celular</label>
+                <input type="tel" id="contacto_supervisor_mel" name="contacto_supervisor_mel" placeholder="+56 9 XXXX XXXX" required />
+                <span class="field-error" id="err_contacto_supervisor_mel">Campo obligatorio</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- SUPERVISOR 2 -->
+          <div class="supervisor-block optional-block">
+            <div class="supervisor-label">Supervisor MEL 2 <span class="opt-badge">Opcional</span></div>
+            <div class="grid-3">
+              <div class="field">
+                <label for="nombre_supervisor_mel2">Nombre completo</label>
+                <input type="text" id="nombre_supervisor_mel2" name="nombre_supervisor_mel2" placeholder="Nombre completo" />
+              </div>
+              <div class="field">
+                <label for="correo_supervisor_mel2">Correo electrónico</label>
+                <input type="email" id="correo_supervisor_mel2" name="correo_supervisor_mel2" placeholder="correo@bhp.com" />
+              </div>
+              <div class="field">
+                <label for="contacto_supervisor_mel2">Celular</label>
+                <input type="tel" id="contacto_supervisor_mel2" name="contacto_supervisor_mel2" placeholder="+56 9 XXXX XXXX" />
+              </div>
+            </div>
+          </div>
+
+          <!-- UP -->
+          <div class="field" style="margin-top:1rem;">
+            <label for="up_punto_entrega">UP — Punto de Entrega</label>
+            <input type="text" id="up_punto_entrega" name="up_punto_entrega" placeholder="Ej: UP-3450 / Patio Palas" required />
+            <span class="field-error" id="err_up_punto_entrega">Campo obligatorio</span>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- SUBMIT -->
+      <div class="submit-area">
+        <button type="submit" class="btn-submit" id="btnSubmit">
+          <span class="btn-text">Enviar Solicitud de Urgencia</span>
+          <span class="spinner"></span>
+        </button>
+        <p class="submit-note">Al enviar, el Supervisor de Logística BHP será notificado automáticamente.<br>Recibirá un número de urgencia de confirmación.</p>
+      </div>
+
+    </form>
+
+    <!-- SUCCESS -->
+    <div class="success-screen" id="successScreen">
+      <div class="success-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#2D7D46" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="20 6 9 17 4 12"></polyline>
+        </svg>
+      </div>
+      <h2>Solicitud enviada correctamente</h2>
+      <p>El Supervisor de Logística BHP ha sido notificado. Su número de urgencia es:</p>
+      <div class="success-urg" id="successUrgNum">URG-0001</div>
+      <p style="margin-bottom:1.5rem;">Guarde este número para hacer seguimiento de su solicitud.</p>
+      <button class="btn-nueva" onclick="resetForm()">Ingresar nueva solicitud</button>
+    </div>
+
+  </div>
+
+  <script>
+    const SUPABASE_URL = 'https://dnsijobpjnirbfrlkwfq.supabase.co';
+    const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRuc2lqb2Jwam5pcmJmcmxrd2ZxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzczMjAzNDQsImV4cCI6MjA5Mjg5NjM0NH0.MRPIvr32iqoYMsh00cQ9PZq5_M9XJUKZtbfII8cMC8A';
+
+    // Set today's date as default
+    document.getElementById('fecha_solicitud').valueAsDate = new Date();
+
+    const requiredFields = [
+      'fecha_solicitud', 'gerencia', 'superintendencia', 'nombre_superintendente',
+      'centro_costo_wbs', 'firma_nombre', 'nombre_proveedor', 'focal_proveedor',
+      'contacto_proveedor', 'po_items', 'nombre_supervisor_mel',
+      'correo_supervisor_mel', 'contacto_supervisor_mel', 'up_punto_entrega'
+    ];
+
+    function validateForm() {
+      let valid = true;
+
+      requiredFields.forEach(id => {
+        const el = document.getElementById(id);
+        const err = document.getElementById('err_' + id);
+        if (!el.value.trim()) {
+          el.classList.add('error');
+          if (err) err.classList.add('visible');
+          valid = false;
+        } else {
+          el.classList.remove('error');
+          if (err) err.classList.remove('visible');
+        }
+      });
+
+      // Checkbox
+      const cb = document.getElementById('firma_autoriza');
+      const errCb = document.getElementById('err_firma_autoriza');
+      if (!cb.checked) {
+        errCb.classList.add('visible');
+        valid = false;
+      } else {
+        errCb.classList.remove('visible');
+      }
+
+      return valid;
+    }
+
+    // Live validation
+    requiredFields.forEach(id => {
+      const el = document.getElementById(id);
+      el.addEventListener('input', () => {
+        if (el.value.trim()) {
+          el.classList.remove('error');
+          const err = document.getElementById('err_' + id);
+          if (err) err.classList.remove('visible');
+        }
+      });
+    });
+
+    document.getElementById('urgenciaForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (!validateForm()) {
+        document.querySelector('.error')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return;
+      }
+
+      const btn = document.getElementById('btnSubmit');
+      btn.classList.add('loading');
+      btn.disabled = true;
+
+      const payload = {
+        fecha_solicitud: document.getElementById('fecha_solicitud').value,
+        gerencia: document.getElementById('gerencia').value.trim(),
+        superintendencia: document.getElementById('superintendencia').value.trim(),
+        nombre_superintendente: document.getElementById('nombre_superintendente').value.trim(),
+        centro_costo_wbs: document.getElementById('centro_costo_wbs').value.trim(),
+        firma_nombre: document.getElementById('firma_nombre').value.trim(),
+        firma_autoriza: document.getElementById('firma_autoriza').checked,
+        nombre_proveedor: document.getElementById('nombre_proveedor').value.trim(),
+        focal_proveedor: document.getElementById('focal_proveedor').value.trim(),
+        contacto_proveedor: document.getElementById('contacto_proveedor').value.trim(),
+        po_items: document.getElementById('po_items').value.trim(),
+        codigo_stock: document.getElementById('codigo_stock').value.trim() || null,
+        numero_reserva: document.getElementById('numero_reserva').value.trim() || null,
+        nombre_supervisor_mel: document.getElementById('nombre_supervisor_mel').value.trim(),
+        correo_supervisor_mel: document.getElementById('correo_supervisor_mel').value.trim(),
+        contacto_supervisor_mel: document.getElementById('contacto_supervisor_mel').value.trim(),
+        nombre_supervisor_mel2: document.getElementById('nombre_supervisor_mel2').value.trim() || null,
+        correo_supervisor_mel2: document.getElementById('correo_supervisor_mel2').value.trim() || null,
+        contacto_supervisor_mel2: document.getElementById('contacto_supervisor_mel2').value.trim() || null,
+        up_punto_entrega: document.getElementById('up_punto_entrega').value.trim(),
+        numero_urg: 'PENDING'
+      };
+
+      try {
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/urgencias`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': SUPABASE_ANON,
+            'Authorization': `Bearer ${SUPABASE_ANON}`,
+            'Prefer': 'return=representation'
+          },
+          body: JSON.stringify(payload)
+        });
+
+        if (!res.ok) {
+          const err = await res.json();
+          throw new Error(err.message || 'Error al enviar');
+        }
+
+        const data = await res.json();
+        const urgNum = data[0]?.numero_urg || 'URG-????';
+
+        document.getElementById('urgenciaForm').style.display = 'none';
+        document.getElementById('successUrgNum').textContent = urgNum;
+        document.getElementById('successScreen').classList.add('visible');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+
+      } catch (err) {
+        alert('Hubo un problema al enviar la solicitud. Por favor intente nuevamente.\n\n' + err.message);
+        btn.classList.remove('loading');
+        btn.disabled = false;
+      }
+    });
+
+    function resetForm() {
+      document.getElementById('urgenciaForm').reset();
+      document.getElementById('fecha_solicitud').valueAsDate = new Date();
+      document.getElementById('urgenciaForm').style.display = 'block';
+      document.getElementById('successScreen').classList.remove('visible');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  </script>
+
+</body>
+</html>
