@@ -793,7 +793,7 @@
 
               ${u.fecha_recepcion_p3 ? `<div style="font-size:0.78rem;color:var(--kdm-gray);margin-bottom:0.5rem;">📦 Recibido en Patio 3: <strong>${formatDateTime(u.fecha_recepcion_p3)}</strong></div>` : ''}
               ${u.fecha_cierre_sistemico ? `<div style="font-size:0.78rem;color:var(--kdm-gray);margin-bottom:0.5rem;">📋 Proceso sistémico cerrado: <strong>${formatDateTime(u.fecha_cierre_sistemico)}</strong></div>` : ''}
-              ${u.fecha_entrega_cliente ? `<div style="font-size:0.78rem;color:var(--kdm-gray);margin-bottom:0.5rem;">🤝 Entregado a cliente: <strong>${formatDateTime(u.fecha_entrega_cliente)}</strong></div>` : ''}
+              ${u.fecha_entrega_cliente ? `<div style="font-size:0.78rem;color:var(--kdm-gray);margin-bottom:0.5rem;">🤝 Entregado a cliente: <strong>${formatDateTime(u.fecha_entrega_cliente)}</strong>${u.receptor_entrega ? ` — Recibe: <strong>${u.receptor_entrega}</strong>` : ''}</div>` : ''}
 
               <div class="sap-fields" style="margin-top:1rem;">
                 <div class="sap-field">
@@ -875,10 +875,20 @@
     }
 
     async function cerrarEntregado() {
-      if (!confirm('¿Confirma que la carga fue entregada al cliente? La urgencia quedará como "Cerrado y entregado".')) return;
+      // Mostrar campo para ingresar quien recibe
+      const receptor = prompt('¿Quién recibe la carga? Ingrese el nombre completo:');
+      if (receptor === null) return; // canceló
+      if (!receptor.trim()) {
+        alert('Debe ingresar el nombre de quien recibe la carga.');
+        return;
+      }
       await guardarSAP();
       try {
-        await patchUrgencia({ estado: 'cerrado_entregado', fecha_entrega_cliente: new Date().toISOString() }, 'cerrado_entregado', 'Urgencia cerrada y entregada al cliente.');
+        await patchUrgencia({
+          estado: 'cerrado_entregado',
+          fecha_entrega_cliente: new Date().toISOString(),
+          receptor_entrega: receptor.trim()
+        }, 'cerrado_entregado', `Urgencia cerrada y entregada al cliente. Recibe: ${receptor.trim()}.`);
         closeModal();
         await loadUrgencias();
       } catch (err) { alert('Error al actualizar. Intente nuevamente.'); }
@@ -949,6 +959,7 @@
         'Destino': u.destino || '',
         'Fecha Recepción Patio 3': formatDateTime(u.fecha_recepcion_p3),
         'Fecha Cierre Sistémico': formatDateTime(u.fecha_cierre_sistemico),
+        'Receptor Entrega': u.receptor_entrega || '',
         'Fecha Entrega Cliente': formatDateTime(u.fecha_entrega_cliente),
         'N° Resumen Viaje': u.numero_resumen_viaje || '',
         'N° Guía': u.numero_guia || '',
