@@ -923,10 +923,6 @@
 
     function switchTab(tab) {
       currentTab = tab;
-      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-      document.getElementById('tab_' + tab.split('_')[0]).classList.add('active');
-
-      // Fix tab IDs
       const tabMap = {
         pendiente_aprobacion: 'tab_pendiente',
         en_correccion: 'tab_correccion',
@@ -1032,18 +1028,23 @@
     function doAction(action) {
       pendingAction = action;
 
-      if (action === 'aprobada') {
-        // No comment needed — confirm directly
-        updateUrgenciaStatus('aprobada', null);
-        return;
-      }
-
-      // Show comment box
+      // Show comment box for all actions
       const commentBox = document.getElementById('commentBox');
       commentBox.classList.add('visible');
-      document.getElementById('commentLabel').textContent = action === 'en_correccion'
-        ? 'Indique qué debe corregir el solicitante (obligatorio)'
-        : 'Indique el motivo del rechazo (obligatorio)';
+
+      if (action === 'aprobada') {
+        document.getElementById('commentLabel').textContent = 'Comentario (opcional)';
+        document.getElementById('commentText').placeholder = 'Puede agregar una nota o dejarlo en blanco...';
+        document.getElementById('btnConfirmar').textContent = 'Confirmar aprobación';
+      } else if (action === 'en_correccion') {
+        document.getElementById('commentLabel').textContent = 'Indique qué debe corregir el solicitante (obligatorio)';
+        document.getElementById('commentText').placeholder = 'Escriba el motivo...';
+        document.getElementById('btnConfirmar').textContent = 'Confirmar';
+      } else {
+        document.getElementById('commentLabel').textContent = 'Indique el motivo del rechazo (obligatorio)';
+        document.getElementById('commentText').placeholder = 'Escriba el motivo...';
+        document.getElementById('btnConfirmar').textContent = 'Confirmar';
+      }
       document.getElementById('commentText').focus();
     }
 
@@ -1055,12 +1056,14 @@
 
     async function confirmAction() {
       const comment = document.getElementById('commentText').value.trim();
-      if (!comment) {
+      
+      // Comentario obligatorio solo para corrección y rechazo
+      if (!comment && pendingAction !== 'aprobada') {
         document.getElementById('commentText').style.borderColor = 'var(--bhp-error)';
         setTimeout(() => document.getElementById('commentText').style.borderColor = '', 1500);
         return;
       }
-      await updateUrgenciaStatus(pendingAction, comment);
+      await updateUrgenciaStatus(pendingAction, comment || null);
     }
 
     async function updateUrgenciaStatus(newStatus, comment) {
