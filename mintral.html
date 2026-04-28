@@ -1,0 +1,918 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MINTRAL — Gestión de Urgencias</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bhp-orange: #E05E1B;
+      --bhp-dark: #1A1A1A;
+      --bhp-gray: #6B6B6B;
+      --bhp-light: #F5F4F1;
+      --bhp-white: #FFFFFF;
+      --bhp-border: #E0DDD8;
+      --bhp-success: #2D7D46;
+      --bhp-error: #C0392B;
+      --bhp-warning: #B45309;
+      --mintral-blue: #1D4ED8;
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bhp-light);
+      color: var(--bhp-dark);
+      min-height: 100vh;
+    }
+
+    /* LOGIN */
+    .login-screen {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+    }
+
+    .login-card {
+      background: var(--bhp-white);
+      border: 1px solid var(--bhp-border);
+      border-radius: 12px;
+      padding: 2.5rem 2rem;
+      width: 100%;
+      max-width: 400px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.07);
+    }
+
+    .login-header { text-align: center; margin-bottom: 2rem; }
+
+    .login-logo {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .logo-escondida { font-weight: 600; font-size: 1rem; color: var(--bhp-dark); letter-spacing: -0.02em; }
+    .logo-sep { width: 1px; height: 24px; background: var(--bhp-border); }
+    .logo-bhp { font-weight: 600; font-size: 1rem; color: var(--bhp-orange); letter-spacing: 0.05em; }
+
+    .login-header h2 { font-size: 1.1rem; font-weight: 600; color: var(--bhp-dark); margin-bottom: 0.3rem; }
+    .login-header p { font-size: 0.82rem; color: var(--bhp-gray); }
+
+    .login-role-badge {
+      display: inline-block;
+      background: #EFF6FF;
+      color: var(--mintral-blue);
+      font-size: 0.7rem;
+      font-weight: 600;
+      padding: 0.2rem 0.7rem;
+      border-radius: 20px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 0.75rem;
+      border: 1px solid #BFDBFE;
+    }
+
+    .field { display: flex; flex-direction: column; gap: 0.35rem; margin-bottom: 1rem; }
+    label { font-size: 0.78rem; font-weight: 500; color: var(--bhp-dark); }
+
+    input[type="email"], input[type="password"], input[type="text"], input[type="tel"], textarea, select {
+      width: 100%;
+      padding: 0.65rem 0.85rem;
+      border: 1.5px solid var(--bhp-border);
+      border-radius: 6px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.875rem;
+      color: var(--bhp-dark);
+      background: var(--bhp-white);
+      transition: border-color 0.15s, box-shadow 0.15s;
+      -webkit-appearance: none;
+    }
+
+    input:focus, textarea:focus, select:focus {
+      outline: none;
+      border-color: var(--mintral-blue);
+      box-shadow: 0 0 0 3px rgba(29,78,216,0.1);
+    }
+
+    .btn-primary {
+      width: 100%;
+      background: var(--mintral-blue);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 0.85rem;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s;
+      margin-top: 0.5rem;
+    }
+
+    .btn-primary:hover { background: #1E40AF; }
+    .btn-primary:disabled { background: #93C5FD; cursor: not-allowed; }
+
+    .login-error {
+      background: #FEE;
+      border: 1px solid #F5C6C6;
+      border-radius: 6px;
+      padding: 0.65rem 0.85rem;
+      font-size: 0.8rem;
+      color: var(--bhp-error);
+      margin-bottom: 1rem;
+      display: none;
+    }
+    .login-error.visible { display: block; }
+
+    /* APP */
+    .app { display: none; }
+    .app.visible { display: block; }
+
+    /* HEADER */
+    .header {
+      background: var(--bhp-white);
+      border-bottom: 3px solid var(--mintral-blue);
+      padding: 0.9rem 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    }
+
+    .header-divider { width: 1px; height: 24px; background: var(--bhp-border); }
+    .header-section { font-size: 0.78rem; font-weight: 500; color: var(--bhp-gray); text-transform: uppercase; letter-spacing: 0.06em; }
+
+    .header-right { margin-left: auto; display: flex; align-items: center; gap: 1rem; }
+
+    .user-avatar {
+      width: 30px; height: 30px;
+      background: var(--mintral-blue);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      color: white; font-size: 0.7rem; font-weight: 600;
+    }
+
+    .user-name { font-size: 0.82rem; font-weight: 500; color: var(--bhp-dark); }
+
+    .btn-logout {
+      background: transparent;
+      border: 1px solid var(--bhp-border);
+      border-radius: 6px;
+      padding: 0.35rem 0.75rem;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.75rem;
+      color: var(--bhp-gray);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .btn-logout:hover { border-color: var(--bhp-error); color: var(--bhp-error); }
+
+    /* NOTIF BANNER */
+    .notif-banner {
+      background: var(--mintral-blue);
+      color: white;
+      padding: 0.75rem 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 0.85rem;
+      font-weight: 500;
+    }
+    .notif-banner.hidden { display: none; }
+
+    .notif-dot {
+      width: 28px; height: 28px;
+      background: white;
+      color: var(--mintral-blue);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.75rem; font-weight: 700; flex-shrink: 0;
+    }
+
+    /* CONTAINER */
+    .container { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem; }
+
+    /* TABS */
+    .tabs {
+      display: flex;
+      gap: 0.25rem;
+      margin-bottom: 1.5rem;
+      border-bottom: 2px solid var(--bhp-border);
+    }
+
+    .tab {
+      padding: 0.6rem 1.1rem;
+      font-size: 0.82rem;
+      font-weight: 500;
+      color: var(--bhp-gray);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -2px;
+      transition: all 0.15s;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .tab:hover { color: var(--bhp-dark); }
+    .tab.active { color: var(--mintral-blue); border-bottom-color: var(--mintral-blue); }
+
+    .tab-badge {
+      background: var(--mintral-blue);
+      color: white;
+      font-size: 0.65rem;
+      font-weight: 700;
+      padding: 0.1rem 0.45rem;
+      border-radius: 20px;
+      min-width: 18px;
+      text-align: center;
+    }
+    .tab-badge.gray { background: var(--bhp-border); color: var(--bhp-gray); }
+
+    /* CARDS */
+    .urgencias-list { display: flex; flex-direction: column; gap: 0.85rem; }
+
+    .urgencia-card {
+      background: var(--bhp-white);
+      border: 1.5px solid var(--bhp-border);
+      border-radius: 10px;
+      padding: 1.25rem 1.5rem;
+      cursor: pointer;
+      transition: border-color 0.15s, box-shadow 0.15s;
+      display: flex;
+      align-items: center;
+      gap: 1.25rem;
+    }
+
+    .urgencia-card:hover {
+      border-color: var(--mintral-blue);
+      box-shadow: 0 2px 12px rgba(29,78,216,0.1);
+    }
+
+    .urgencia-card.aprobada { border-left: 4px solid var(--mintral-blue); }
+    .urgencia-card.en_transito_p3 { border-left: 4px solid var(--bhp-warning); }
+    .urgencia-card.en_transito_cd { border-left: 4px solid var(--bhp-success); }
+
+    .urg-num { font-family: 'DM Mono', monospace; font-size: 0.85rem; font-weight: 500; color: var(--bhp-dark); white-space: nowrap; }
+    .urg-info { flex: 1; min-width: 0; }
+    .urg-proveedor { font-size: 0.9rem; font-weight: 600; color: var(--bhp-dark); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .urg-meta { font-size: 0.75rem; color: var(--bhp-gray); margin-top: 0.2rem; }
+    .urg-arrow { color: var(--bhp-border); font-size: 1.1rem; flex-shrink: 0; }
+
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 0.25rem 0.7rem;
+      border-radius: 20px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      white-space: nowrap;
+    }
+
+    .status-pill.aprobada { background: #EFF6FF; color: var(--mintral-blue); }
+    .status-pill.en_transito_p3 { background: #FFFBEB; color: var(--bhp-warning); }
+    .status-pill.en_transito_cd { background: #EDFAF3; color: var(--bhp-success); }
+
+    .empty-state { text-align: center; padding: 3rem 1rem; color: var(--bhp-gray); }
+    .empty-state .icon { font-size: 2.5rem; margin-bottom: 0.75rem; }
+    .empty-state p { font-size: 0.9rem; }
+
+    .loading-state { text-align: center; padding: 3rem; color: var(--bhp-gray); font-size: 0.9rem; }
+
+    /* MODAL */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.45);
+      z-index: 200;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 1.5rem;
+      overflow-y: auto;
+    }
+    .modal-overlay.visible { display: flex; }
+
+    .modal {
+      background: var(--bhp-white);
+      border-radius: 12px;
+      width: 100%;
+      max-width: 680px;
+      margin: auto;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.18);
+      overflow: hidden;
+    }
+
+    .modal-header {
+      background: var(--bhp-dark);
+      padding: 1.1rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .modal-header-left { display: flex; align-items: center; gap: 0.75rem; }
+    .modal-urg-num { font-family: 'DM Mono', monospace; font-size: 0.9rem; color: white; font-weight: 500; }
+
+    .modal-close {
+      background: transparent;
+      border: none;
+      color: rgba(255,255,255,0.6);
+      font-size: 1.3rem;
+      cursor: pointer;
+      line-height: 1;
+      padding: 0.2rem;
+      transition: color 0.15s;
+    }
+    .modal-close:hover { color: white; }
+
+    .modal-body { padding: 1.5rem; }
+
+    .detail-section { margin-bottom: 1.5rem; }
+
+    .detail-section-title {
+      font-size: 0.72rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--bhp-gray);
+      margin-bottom: 0.85rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--bhp-border);
+    }
+
+    .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+    .detail-field { display: flex; flex-direction: column; gap: 0.2rem; }
+    .detail-label { font-size: 0.7rem; color: var(--bhp-gray); font-weight: 500; }
+    .detail-value { font-size: 0.875rem; color: var(--bhp-dark); }
+    .detail-value.mono { font-family: 'DM Mono', monospace; font-size: 0.8rem; }
+    .detail-value.empty { color: var(--bhp-border); font-style: italic; }
+
+    /* DESPACHO FORM */
+    .despacho-form {
+      border-top: 1px solid var(--bhp-border);
+      padding: 1.25rem 1.5rem;
+      background: #F0F5FF;
+    }
+
+    .despacho-title {
+      font-size: 0.72rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--mintral-blue);
+      margin-bottom: 1rem;
+    }
+
+    .destino-options {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .destino-option {
+      border: 2px solid var(--bhp-border);
+      border-radius: 8px;
+      padding: 1rem;
+      cursor: pointer;
+      transition: all 0.15s;
+      text-align: center;
+      background: var(--bhp-white);
+    }
+
+    .destino-option:hover { border-color: var(--mintral-blue); }
+    .destino-option.selected { border-color: var(--mintral-blue); background: #EFF6FF; }
+
+    .destino-option .icon { font-size: 1.5rem; margin-bottom: 0.4rem; }
+    .destino-option .label { font-size: 0.82rem; font-weight: 600; color: var(--bhp-dark); }
+    .destino-option .sublabel { font-size: 0.72rem; color: var(--bhp-gray); margin-top: 0.2rem; }
+
+    .despacho-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+    .despacho-field-full { grid-column: span 2; }
+
+    .btn-despachar {
+      width: 100%;
+      background: var(--mintral-blue);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 0.85rem;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s;
+      margin-top: 0.5rem;
+    }
+
+    .btn-despachar:hover { background: #1E40AF; }
+    .btn-despachar:disabled { background: #93C5FD; cursor: not-allowed; }
+
+    /* DESPACHO INFO (ya despachado) */
+    .despacho-info {
+      border-top: 1px solid var(--bhp-border);
+      padding: 1.25rem 1.5rem;
+      background: #EDFAF3;
+    }
+
+    .despacho-info-title {
+      font-size: 0.72rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--bhp-success);
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 600px) {
+      .container { padding: 1.25rem 1rem; }
+      .detail-grid { grid-template-columns: 1fr; }
+      .destino-options { grid-template-columns: 1fr; }
+      .despacho-fields { grid-template-columns: 1fr; }
+      .despacho-field-full { grid-column: span 1; }
+      .header { padding: 0.75rem 1rem; }
+      .user-name { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- LOGIN -->
+  <div class="login-screen" id="loginScreen">
+    <div class="login-card">
+      <div class="login-header">
+        <div class="login-logo">
+          <span class="logo-escondida">ESCONDIDA</span>
+          <div class="logo-sep"></div>
+          <span class="logo-bhp">BHP</span>
+        </div>
+        <div class="login-role-badge">Operador Logístico — MINTRAL</div>
+        <h2>Acceso al sistema</h2>
+        <p>Ingrese sus credenciales para continuar</p>
+      </div>
+      <div class="login-error" id="loginError">Correo o contraseña incorrectos.</div>
+      <div class="field">
+        <label for="loginEmail">Correo electrónico</label>
+        <input type="email" id="loginEmail" placeholder="correo@mintral.cl" />
+      </div>
+      <div class="field">
+        <label for="loginPassword">Contraseña</label>
+        <input type="password" id="loginPassword" placeholder="••••••••" />
+      </div>
+      <button class="btn-primary" id="btnLogin">Ingresar</button>
+    </div>
+  </div>
+
+  <!-- APP -->
+  <div class="app" id="app">
+
+    <header class="header">
+      <div style="display:flex;align-items:center;gap:0.6rem;">
+        <span class="logo-escondida" style="font-size:0.9rem;">ESCONDIDA</span>
+        <div style="width:1px;height:20px;background:var(--bhp-border);"></div>
+        <span class="logo-bhp" style="font-size:0.9rem;">BHP</span>
+      </div>
+      <div class="header-divider"></div>
+      <span class="header-section">MINTRAL — Operador Logístico</span>
+      <div class="header-right">
+        <div style="display:flex;align-items:center;gap:0.5rem;">
+          <div class="user-avatar" id="userAvatar">--</div>
+          <span class="user-name" id="userName">--</span>
+        </div>
+        <button class="btn-logout" onclick="logout()">Cerrar sesión</button>
+      </div>
+    </header>
+
+    <!-- NOTIF BANNER -->
+    <div class="notif-banner hidden" id="notifBanner">
+      <div class="notif-dot" id="notifCount">0</div>
+      <span id="notifText">urgencias aprobadas pendientes de despacho</span>
+    </div>
+
+    <div class="container">
+      <div class="tabs">
+        <div class="tab active" onclick="switchTab('aprobada')" id="tab_aprobada">
+          Por despachar
+          <span class="tab-badge" id="badge_aprobada">0</span>
+        </div>
+        <div class="tab" onclick="switchTab('en_transito')" id="tab_transito">
+          Despachadas
+          <span class="tab-badge gray" id="badge_transito">0</span>
+        </div>
+      </div>
+
+      <div id="urgenciasList">
+        <div class="loading-state">Cargando urgencias...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL -->
+  <div class="modal-overlay" id="modalOverlay" onclick="closeModalOutside(event)">
+    <div class="modal" id="modal">
+      <div class="modal-header">
+        <div class="modal-header-left">
+          <span class="modal-urg-num" id="modalUrgNum">URG-0000</span>
+          <span class="status-pill aprobada" id="modalStatus">Aprobada</span>
+        </div>
+        <button class="modal-close" onclick="closeModal()">✕</button>
+      </div>
+
+      <div class="modal-body" id="modalBody"></div>
+
+      <div id="modalFooter"></div>
+    </div>
+  </div>
+
+  <script>
+    const SUPABASE_URL = 'https://dnsijobpjnirbfrlkwfq.supabase.co';
+    const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRuc2lqb2Jwam5pcmJmcmxrd2ZxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzczMjAzNDQsImV4cCI6MjA5Mjg5NjM0NH0.MRPIvr32iqoYMsh00cQ9PZq5_M9XJUKZtbfII8cMC8A';
+
+    let currentUser = null;
+    let currentTab = 'aprobada';
+    let allUrgencias = [];
+    let currentUrgencia = null;
+    let selectedDestino = null;
+
+    // ─── AUTH ───────────────────────────────────────────────
+    document.getElementById('btnLogin').addEventListener('click', login);
+    document.getElementById('loginPassword').addEventListener('keydown', e => { if (e.key === 'Enter') login(); });
+
+    async function login() {
+      const email = document.getElementById('loginEmail').value.trim();
+      const password = document.getElementById('loginPassword').value;
+      const btn = document.getElementById('btnLogin');
+      const errEl = document.getElementById('loginError');
+
+      btn.disabled = true;
+      btn.textContent = 'Ingresando...';
+      errEl.classList.remove('visible');
+
+      try {
+        const res = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON },
+          body: JSON.stringify({ email, password })
+        });
+
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error_description || 'Error');
+
+        const roleRes = await fetch(`${SUPABASE_URL}/rest/v1/usuarios?email=eq.${encodeURIComponent(email)}&select=*`, {
+          headers: { 'apikey': SUPABASE_ANON, 'Authorization': `Bearer ${data.access_token}` }
+        });
+
+        const roleData = await roleRes.json();
+
+        if (!roleData.length || roleData[0].rol !== 'mintral') {
+          throw new Error('No tienes acceso a esta sección.');
+        }
+
+        currentUser = { ...roleData[0], token: data.access_token };
+        showApp();
+
+      } catch (err) {
+        errEl.textContent = err.message;
+        errEl.classList.add('visible');
+        btn.disabled = false;
+        btn.textContent = 'Ingresar';
+      }
+    }
+
+    function showApp() {
+      document.getElementById('loginScreen').style.display = 'none';
+      document.getElementById('app').classList.add('visible');
+      const initials = currentUser.nombre.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+      document.getElementById('userAvatar').textContent = initials;
+      document.getElementById('userName').textContent = currentUser.nombre;
+      loadUrgencias();
+    }
+
+    function logout() {
+      currentUser = null;
+      allUrgencias = [];
+      document.getElementById('loginScreen').style.display = 'flex';
+      document.getElementById('app').classList.remove('visible');
+      document.getElementById('loginEmail').value = '';
+      document.getElementById('loginPassword').value = '';
+    }
+
+    // ─── LOAD DATA ───────────────────────────────────────────
+    async function loadUrgencias() {
+      document.getElementById('urgenciasList').innerHTML = '<div class="loading-state">Cargando urgencias...</div>';
+
+      try {
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/urgencias?estado=in.(aprobada,en_transito_p3,en_transito_cd)&select=*&order=created_at.desc`, {
+          headers: { 'apikey': SUPABASE_ANON, 'Authorization': `Bearer ${currentUser.token}` }
+        });
+
+        allUrgencias = await res.json();
+        updateBadges();
+        renderList();
+
+      } catch (err) {
+        document.getElementById('urgenciasList').innerHTML = '<div class="loading-state">Error al cargar. Recargue la página.</div>';
+      }
+    }
+
+    function updateBadges() {
+      const aprobadas = allUrgencias.filter(u => u.estado === 'aprobada').length;
+      const transito = allUrgencias.filter(u => u.estado === 'en_transito_p3' || u.estado === 'en_transito_cd').length;
+
+      document.getElementById('badge_aprobada').textContent = aprobadas;
+      document.getElementById('badge_transito').textContent = transito;
+
+      const banner = document.getElementById('notifBanner');
+      if (aprobadas > 0) {
+        banner.classList.remove('hidden');
+        document.getElementById('notifCount').textContent = aprobadas;
+        document.getElementById('notifText').textContent = aprobadas === 1 ? 'urgencia aprobada pendiente de despacho' : 'urgencias aprobadas pendientes de despacho';
+      } else {
+        banner.classList.add('hidden');
+      }
+    }
+
+    function renderList() {
+      const filtered = currentTab === 'aprobada'
+        ? allUrgencias.filter(u => u.estado === 'aprobada')
+        : allUrgencias.filter(u => u.estado === 'en_transito_p3' || u.estado === 'en_transito_cd');
+
+      const container = document.getElementById('urgenciasList');
+
+      if (!filtered.length) {
+        container.innerHTML = `<div class="empty-state"><div class="icon">📦</div><p>No hay urgencias en este estado.</p></div>`;
+        return;
+      }
+
+      container.innerHTML = filtered.map(u => `
+        <div class="urgencia-card ${u.estado}" onclick="openModal('${u.id}')">
+          <span class="urg-num">${u.numero_urg}</span>
+          <div class="urg-info">
+            <div class="urg-proveedor">${u.nombre_proveedor}</div>
+            <div class="urg-meta">${u.gerencia} · ${u.superintendencia} · ${formatDate(u.created_at)}</div>
+          </div>
+          <div>
+            <span class="status-pill ${u.estado}">${statusLabel(u.estado)}</span>
+          </div>
+          <span class="urg-arrow">›</span>
+        </div>
+      `).join('');
+    }
+
+    function switchTab(tab) {
+      currentTab = tab;
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.getElementById(tab === 'aprobada' ? 'tab_aprobada' : 'tab_transito').classList.add('active');
+      renderList();
+    }
+
+    // ─── MODAL ───────────────────────────────────────────────
+    function openModal(id) {
+      currentUrgencia = allUrgencias.find(u => u.id === id);
+      if (!currentUrgencia) return;
+
+      const u = currentUrgencia;
+      selectedDestino = null;
+
+      document.getElementById('modalUrgNum').textContent = u.numero_urg;
+      const statusEl = document.getElementById('modalStatus');
+      statusEl.textContent = statusLabel(u.estado);
+      statusEl.className = `status-pill ${u.estado}`;
+
+      document.getElementById('modalBody').innerHTML = `
+        <div class="detail-section">
+          <div class="detail-section-title">Datos de la Urgencia</div>
+          <div class="detail-grid">
+            <div class="detail-field"><span class="detail-label">Proveedor</span><span class="detail-value">${u.nombre_proveedor}</span></div>
+            <div class="detail-field"><span class="detail-label">Focal Proveedor</span><span class="detail-value">${u.focal_proveedor}</span></div>
+            <div class="detail-field"><span class="detail-label">PO / Ítems</span><span class="detail-value mono">${u.po_items}</span></div>
+            <div class="detail-field"><span class="detail-label">Contacto Proveedor</span><span class="detail-value">${u.contacto_proveedor}</span></div>
+            <div class="detail-field"><span class="detail-label">Código Stock</span><span class="detail-value ${u.codigo_stock ? '' : 'empty'}">${u.codigo_stock || 'No aplica'}</span></div>
+            <div class="detail-field"><span class="detail-label">N° Reserva</span><span class="detail-value ${u.numero_reserva ? '' : 'empty'}">${u.numero_reserva || 'No aplica'}</span></div>
+          </div>
+        </div>
+        <div class="detail-section">
+          <div class="detail-section-title">Datos para Entrega en el Sitio</div>
+          <div class="detail-grid">
+            <div class="detail-field"><span class="detail-label">Supervisor MEL 1</span><span class="detail-value">${u.nombre_supervisor_mel}</span></div>
+            <div class="detail-field"><span class="detail-label">Contacto</span><span class="detail-value">${u.contacto_supervisor_mel}</span></div>
+            ${u.nombre_supervisor_mel2 ? `<div class="detail-field"><span class="detail-label">Supervisor MEL 2</span><span class="detail-value">${u.nombre_supervisor_mel2}</span></div><div class="detail-field"><span class="detail-label">Contacto</span><span class="detail-value">${u.contacto_supervisor_mel2 || '—'}</span></div>` : ''}
+            <div class="detail-field"><span class="detail-label">UP — Punto de entrega</span><span class="detail-value mono">${u.up_punto_entrega}</span></div>
+          </div>
+        </div>
+      `;
+
+      // Footer según estado
+      const footer = document.getElementById('modalFooter');
+
+      if (u.estado === 'aprobada') {
+        footer.innerHTML = `
+          <div class="despacho-form">
+            <div class="despacho-title">📦 Registrar Despacho</div>
+
+            <div class="destino-options">
+              <div class="destino-option" id="opt_p3" onclick="selectDestino('en_transito_p3')">
+                <div class="icon">🏭</div>
+                <div class="label">Patio 3 (UR)</div>
+                <div class="sublabel">Faena Escondida</div>
+              </div>
+              <div class="destino-option" id="opt_cd" onclick="selectDestino('en_transito_cd')">
+                <div class="icon">🚚</div>
+                <div class="label">Directo al usuario</div>
+                <div class="sublabel">Entrega CD</div>
+              </div>
+            </div>
+
+            <div class="despacho-fields">
+              <div class="field">
+                <label for="num_resumen">N° Resumen de Viaje</label>
+                <input type="text" id="num_resumen" placeholder="Ej: RV-123456" />
+              </div>
+              <div class="field">
+                <label for="num_guia">N° Guía</label>
+                <input type="text" id="num_guia" placeholder="Ej: G-987654" />
+              </div>
+              <div class="field">
+                <label for="nombre_conductor">Nombre Conductor</label>
+                <input type="text" id="nombre_conductor" placeholder="Nombre completo" />
+              </div>
+              <div class="field">
+                <label for="patente_equipo">Patente Equipo</label>
+                <input type="text" id="patente_equipo" placeholder="Ej: ABCD12" />
+              </div>
+              <div class="field">
+                <label for="qty">Cantidad (QTY)</label>
+                <input type="text" id="qty" placeholder="Ej: 3 pallets" />
+              </div>
+              <div class="field">
+                <label for="tipo_carga">Tipo de Carga</label>
+                <select id="tipo_carga">
+                  <option value="">Seleccionar...</option>
+                  <option value="PALLET">PALLET</option>
+                  <option value="CAJA">CAJA</option>
+                  <option value="BULTO">BULTO</option>
+                  <option value="OTROS">OTROS</option>
+                </select>
+              </div>
+              <div class="field despacho-field-full">
+                <label for="nombre_receptor">Nombre de quien recibe en Faena</label>
+                <input type="text" id="nombre_receptor" placeholder="Nombre completo del receptor" />
+              </div>
+            </div>
+
+            <button class="btn-despachar" onclick="registrarDespacho()">Confirmar Despacho →</button>
+          </div>
+        `;
+      } else {
+        // Ya despachada — mostrar info
+        footer.innerHTML = `
+          <div class="despacho-info">
+            <div class="despacho-info-title">✅ Carga despachada</div>
+            <div class="detail-grid">
+              <div class="detail-field"><span class="detail-label">Destino</span><span class="detail-value">${u.estado === 'en_transito_p3' ? 'Patio 3 (UR)' : 'Directo al usuario (CD)'}</span></div>
+              <div class="detail-field"><span class="detail-label">N° Resumen Viaje</span><span class="detail-value mono">${u.numero_resumen_viaje || '—'}</span></div>
+              <div class="detail-field"><span class="detail-label">N° Guía</span><span class="detail-value mono">${u.numero_guia || '—'}</span></div>
+              <div class="detail-field"><span class="detail-label">Conductor</span><span class="detail-value">${u.nombre_conductor || '—'}</span></div>
+              <div class="detail-field"><span class="detail-label">Patente</span><span class="detail-value mono">${u.patente_equipo || '—'}</span></div>
+              <div class="detail-field"><span class="detail-label">QTY</span><span class="detail-value">${u.qty || '—'}</span></div>
+              <div class="detail-field"><span class="detail-label">Tipo Carga</span><span class="detail-value">${u.tipo_carga || '—'}</span></div>
+              <div class="detail-field"><span class="detail-label">Receptor en Faena</span><span class="detail-value">${u.nombre_receptor || '—'}</span></div>
+              <div class="detail-field"><span class="detail-label">Despachado por</span><span class="detail-value">${u.despachado_por || '—'}</span></div>
+              <div class="detail-field"><span class="detail-label">Fecha despacho</span><span class="detail-value">${formatDate(u.fecha_despacho)}</span></div>
+            </div>
+          </div>
+        `;
+      }
+
+      document.getElementById('modalOverlay').classList.add('visible');
+    }
+
+    function selectDestino(destino) {
+      selectedDestino = destino;
+      document.getElementById('opt_p3').classList.toggle('selected', destino === 'en_transito_p3');
+      document.getElementById('opt_cd').classList.toggle('selected', destino === 'en_transito_cd');
+    }
+
+    function closeModal() {
+      document.getElementById('modalOverlay').classList.remove('visible');
+      currentUrgencia = null;
+      selectedDestino = null;
+    }
+
+    function closeModalOutside(e) {
+      if (e.target === document.getElementById('modalOverlay')) closeModal();
+    }
+
+    async function registrarDespacho() {
+      if (!selectedDestino) {
+        alert('Por favor seleccione el destino de la carga.');
+        return;
+      }
+
+      const numResumen = document.getElementById('num_resumen').value.trim();
+      const numGuia = document.getElementById('num_guia').value.trim();
+      const conductor = document.getElementById('nombre_conductor').value.trim();
+      const patente = document.getElementById('patente_equipo').value.trim();
+      const qty = document.getElementById('qty').value.trim();
+      const tipoCarga = document.getElementById('tipo_carga').value;
+      const receptor = document.getElementById('nombre_receptor').value.trim();
+
+      if (!numResumen || !numGuia || !conductor || !patente || !qty || !tipoCarga || !receptor) {
+        alert('Por favor complete todos los campos del despacho.');
+        return;
+      }
+
+      const btn = document.querySelector('.btn-despachar');
+      btn.disabled = true;
+      btn.textContent = 'Registrando...';
+
+      try {
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/urgencias?id=eq.${currentUrgencia.id}`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': SUPABASE_ANON,
+            'Authorization': `Bearer ${currentUser.token}`,
+            'Prefer': 'return=representation'
+          },
+          body: JSON.stringify({
+            estado: selectedDestino,
+            destino: selectedDestino === 'en_transito_p3' ? 'Patio 3' : 'Directo CD',
+            numero_resumen_viaje: numResumen,
+            numero_guia: numGuia,
+            nombre_conductor: conductor,
+            patente_equipo: patente,
+            qty: qty,
+            tipo_carga: tipoCarga,
+            nombre_receptor: receptor,
+            despachado_por: currentUser.nombre,
+            fecha_despacho: new Date().toISOString(),
+            fecha_llegada: new Date().toISOString()
+          })
+        });
+
+        if (!res.ok) throw new Error('Error al registrar');
+
+        // Historial
+        await fetch(`${SUPABASE_URL}/rest/v1/historial_estados`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': SUPABASE_ANON,
+            'Authorization': `Bearer ${currentUser.token}`
+          },
+          body: JSON.stringify({
+            urgencia_id: currentUrgencia.id,
+            estado_anterior: currentUrgencia.estado,
+            estado_nuevo: selectedDestino,
+            comentario: `Despachado a ${selectedDestino === 'en_transito_p3' ? 'Patio 3' : 'Directo CD'}. Guía: ${numGuia}. Conductor: ${conductor}. Patente: ${patente}.`,
+            actor: currentUser.nombre
+          })
+        });
+
+        closeModal();
+        await loadUrgencias();
+
+      } catch (err) {
+        alert('Error al registrar el despacho. Intente nuevamente.');
+        btn.disabled = false;
+        btn.textContent = 'Confirmar Despacho →';
+      }
+    }
+
+    // ─── HELPERS ─────────────────────────────────────────────
+    function formatDate(d) {
+      if (!d) return '—';
+      return new Date(d).toLocaleDateString('es-CL', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    }
+
+    function statusLabel(s) {
+      const labels = {
+        aprobada: 'Por despachar',
+        en_transito_p3: 'En tránsito — Patio 3',
+        en_transito_cd: 'En tránsito — Directo CD',
+        cerrada: 'Cerrada'
+      };
+      return labels[s] || s;
+    }
+  </script>
+
+</body>
+</html>
