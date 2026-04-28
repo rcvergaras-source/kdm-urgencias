@@ -1,7 +1,8 @@
 {
   "rewrites": [
-    { "source": "/supervisor", "destination": "/supervisor.html" },
+    { "source": "/", "destination": "/formulario-urgencia.html" },
     { "source": "/formulario", "destination": "/formulario-urgencia.html" },
-    { "source": "/", "destination": "/formulario-urgencia.html" }
+    { "source": "/supervisor", "destination": "/supervisor.html" },
+    { "source": "/mintral", "destination": "/mintral.html" }
   ]
 }
