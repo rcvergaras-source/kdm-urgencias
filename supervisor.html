@@ -1014,12 +1014,6 @@
       document.getElementById('modalOverlay').classList.add('visible');
     }
 
-    function closeModal() {
-      document.getElementById('modalOverlay').classList.remove('visible');
-      currentUrgencia = null;
-      pendingAction = null;
-    }
-
     function closeModalOutside(e) {
       if (e.target === document.getElementById('modalOverlay')) closeModal();
     }
@@ -1115,6 +1109,15 @@
         alert('Error al actualizar la urgencia. Intente nuevamente.');
         if (btn) btn.disabled = false;
       }
+    }
+
+    function closeModal() {
+      document.getElementById('modalOverlay').classList.remove('visible');
+      document.getElementById('commentBox').classList.remove('visible');
+      document.getElementById('commentText').value = '';
+      document.getElementById('commentText').style.borderColor = '';
+      currentUrgencia = null;
+      pendingAction = null;
     }
 
     // ─── HELPERS ─────────────────────────────────────────────
