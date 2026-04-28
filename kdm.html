@@ -750,69 +750,70 @@
       const estadosConSAP = ['en_transito_p3', 'recibido_p3', 'en_transito_cd', 'cerrado_pendiente_retiro', 'cerrado_entregado'];
 
       if (estadosConSAP.includes(u.estado)) {
-        const isCerradoEntregado = u.estado === 'cerrado_entregado';
-        const isP3 = u.destino === 'Patio 3' || u.estado === 'en_transito_p3' || u.estado === 'recibido_p3' || u.estado === 'cerrado_pendiente_retiro';
-        const isCD = u.destino === 'Directo CD' || u.estado === 'en_transito_cd';
-
-        // Botones según estado actual
-        let botonesHTML = '';
-
         if (u.estado === 'en_transito_p3') {
-          botonesHTML = `
-            <button class="btn-guardar-sap" onclick="marcarRecibidoP3()">📦 Marcar como Recibido en Patio 3</button>
+          sapEl.innerHTML = `
+            <div class="sap-section">
+              <div class="sap-title">📦 Recepción en Patio 3</div>
+              <p style="font-size:0.82rem;color:var(--kdm-gray);margin-bottom:1rem;">Una vez recibida la carga físicamente en Patio 3, confirme la recepción para iniciar el proceso sistémico.</p>
+              <button class="btn-guardar-sap" onclick="marcarRecibidoP3()">📦 Marcar como Recibido en Patio 3</button>
+            </div>
           `;
-        } else if (u.estado === 'recibido_p3') {
-          botonesHTML = `
-            <button class="btn-guardar-sap" onclick="guardarSAP()">💾 Guardar registros SAP</button>
-            <button class="btn-cerrar-urg" id="btnCerrar" onclick="cerrarSistemico()">✅ Cerrar — Pendiente retiro cliente</button>
-          `;
-        } else if (u.estado === 'cerrado_pendiente_retiro') {
-          botonesHTML = `
-            <button class="btn-guardar-sap" onclick="guardarSAP()">💾 Guardar registros SAP</button>
-            <button class="btn-cerrar-urg" id="btnCerrar" onclick="cerrarEntregado()">🤝 Marcar como entregado a cliente</button>
-          `;
-        } else if (u.estado === 'en_transito_cd') {
-          botonesHTML = `
-            <button class="btn-guardar-sap" onclick="guardarSAP()">💾 Guardar registros SAP</button>
-            <button class="btn-cerrar-urg" id="btnCerrar" onclick="cerrarEntregado()">✅ Cerrar y marcar como entregado</button>
-          `;
-        } else if (isCerradoEntregado) {
-          botonesHTML = `<div style="background:#EDFAF3;border-radius:6px;padding:0.75rem 1rem;font-size:0.82rem;color:var(--kdm-success);font-weight:500;">✅ Urgencia cerrada y entregada correctamente</div>`;
-        }
+        } else if (u.estado === 'recibido_p3' || u.estado === 'cerrado_pendiente_retiro' || u.estado === 'cerrado_entregado' || u.estado === 'en_transito_cd') {
+          const isCerradoEntregado = u.estado === 'cerrado_entregado';
 
-        sapEl.innerHTML = `
-          <div class="sap-section">
-            <div class="sap-title">📊 Registro SAP y Cierre</div>
+          let botonesHTML = '';
+          if (u.estado === 'recibido_p3') {
+            botonesHTML = `
+              <button class="btn-guardar-sap" onclick="guardarSAP()">💾 Guardar registros SAP</button>
+              <button class="btn-cerrar-urg" onclick="cerrarSistemico()">✅ Cerrar — Pendiente retiro cliente</button>
+            `;
+          } else if (u.estado === 'cerrado_pendiente_retiro') {
+            botonesHTML = `
+              <button class="btn-guardar-sap" onclick="guardarSAP()">💾 Guardar registros SAP</button>
+              <button class="btn-cerrar-urg" onclick="cerrarEntregado()">🤝 Marcar como entregado a cliente</button>
+            `;
+          } else if (u.estado === 'en_transito_cd') {
+            botonesHTML = `
+              <button class="btn-guardar-sap" onclick="guardarSAP()">💾 Guardar registros SAP</button>
+              <button class="btn-cerrar-urg" onclick="cerrarEntregado()">✅ Cerrar y marcar como entregado</button>
+            `;
+          } else if (isCerradoEntregado) {
+            botonesHTML = `<div style="background:#EDFAF3;border-radius:6px;padding:0.75rem 1rem;font-size:0.82rem;color:var(--kdm-success);font-weight:500;">✅ Urgencia cerrada y entregada correctamente</div>`;
+          }
 
-            ${u.fecha_recepcion_p3 ? `<div style="font-size:0.78rem;color:var(--kdm-gray);margin-bottom:1rem;">📦 Recibido en Patio 3: <strong>${formatDateTime(u.fecha_recepcion_p3)}</strong></div>` : ''}
-            ${u.fecha_cierre_sistemico ? `<div style="font-size:0.78rem;color:var(--kdm-gray);margin-bottom:1rem;">📋 Proceso sistémico cerrado: <strong>${formatDateTime(u.fecha_cierre_sistemico)}</strong></div>` : ''}
-            ${u.fecha_entrega_cliente ? `<div style="font-size:0.78rem;color:var(--kdm-gray);margin-bottom:1rem;">🤝 Entregado a cliente: <strong>${formatDateTime(u.fecha_entrega_cliente)}</strong></div>` : ''}
+          sapEl.innerHTML = `
+            <div class="sap-section">
+              <div class="sap-title">📊 Registro SAP y Cierre</div>
 
-            <div class="sap-fields">
-              <div class="sap-field">
-                <label for="mov261">N° Movimiento 261</label>
-                <input type="text" id="mov261" value="${u.movimiento_261 || ''}" placeholder="Ej: 4900012345" ${isCerradoEntregado ? 'disabled' : ''} />
-              </div>
-              <div class="sap-field">
-                <label>Ingresado a SAP</label>
-                <div style="display:flex;align-items:center;gap:0.5rem;padding:0.65rem 0;">
-                  <input type="checkbox" id="ingresadoSAP" ${u.ingresado_sap ? 'checked' : ''} ${isCerradoEntregado ? 'disabled' : ''} />
-                  <label for="ingresadoSAP" style="font-size:0.85rem;">Confirmado</label>
+              ${u.fecha_recepcion_p3 ? `<div style="font-size:0.78rem;color:var(--kdm-gray);margin-bottom:0.5rem;">📦 Recibido en Patio 3: <strong>${formatDateTime(u.fecha_recepcion_p3)}</strong></div>` : ''}
+              ${u.fecha_cierre_sistemico ? `<div style="font-size:0.78rem;color:var(--kdm-gray);margin-bottom:0.5rem;">📋 Proceso sistémico cerrado: <strong>${formatDateTime(u.fecha_cierre_sistemico)}</strong></div>` : ''}
+              ${u.fecha_entrega_cliente ? `<div style="font-size:0.78rem;color:var(--kdm-gray);margin-bottom:0.5rem;">🤝 Entregado a cliente: <strong>${formatDateTime(u.fecha_entrega_cliente)}</strong></div>` : ''}
+
+              <div class="sap-fields" style="margin-top:1rem;">
+                <div class="sap-field">
+                  <label for="mov261">N° Movimiento 261</label>
+                  <input type="text" id="mov261" value="${u.movimiento_261 || ''}" placeholder="Ej: 4900012345" ${isCerradoEntregado ? 'disabled' : ''} />
+                </div>
+                <div class="sap-field">
+                  <label>Ingresado a SAP</label>
+                  <div style="display:flex;align-items:center;gap:0.5rem;padding:0.65rem 0;">
+                    <input type="checkbox" id="ingresadoSAP" ${u.ingresado_sap ? 'checked' : ''} ${isCerradoEntregado ? 'disabled' : ''} />
+                    <label for="ingresadoSAP" style="font-size:0.85rem;">Confirmado</label>
+                  </div>
                 </div>
               </div>
-            </div>
 
-            <div class="pod-row">
-              <input type="checkbox" id="podRealizado" ${u.pod_realizado ? 'checked' : ''} ${isCerradoEntregado ? 'disabled' : ''} />
-              <label for="podRealizado">POD realizado</label>
-            </div>
+              <div class="pod-row">
+                <input type="checkbox" id="podRealizado" ${u.pod_realizado ? 'checked' : ''} ${isCerradoEntregado ? 'disabled' : ''} />
+                <label for="podRealizado">POD realizado</label>
+              </div>
 
-            ${!isCerradoEntregado ? `<div class="sap-actions">${botonesHTML}</div>` : botonesHTML}
-          </div>
-        `;
-      } else {
-        sapEl.innerHTML = '';
-      }
+              ${!isCerradoEntregado ? `<div class="sap-actions">${botonesHTML}</div>` : botonesHTML}
+            </div>
+          `;
+        } else {
+          sapEl.innerHTML = '';
+        }
 
       document.getElementById('modalOverlay').classList.add('visible');
     }
