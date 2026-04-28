@@ -525,6 +525,7 @@
         }
 
         currentUser = { ...roleData[0], token: data.access_token };
+        sessionStorage.setItem('kdm_user', JSON.stringify(currentUser));
         showApp();
 
       } catch (err) {
@@ -555,11 +556,21 @@
     function logout() {
       currentUser = null;
       allUrgencias = [];
+      sessionStorage.removeItem('kdm_user');
       document.getElementById('loginScreen').style.display = 'flex';
       document.getElementById('app').classList.remove('visible');
       document.getElementById('loginEmail').value = '';
       document.getElementById('loginPassword').value = '';
     }
+
+    // Restaurar sesión al cargar
+    window.addEventListener('load', () => {
+      const saved = sessionStorage.getItem('kdm_user');
+      if (saved) {
+        currentUser = JSON.parse(saved);
+        showApp();
+      }
+    });
 
     // ─── LOAD DATA ───────────────────────────────────────────
     async function loadUrgencias() {
