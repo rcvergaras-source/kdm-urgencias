@@ -53,18 +53,24 @@
     .field { display: flex; flex-direction: column; gap: 0.35rem; margin-bottom: 1rem; }
     label { font-size: 0.78rem; font-weight: 500; color: var(--kdm-dark); }
 
-    input, select, textarea {
+    input:not([type="checkbox"]), select, textarea {
       width: 100%; padding: 0.65rem 0.85rem; border: 1.5px solid var(--kdm-border);
       border-radius: 6px; font-family: 'DM Sans', sans-serif; font-size: 0.875rem;
       color: var(--kdm-dark); background: var(--kdm-white);
       transition: border-color 0.15s, box-shadow 0.15s; -webkit-appearance: none;
     }
 
-    input:focus, select:focus, textarea:focus {
+    input:not([type="checkbox"]):focus, select:focus, textarea:focus {
       outline: none; border-color: var(--kdm-orange); box-shadow: 0 0 0 3px rgba(224,94,27,0.1);
     }
 
-    input[type="checkbox"] { width: auto; accent-color: var(--kdm-orange); }
+    input[type="checkbox"] { 
+      width: 18px !important; 
+      height: 18px !important;
+      accent-color: var(--kdm-orange); 
+      cursor: pointer;
+      flex-shrink: 0;
+    }
 
     .btn-primary {
       width: 100%; background: var(--kdm-orange); color: white; border: none;
