@@ -814,7 +814,15 @@
                 <label for="podRealizado">POD realizado</label>
               </div>
 
-              ${!isCerradoEntregado ? `<div class="sap-actions">${botonesHTML}</div>` : botonesHTML}
+              ${!isCerradoEntregado ? `
+              <div class="sap-actions">
+                ${u.estado === 'cerrado_pendiente_retiro' || u.estado === 'en_transito_cd' ? `
+                <div class="sap-field" style="width:100%;margin-bottom:0.75rem;">
+                  <label for="receptorEntrega">Nombre de quien recibe la carga</label>
+                  <input type="text" id="receptorEntrega" value="${u.receptor_entrega || ''}" placeholder="Nombre completo del receptor" />
+                </div>` : ''}
+                ${botonesHTML}
+              </div>` : botonesHTML}
             </div>
           `;
         } else {
@@ -875,10 +883,11 @@
     }
 
     async function cerrarEntregado() {
-      // Mostrar campo para ingresar quien recibe
-      const receptor = prompt('¿Quién recibe la carga? Ingrese el nombre completo:');
-      if (receptor === null) return; // canceló
-      if (!receptor.trim()) {
+      const receptorEl = document.getElementById('receptorEntrega');
+      const receptor = receptorEl ? receptorEl.value.trim() : '';
+      if (!receptor) {
+        if (receptorEl) receptorEl.style.borderColor = 'var(--kdm-error)';
+        setTimeout(() => { if (receptorEl) receptorEl.style.borderColor = ''; }, 1500);
         alert('Debe ingresar el nombre de quien recibe la carga.');
         return;
       }
@@ -887,8 +896,8 @@
         await patchUrgencia({
           estado: 'cerrado_entregado',
           fecha_entrega_cliente: new Date().toISOString(),
-          receptor_entrega: receptor.trim()
-        }, 'cerrado_entregado', `Urgencia cerrada y entregada al cliente. Recibe: ${receptor.trim()}.`);
+          receptor_entrega: receptor
+        }, 'cerrado_entregado', `Urgencia cerrada y entregada al cliente. Recibe: ${receptor}.`);
         closeModal();
         await loadUrgencias();
       } catch (err) { alert('Error al actualizar. Intente nuevamente.'); }
