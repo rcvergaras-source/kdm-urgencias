@@ -750,6 +750,10 @@
                 <input type="text" id="num_guia" placeholder="Ej: G-987654" />
               </div>
               <div class="field">
+                <label for="expedicion_shipment">Expedición / Shipment</label>
+                <input type="text" id="expedicion_shipment" placeholder="Ej: EXP-123456" />
+              </div>
+              <div class="field">
                 <label for="nombre_conductor">Nombre Conductor</label>
                 <input type="text" id="nombre_conductor" placeholder="Nombre completo" />
               </div>
@@ -789,6 +793,7 @@
               <div class="detail-field"><span class="detail-label">Destino</span><span class="detail-value">${u.estado === 'en_transito_p3' ? 'Patio 3 (UR)' : 'Directo al usuario (CD)'}</span></div>
               <div class="detail-field"><span class="detail-label">N° Resumen Viaje</span><span class="detail-value mono">${u.numero_resumen_viaje || '—'}</span></div>
               <div class="detail-field"><span class="detail-label">N° Guía</span><span class="detail-value mono">${u.numero_guia || '—'}</span></div>
+              <div class="detail-field"><span class="detail-label">Expedición / Shipment</span><span class="detail-value mono">${u.expedicion_shipment || '—'}</span></div>
               <div class="detail-field"><span class="detail-label">Conductor</span><span class="detail-value">${u.nombre_conductor || '—'}</span></div>
               <div class="detail-field"><span class="detail-label">Patente</span><span class="detail-value mono">${u.patente_equipo || '—'}</span></div>
               <div class="detail-field"><span class="detail-label">QTY</span><span class="detail-value">${u.qty || '—'}</span></div>
@@ -828,13 +833,14 @@
 
       const numResumen = document.getElementById('num_resumen').value.trim();
       const numGuia = document.getElementById('num_guia').value.trim();
+      const expedicion = document.getElementById('expedicion_shipment').value.trim();
       const conductor = document.getElementById('nombre_conductor').value.trim();
       const patente = document.getElementById('patente_equipo').value.trim();
       const qty = document.getElementById('qty').value.trim();
       const tipoCarga = document.getElementById('tipo_carga').value;
       const receptor = document.getElementById('nombre_receptor').value.trim();
 
-      if (!numResumen || !numGuia || !conductor || !patente || !qty || !tipoCarga || !receptor) {
+      if (!numResumen || !numGuia || !expedicion || !conductor || !patente || !qty || !tipoCarga || !receptor) {
         alert('Por favor complete todos los campos del despacho.');
         return;
       }
@@ -857,6 +863,7 @@
             destino: selectedDestino === 'en_transito_p3' ? 'Patio 3' : 'Directo CD',
             numero_resumen_viaje: numResumen,
             numero_guia: numGuia,
+            expedicion_shipment: expedicion,
             nombre_conductor: conductor,
             patente_equipo: patente,
             qty: qty,
