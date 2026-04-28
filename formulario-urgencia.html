@@ -601,9 +601,15 @@
 
     <!-- TÍTULO -->
     <div class="page-title">
-      <div class="urg-badge">SOLICITUD DE URGENCIA</div>
-      <h1>Formulario de Solicitud<br>para Carga General</h1>
-      <p>Complete todos los campos obligatorios. El Supervisor de Logística será notificado automáticamente.</p>
+      <div class="urg-badge" id="formBadge">SOLICITUD DE URGENCIA</div>
+      <h1 id="formTitle">Formulario de Solicitud<br>para Carga General</h1>
+      <p id="formSubtitle">Complete todos los campos obligatorios. El Supervisor de Logística será notificado automáticamente.</p>
+    </div>
+
+    <!-- AVISO CORRECCIÓN -->
+    <div id="avisoCorre" style="display:none;background:#FFF8F0;border:2px solid #E05E1B;border-radius:8px;padding:1rem 1.25rem;margin-bottom:1.5rem;font-size:0.85rem;color:#7A3010;">
+      <strong style="display:block;margin-bottom:0.3rem;">✏️ Modo corrección</strong>
+      Está corrigiendo la urgencia <strong id="avisoUrgNum"></strong>. Los datos han sido cargados automáticamente. Corrija lo necesario y envíe nuevamente.
     </div>
 
     <!-- NOTA RUTAS -->
@@ -847,6 +853,66 @@
     document.getElementById('fecha_solicitud').valueAsDate = new Date();
     document.getElementById('fecha_solicitud').min = today;
 
+    // Detectar modo corrección
+    let modoCorreccion = false;
+    let urgenciaId = null;
+    let urgenciaNum = null;
+
+    const params = new URLSearchParams(window.location.search);
+    const urgParam = params.get('id');
+
+    if (urgParam) {
+      cargarUrgenciaParaCorreccion(urgParam);
+    }
+
+    async function cargarUrgenciaParaCorreccion(numeroUrg) {
+      try {
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/urgencias?numero_urg=eq.${numeroUrg}&select=*`, {
+          headers: { 'apikey': SUPABASE_ANON, 'Authorization': `Bearer ${SUPABASE_ANON}` }
+        });
+        const data = await res.json();
+        if (!data.length) return;
+
+        const u = data[0];
+        urgenciaId = u.id;
+        urgenciaNum = u.numero_urg;
+        modoCorreccion = true;
+
+        // Mostrar aviso
+        document.getElementById('avisoCorre').style.display = 'block';
+        document.getElementById('avisoUrgNum').textContent = u.numero_urg;
+        document.getElementById('formBadge').textContent = 'CORRECCIÓN DE URGENCIA';
+        document.getElementById('formTitle').innerHTML = 'Corrección de Solicitud<br>de Urgencia';
+        document.getElementById('formSubtitle').textContent = 'Corrija los campos indicados por el Supervisor y envíe nuevamente.';
+        document.querySelector('.btn-submit .btn-text').textContent = 'Enviar corrección';
+
+        // Rellenar campos
+        document.getElementById('fecha_solicitud').value = u.fecha_solicitud;
+        document.getElementById('gerencia').value = u.gerencia || '';
+        document.getElementById('superintendencia').value = u.superintendencia || '';
+        document.getElementById('nombre_superintendente').value = u.nombre_superintendente || '';
+        document.getElementById('centro_costo_wbs').value = u.centro_costo_wbs || '';
+        document.getElementById('firma_nombre').value = u.firma_nombre || '';
+        document.getElementById('firma_autoriza').checked = u.firma_autoriza || false;
+        document.getElementById('nombre_proveedor').value = u.nombre_proveedor || '';
+        document.getElementById('focal_proveedor').value = u.focal_proveedor || '';
+        document.getElementById('contacto_proveedor').value = u.contacto_proveedor || '';
+        document.getElementById('po_items').value = u.po_items || '';
+        document.getElementById('codigo_stock').value = u.codigo_stock || '';
+        document.getElementById('numero_reserva').value = u.numero_reserva || '';
+        document.getElementById('nombre_supervisor_mel').value = u.nombre_supervisor_mel || '';
+        document.getElementById('correo_supervisor_mel').value = u.correo_supervisor_mel || '';
+        document.getElementById('contacto_supervisor_mel').value = u.contacto_supervisor_mel || '';
+        document.getElementById('nombre_supervisor_mel2').value = u.nombre_supervisor_mel2 || '';
+        document.getElementById('correo_supervisor_mel2').value = u.correo_supervisor_mel2 || '';
+        document.getElementById('contacto_supervisor_mel2').value = u.contacto_supervisor_mel2 || '';
+        document.getElementById('up_punto_entrega').value = u.up_punto_entrega || '';
+
+      } catch (err) {
+        console.error('Error cargando urgencia:', err);
+      }
+    }
+
     const requiredFields = [
       'fecha_solicitud', 'gerencia', 'superintendencia', 'nombre_superintendente',
       'centro_costo_wbs', 'firma_nombre', 'nombre_proveedor', 'focal_proveedor',
@@ -927,28 +993,51 @@
         correo_supervisor_mel2: document.getElementById('correo_supervisor_mel2').value.trim() || null,
         contacto_supervisor_mel2: document.getElementById('contacto_supervisor_mel2').value.trim() || null,
         up_punto_entrega: document.getElementById('up_punto_entrega').value.trim(),
-        numero_urg: 'PENDING'
       };
 
       try {
-        const res = await fetch(`${SUPABASE_URL}/rest/v1/urgencias`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'apikey': SUPABASE_ANON,
-            'Authorization': `Bearer ${SUPABASE_ANON}`,
-            'Prefer': 'return=representation'
-          },
-          body: JSON.stringify(payload)
-        });
+        let urgNum;
 
-        if (!res.ok) {
-          const err = await res.json();
-          throw new Error(err.message || 'Error al enviar');
+        if (modoCorreccion && urgenciaId) {
+          // MODO CORRECCIÓN — actualizar urgencia existente
+          const res = await fetch(`${SUPABASE_URL}/rest/v1/urgencias?id=eq.${urgenciaId}`, {
+            method: 'PATCH',
+            headers: {
+              'Content-Type': 'application/json',
+              'apikey': SUPABASE_ANON,
+              'Authorization': `Bearer ${SUPABASE_ANON}`,
+              'Prefer': 'return=representation'
+            },
+            body: JSON.stringify({ ...payload, estado: 'pendiente_aprobacion', comentario_supervisor: null })
+          });
+
+          if (!res.ok) {
+            const err = await res.json();
+            throw new Error(err.message || 'Error al enviar');
+          }
+          urgNum = urgenciaNum;
+
+        } else {
+          // MODO NUEVO — crear urgencia
+          const res = await fetch(`${SUPABASE_URL}/rest/v1/urgencias`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'apikey': SUPABASE_ANON,
+              'Authorization': `Bearer ${SUPABASE_ANON}`,
+              'Prefer': 'return=representation'
+            },
+            body: JSON.stringify({ ...payload, numero_urg: 'PENDING' })
+          });
+
+          if (!res.ok) {
+            const err = await res.json();
+            throw new Error(err.message || 'Error al enviar');
+          }
+
+          const data = await res.json();
+          urgNum = data[0]?.numero_urg || 'URG-????';
         }
-
-        const data = await res.json();
-        const urgNum = data[0]?.numero_urg || 'URG-????';
 
         document.getElementById('urgenciaForm').style.display = 'none';
         document.getElementById('successUrgNum').textContent = urgNum;
