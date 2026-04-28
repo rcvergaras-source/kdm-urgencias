@@ -3,6 +3,7 @@
     { "source": "/", "destination": "/formulario-urgencia.html" },
     { "source": "/formulario", "destination": "/formulario-urgencia.html" },
     { "source": "/supervisor", "destination": "/supervisor.html" },
-    { "source": "/mintral", "destination": "/mintral.html" }
+    { "source": "/mintral", "destination": "/mintral.html" },
+    { "source": "/kdm", "destination": "/kdm.html" }
   ]
 }
