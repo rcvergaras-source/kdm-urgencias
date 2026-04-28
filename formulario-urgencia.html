@@ -842,8 +842,10 @@
     const SUPABASE_URL = 'https://dnsijobpjnirbfrlkwfq.supabase.co';
     const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRuc2lqb2Jwam5pcmJmcmxrd2ZxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzczMjAzNDQsImV4cCI6MjA5Mjg5NjM0NH0.MRPIvr32iqoYMsh00cQ9PZq5_M9XJUKZtbfII8cMC8A';
 
-    // Set today's date as default
+    // Set today's date as default and minimum
+    const today = new Date().toISOString().split('T')[0];
     document.getElementById('fecha_solicitud').valueAsDate = new Date();
+    document.getElementById('fecha_solicitud').min = today;
 
     const requiredFields = [
       'fecha_solicitud', 'gerencia', 'superintendencia', 'nombre_superintendente',
@@ -963,6 +965,7 @@
     function resetForm() {
       document.getElementById('urgenciaForm').reset();
       document.getElementById('fecha_solicitud').valueAsDate = new Date();
+      document.getElementById('fecha_solicitud').min = today;
       document.getElementById('urgenciaForm').style.display = 'block';
       document.getElementById('successScreen').classList.remove('visible');
       window.scrollTo({ top: 0, behavior: 'smooth' });
