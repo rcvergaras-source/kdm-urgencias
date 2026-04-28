@@ -1000,7 +1000,7 @@
 
         if (modoCorreccion && urgenciaId) {
           // MODO CORRECCIÓN — actualizar urgencia existente
-          const res = await fetch(`${SUPABASE_URL}/rest/v1/urgencias?id=eq.${urgenciaId}`, {
+          fetch(`${SUPABASE_URL}/rest/v1/urgencias?id=eq.${urgenciaId}`, {
             method: 'PATCH',
             headers: {
               'Content-Type': 'application/json',
@@ -1010,15 +1010,10 @@
             },
             body: JSON.stringify({ ...payload, estado: 'pendiente_aprobacion', comentario_supervisor: null })
           });
-
-          if (!res.ok) {
-            const err = await res.json();
-            throw new Error(err.message || 'Error al enviar');
-          }
           urgNum = urgenciaNum;
 
         } else {
-          // MODO NUEVO — crear urgencia
+          // MODO NUEVO — crear urgencia y esperar solo el número
           const res = await fetch(`${SUPABASE_URL}/rest/v1/urgencias`, {
             method: 'POST',
             headers: {
