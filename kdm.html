@@ -208,6 +208,9 @@
     .status-pill.aprobada { background: #EFF6FF; color: var(--kdm-blue); }
     .status-pill.en_transito_p3 { background: #FFFBEB; color: var(--kdm-warning); }
     .status-pill.en_transito_cd { background: #EDFAF3; color: var(--kdm-success); }
+    .status-pill.recibido_p3 { background: #FFF0E8; color: var(--kdm-orange); }
+    .status-pill.cerrado_pendiente_retiro { background: #EFF6FF; color: var(--kdm-blue); }
+    .status-pill.cerrado_entregado { background: #EDFAF3; color: var(--kdm-success); }
     .status-pill.cerrada { background: #F0F0F0; color: var(--kdm-gray); }
     .status-pill.rechazada { background: #FEE; color: var(--kdm-error); }
 
@@ -384,11 +387,15 @@
           <div class="kpi-value orange" id="kpi_transito">—</div>
         </div>
         <div class="kpi-card">
-          <div class="kpi-label">⚠️ Sobre 24 hrs</div>
+          <div class="kpi-label">⚠️ KPI sistémico &gt;24h</div>
           <div class="kpi-value red" id="kpi_alerta">—</div>
         </div>
         <div class="kpi-card">
-          <div class="kpi-label">Cerradas</div>
+          <div class="kpi-label">⚠️ KPI retiro cliente &gt;24h</div>
+          <div class="kpi-value red" id="kpi_alerta_cliente">—</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Cerradas y entregadas</div>
           <div class="kpi-value green" id="kpi_cerradas">—</div>
         </div>
         <div class="kpi-card">
@@ -416,7 +423,9 @@
             <option value="aprobada">Aprobada</option>
             <option value="en_transito_p3">En tránsito — Patio 3</option>
             <option value="en_transito_cd">En tránsito — CD</option>
-            <option value="cerrada">Cerrada</option>
+            <option value="recibido_p3">Recibido en Patio 3</option>
+            <option value="cerrado_pendiente_retiro">Cerrado — Pendiente retiro</option>
+            <option value="cerrado_entregado">Cerrado y entregado</option>
             <option value="rechazada">Rechazada</option>
           </select>
         </div>
@@ -566,32 +575,52 @@
 
     function updateKPIs() {
       const total = allUrgencias.length;
-      const transito = allUrgencias.filter(u => u.estado === 'en_transito_p3' || u.estado === 'en_transito_cd').length;
-      const cerradas = allUrgencias.filter(u => u.estado === 'cerrada').length;
+      const transito = allUrgencias.filter(u => ['en_transito_p3', 'en_transito_cd', 'recibido_p3'].includes(u.estado)).length;
+      const cerradas = allUrgencias.filter(u => u.estado === 'cerrado_entregado').length;
       const pendientes = allUrgencias.filter(u => u.estado === 'pendiente_aprobacion').length;
-      const alertas = allUrgencias.filter(u => tieneAlerta24h(u)).length;
+
+      // KPI sistémico: recibido_p3 hace más de 24h sin llegar a cerrado_pendiente_retiro
+      const alertaSistemica = allUrgencias.filter(u => {
+        if (u.estado !== 'recibido_p3') return false;
+        if (!u.fecha_recepcion_p3) return false;
+        const horas = (new Date() - new Date(u.fecha_recepcion_p3)) / (1000 * 60 * 60);
+        return horas > 24;
+      }).length;
+
+      // KPI retiro cliente: cerrado_pendiente_retiro hace más de 24h sin llegar a cerrado_entregado
+      const alertaCliente = allUrgencias.filter(u => {
+        if (u.estado !== 'cerrado_pendiente_retiro') return false;
+        if (!u.fecha_recepcion_p3) return false;
+        const horas = (new Date() - new Date(u.fecha_recepcion_p3)) / (1000 * 60 * 60);
+        return horas > 24;
+      }).length;
 
       document.getElementById('kpi_total').textContent = total;
       document.getElementById('kpi_transito').textContent = transito;
-      document.getElementById('kpi_alerta').textContent = alertas;
+      document.getElementById('kpi_alerta').textContent = alertaSistemica;
+      document.getElementById('kpi_alerta_cliente').textContent = alertaCliente;
       document.getElementById('kpi_cerradas').textContent = cerradas;
       document.getElementById('kpi_pendientes').textContent = pendientes;
     }
 
-    function tieneAlerta24h(u) {
-      if (!u.fecha_llegada) return false;
-      if (u.estado === 'cerrada' || u.pod_realizado) return false;
-      if (u.estado !== 'en_transito_p3' && u.estado !== 'en_transito_cd') return false;
-      const horas = (new Date() - new Date(u.fecha_llegada)) / (1000 * 60 * 60);
+    function tieneAlertaSistemica(u) {
+      if (u.estado !== 'recibido_p3') return false;
+      if (!u.fecha_recepcion_p3) return false;
+      const horas = (new Date() - new Date(u.fecha_recepcion_p3)) / (1000 * 60 * 60);
       return horas > 24;
     }
 
-    function diasSinRetirar(u) {
-      if (!u.fecha_llegada) return null;
-      if (u.estado === 'cerrada' || u.pod_realizado) return null;
-      if (u.estado !== 'en_transito_p3' && u.estado !== 'en_transito_cd') return null;
-      const horas = (new Date() - new Date(u.fecha_llegada)) / (1000 * 60 * 60);
-      return horas;
+    function tieneAlertaCliente(u) {
+      if (u.estado !== 'cerrado_pendiente_retiro') return false;
+      if (!u.fecha_recepcion_p3) return false;
+      const horas = (new Date() - new Date(u.fecha_recepcion_p3)) / (1000 * 60 * 60);
+      return horas > 24;
+    }
+
+    function horasDesdeRecepcion(u) {
+      if (!u.fecha_recepcion_p3) return null;
+      if (!['recibido_p3', 'cerrado_pendiente_retiro'].includes(u.estado)) return null;
+      return (new Date() - new Date(u.fecha_recepcion_p3)) / (1000 * 60 * 60);
     }
 
     function renderTable() {
@@ -615,16 +644,18 @@
       }
 
       tbody.innerHTML = filtered.map(u => {
-        const horas = diasSinRetirar(u);
-        const alerta = tieneAlerta24h(u);
+        const horas = horasDesdeRecepcion(u);
+        const alertaSist = tieneAlertaSistemica(u);
+        const alertaCli = tieneAlertaCliente(u);
 
         let diasCell = '—';
         if (horas !== null) {
           const dias = Math.floor(horas / 24);
           const horasRest = Math.floor(horas % 24);
-          diasCell = alerta
+          const label = alertaSist || alertaCli
             ? `<span class="alerta-24h">⚠️ ${dias}d ${horasRest}h</span>`
             : `<span class="dias-counter dias-ok">${dias}d ${horasRest}h</span>`;
+          diasCell = label;
         }
 
         return `
@@ -656,10 +687,12 @@
       statusEl.textContent = statusLabel(u.estado);
       statusEl.className = `status-pill ${u.estado}`;
 
-      const alerta = tieneAlerta24h(u);
+      const alertaSist = tieneAlertaSistemica(u);
+      const alertaCli = tieneAlertaCliente(u);
 
       document.getElementById('modalBody').innerHTML = `
-        ${alerta ? `<div class="alerta-modal">⚠️ Esta carga lleva más de 24 horas sin ser retirada. Coordinar retiro urgente con el área solicitante.</div>` : ''}
+        ${alertaSist ? `<div class="alerta-modal">⚠️ KPI sistémico: Esta carga lleva más de 24 horas en Patio 3 sin completar el proceso SAP+POD.</div>` : ''}
+        ${alertaCli ? `<div class="alerta-modal">⚠️ KPI retiro cliente: Esta carga lleva más de 24 horas esperando retiro del cliente.</div>` : ''}
 
         <div class="detail-section">
           <div class="detail-section-title">Datos de la SI</div>
@@ -712,38 +745,69 @@
         </div>
       `;
 
-      // SAP section — solo si está en tránsito o cerrada
+      // SAP section — solo si está en estados relevantes
       const sapEl = document.getElementById('modalSAP');
-      if (['en_transito_p3', 'en_transito_cd', 'cerrada'].includes(u.estado)) {
-        const isCerrada = u.estado === 'cerrada';
+      const estadosConSAP = ['en_transito_p3', 'recibido_p3', 'en_transito_cd', 'cerrado_pendiente_retiro', 'cerrado_entregado'];
+
+      if (estadosConSAP.includes(u.estado)) {
+        const isCerradoEntregado = u.estado === 'cerrado_entregado';
+        const isP3 = u.destino === 'Patio 3' || u.estado === 'en_transito_p3' || u.estado === 'recibido_p3' || u.estado === 'cerrado_pendiente_retiro';
+        const isCD = u.destino === 'Directo CD' || u.estado === 'en_transito_cd';
+
+        // Botones según estado actual
+        let botonesHTML = '';
+
+        if (u.estado === 'en_transito_p3') {
+          botonesHTML = `
+            <button class="btn-guardar-sap" onclick="marcarRecibidoP3()">📦 Marcar como Recibido en Patio 3</button>
+          `;
+        } else if (u.estado === 'recibido_p3') {
+          botonesHTML = `
+            <button class="btn-guardar-sap" onclick="guardarSAP()">💾 Guardar registros SAP</button>
+            <button class="btn-cerrar-urg" id="btnCerrar" onclick="cerrarSistemico()">✅ Cerrar — Pendiente retiro cliente</button>
+          `;
+        } else if (u.estado === 'cerrado_pendiente_retiro') {
+          botonesHTML = `
+            <button class="btn-guardar-sap" onclick="guardarSAP()">💾 Guardar registros SAP</button>
+            <button class="btn-cerrar-urg" id="btnCerrar" onclick="cerrarEntregado()">🤝 Marcar como entregado a cliente</button>
+          `;
+        } else if (u.estado === 'en_transito_cd') {
+          botonesHTML = `
+            <button class="btn-guardar-sap" onclick="guardarSAP()">💾 Guardar registros SAP</button>
+            <button class="btn-cerrar-urg" id="btnCerrar" onclick="cerrarEntregado()">✅ Cerrar y marcar como entregado</button>
+          `;
+        } else if (isCerradoEntregado) {
+          botonesHTML = `<div style="background:#EDFAF3;border-radius:6px;padding:0.75rem 1rem;font-size:0.82rem;color:var(--kdm-success);font-weight:500;">✅ Urgencia cerrada y entregada correctamente</div>`;
+        }
+
         sapEl.innerHTML = `
           <div class="sap-section">
             <div class="sap-title">📊 Registro SAP y Cierre</div>
 
+            ${u.fecha_recepcion_p3 ? `<div style="font-size:0.78rem;color:var(--kdm-gray);margin-bottom:1rem;">📦 Recibido en Patio 3: <strong>${formatDateTime(u.fecha_recepcion_p3)}</strong></div>` : ''}
+            ${u.fecha_cierre_sistemico ? `<div style="font-size:0.78rem;color:var(--kdm-gray);margin-bottom:1rem;">📋 Proceso sistémico cerrado: <strong>${formatDateTime(u.fecha_cierre_sistemico)}</strong></div>` : ''}
+            ${u.fecha_entrega_cliente ? `<div style="font-size:0.78rem;color:var(--kdm-gray);margin-bottom:1rem;">🤝 Entregado a cliente: <strong>${formatDateTime(u.fecha_entrega_cliente)}</strong></div>` : ''}
+
             <div class="sap-fields">
               <div class="sap-field">
                 <label for="mov261">N° Movimiento 261</label>
-                <input type="text" id="mov261" value="${u.movimiento_261 || ''}" placeholder="Ej: 4900012345" ${isCerrada ? 'disabled' : ''} />
+                <input type="text" id="mov261" value="${u.movimiento_261 || ''}" placeholder="Ej: 4900012345" ${isCerradoEntregado ? 'disabled' : ''} />
               </div>
               <div class="sap-field">
                 <label>Ingresado a SAP</label>
                 <div style="display:flex;align-items:center;gap:0.5rem;padding:0.65rem 0;">
-                  <input type="checkbox" id="ingresadoSAP" ${u.ingresado_sap ? 'checked' : ''} ${isCerrada ? 'disabled' : ''} />
+                  <input type="checkbox" id="ingresadoSAP" ${u.ingresado_sap ? 'checked' : ''} ${isCerradoEntregado ? 'disabled' : ''} />
                   <label for="ingresadoSAP" style="font-size:0.85rem;">Confirmado</label>
                 </div>
               </div>
             </div>
 
             <div class="pod-row">
-              <input type="checkbox" id="podRealizado" ${u.pod_realizado ? 'checked' : ''} ${isCerrada ? 'disabled' : ''} />
+              <input type="checkbox" id="podRealizado" ${u.pod_realizado ? 'checked' : ''} ${isCerradoEntregado ? 'disabled' : ''} />
               <label for="podRealizado">POD realizado</label>
             </div>
 
-            ${!isCerrada ? `
-            <div class="sap-actions">
-              <button class="btn-guardar-sap" onclick="guardarSAP()">💾 Guardar registros SAP</button>
-              <button class="btn-cerrar-urg" id="btnCerrar" onclick="cerrarUrgencia()">✅ Cerrar urgencia</button>
-            </div>` : `<div style="background:#EDFAF3;border-radius:6px;padding:0.75rem 1rem;font-size:0.82rem;color:var(--kdm-success);font-weight:500;">✅ Urgencia cerrada correctamente</div>`}
+            ${!isCerradoEntregado ? `<div class="sap-actions">${botonesHTML}</div>` : botonesHTML}
           </div>
         `;
       } else {
@@ -763,78 +827,78 @@
     }
 
     // ─── SAP ACTIONS ─────────────────────────────────────────
+    async function marcarRecibidoP3() {
+      if (!confirm('¿Confirma que la carga fue recibida en Patio 3?')) return;
+      try {
+        await patchUrgencia({ estado: 'recibido_p3', fecha_recepcion_p3: new Date().toISOString() }, 'recibido_p3', 'Carga recibida en Patio 3');
+        closeModal();
+        await loadUrgencias();
+      } catch (err) { alert('Error al actualizar. Intente nuevamente.'); }
+    }
+
     async function guardarSAP() {
-      const mov261 = document.getElementById('mov261').value.trim();
-      const ingresadoSAP = document.getElementById('ingresadoSAP').checked;
-      const podRealizado = document.getElementById('podRealizado').checked;
+      const mov261 = document.getElementById('mov261')?.value.trim();
+      const ingresadoSAP = document.getElementById('ingresadoSAP')?.checked;
+      const podRealizado = document.getElementById('podRealizado')?.checked;
 
       try {
-        const res = await fetch(`${SUPABASE_URL}/rest/v1/urgencias?id=eq.${currentUrgencia.id}`, {
-          method: 'PATCH',
-          headers: {
-            'Content-Type': 'application/json',
-            'apikey': SUPABASE_ANON,
-            'Authorization': `Bearer ${currentUser.token}`
-          },
-          body: JSON.stringify({ movimiento_261: mov261, ingresado_sap: ingresadoSAP, pod_realizado: podRealizado })
-        });
-
-        if (!res.ok) throw new Error('Error al guardar');
-
-        // Update local
+        await patchUrgencia({ movimiento_261: mov261, ingresado_sap: ingresadoSAP, pod_realizado: podRealizado }, null, null);
         currentUrgencia.movimiento_261 = mov261;
         currentUrgencia.ingresado_sap = ingresadoSAP;
         currentUrgencia.pod_realizado = podRealizado;
-
         const idx = allUrgencias.findIndex(u => u.id === currentUrgencia.id);
         if (idx !== -1) allUrgencias[idx] = { ...allUrgencias[idx], movimiento_261: mov261, ingresado_sap: ingresadoSAP, pod_realizado: podRealizado };
-
         updateKPIs();
         renderTable();
-
         const btn = document.querySelector('.btn-guardar-sap');
         if (btn) { btn.textContent = '✅ Guardado'; setTimeout(() => { btn.textContent = '💾 Guardar registros SAP'; }, 2000); }
-
-      } catch (err) {
-        alert('Error al guardar. Intente nuevamente.');
-      }
+      } catch (err) { alert('Error al guardar. Intente nuevamente.'); }
     }
 
-    async function cerrarUrgencia() {
-      if (!confirm('¿Confirma que desea cerrar esta urgencia? Esta acción no se puede deshacer.')) return;
-
+    async function cerrarSistemico() {
+      if (!confirm('¿Confirma que el proceso sistémico SAP+POD está completo? La urgencia quedará como "Cerrado — Pendiente retiro cliente".')) return;
       await guardarSAP();
-
       try {
-        const res = await fetch(`${SUPABASE_URL}/rest/v1/urgencias?id=eq.${currentUrgencia.id}`, {
-          method: 'PATCH',
-          headers: {
-            'Content-Type': 'application/json',
-            'apikey': SUPABASE_ANON,
-            'Authorization': `Bearer ${currentUser.token}`
-          },
-          body: JSON.stringify({ estado: 'cerrada', fecha_entrega_cliente: new Date().toISOString() })
-        });
+        await patchUrgencia({ estado: 'cerrado_pendiente_retiro', fecha_cierre_sistemico: new Date().toISOString() }, 'cerrado_pendiente_retiro', 'Proceso sistémico completado. Pendiente retiro cliente.');
+        closeModal();
+        await loadUrgencias();
+      } catch (err) { alert('Error al actualizar. Intente nuevamente.'); }
+    }
 
-        if (!res.ok) throw new Error('Error al cerrar');
+    async function cerrarEntregado() {
+      if (!confirm('¿Confirma que la carga fue entregada al cliente? La urgencia quedará como "Cerrado y entregado".')) return;
+      await guardarSAP();
+      try {
+        await patchUrgencia({ estado: 'cerrado_entregado', fecha_entrega_cliente: new Date().toISOString() }, 'cerrado_entregado', 'Urgencia cerrada y entregada al cliente.');
+        closeModal();
+        await loadUrgencias();
+      } catch (err) { alert('Error al actualizar. Intente nuevamente.'); }
+    }
 
+    async function patchUrgencia(payload, nuevoEstado, comentario) {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/urgencias?id=eq.${currentUrgencia.id}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': SUPABASE_ANON,
+          'Authorization': `Bearer ${currentUser.token}`
+        },
+        body: JSON.stringify(payload)
+      });
+      if (!res.ok) throw new Error('Error al actualizar');
+
+      if (nuevoEstado) {
         await fetch(`${SUPABASE_URL}/rest/v1/historial_estados`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON, 'Authorization': `Bearer ${currentUser.token}` },
           body: JSON.stringify({
             urgencia_id: currentUrgencia.id,
             estado_anterior: currentUrgencia.estado,
-            estado_nuevo: 'cerrada',
-            comentario: 'Urgencia cerrada por analista KDM',
+            estado_nuevo: nuevoEstado,
+            comentario: comentario,
             actor: currentUser.nombre
           })
         });
-
-        closeModal();
-        await loadUrgencias();
-
-      } catch (err) {
-        alert('Error al cerrar la urgencia. Intente nuevamente.');
       }
     }
 
@@ -874,6 +938,9 @@
         'UP Punto Entrega': u.up_punto_entrega,
         'Estado': statusLabel(u.estado),
         'Destino': u.destino || '',
+        'Fecha Recepción Patio 3': formatDateTime(u.fecha_recepcion_p3),
+        'Fecha Cierre Sistémico': formatDateTime(u.fecha_cierre_sistemico),
+        'Fecha Entrega Cliente': formatDateTime(u.fecha_entrega_cliente),
         'N° Resumen Viaje': u.numero_resumen_viaje || '',
         'N° Guía': u.numero_guia || '',
         'Expedición / Shipment': u.expedicion_shipment || '',
@@ -908,6 +975,11 @@
       return new Date(d).toLocaleDateString('es-CL', { day: '2-digit', month: '2-digit', year: 'numeric' });
     }
 
+    function formatDateTime(d) {
+      if (!d) return '—';
+      return new Date(d).toLocaleDateString('es-CL', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+    }
+
     function statusLabel(s) {
       const labels = {
         pendiente_aprobacion: 'Pendiente aprobación',
@@ -915,6 +987,9 @@
         aprobada: 'Aprobada',
         en_transito_p3: 'En tránsito — P3',
         en_transito_cd: 'En tránsito — CD',
+        recibido_p3: 'Recibido en Patio 3',
+        cerrado_pendiente_retiro: 'Cerrado — Pend. retiro',
+        cerrado_entregado: 'Cerrado y entregado',
         cerrada: 'Cerrada',
         rechazada: 'Rechazada'
       };
