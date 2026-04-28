@@ -1,0 +1,926 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Analista KDM — Gestión de Urgencias</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --kdm-orange: #E05E1B;
+      --kdm-dark: #1A1A1A;
+      --kdm-gray: #6B6B6B;
+      --kdm-light: #F5F4F1;
+      --kdm-white: #FFFFFF;
+      --kdm-border: #E0DDD8;
+      --kdm-success: #2D7D46;
+      --kdm-error: #C0392B;
+      --kdm-warning: #B45309;
+      --kdm-blue: #1D4ED8;
+      --kdm-red: #DC2626;
+    }
+
+    body { font-family: 'DM Sans', sans-serif; background: var(--kdm-light); color: var(--kdm-dark); min-height: 100vh; }
+
+    /* LOGIN */
+    .login-screen { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 1.5rem; }
+
+    .login-card {
+      background: var(--kdm-white); border: 1px solid var(--kdm-border);
+      border-radius: 12px; padding: 2.5rem 2rem; width: 100%; max-width: 400px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.07);
+    }
+
+    .login-header { text-align: center; margin-bottom: 2rem; }
+
+    .login-logo { display: flex; align-items: center; justify-content: center; gap: 0.75rem; margin-bottom: 1.25rem; }
+    .logo-escondida { font-weight: 600; font-size: 1rem; color: var(--kdm-dark); letter-spacing: -0.02em; }
+    .logo-sep { width: 1px; height: 24px; background: var(--kdm-border); }
+    .logo-bhp { font-weight: 600; font-size: 1rem; color: var(--kdm-orange); letter-spacing: 0.05em; }
+
+    .login-header h2 { font-size: 1.1rem; font-weight: 600; color: var(--kdm-dark); margin-bottom: 0.3rem; }
+    .login-header p { font-size: 0.82rem; color: var(--kdm-gray); }
+
+    .login-role-badge {
+      display: inline-block; background: #FFF0E8; color: var(--kdm-orange);
+      font-size: 0.7rem; font-weight: 600; padding: 0.2rem 0.7rem; border-radius: 20px;
+      text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 0.75rem; border: 1px solid #F5C8A8;
+    }
+
+    .field { display: flex; flex-direction: column; gap: 0.35rem; margin-bottom: 1rem; }
+    label { font-size: 0.78rem; font-weight: 500; color: var(--kdm-dark); }
+
+    input, select, textarea {
+      width: 100%; padding: 0.65rem 0.85rem; border: 1.5px solid var(--kdm-border);
+      border-radius: 6px; font-family: 'DM Sans', sans-serif; font-size: 0.875rem;
+      color: var(--kdm-dark); background: var(--kdm-white);
+      transition: border-color 0.15s, box-shadow 0.15s; -webkit-appearance: none;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      outline: none; border-color: var(--kdm-orange); box-shadow: 0 0 0 3px rgba(224,94,27,0.1);
+    }
+
+    input[type="checkbox"] { width: auto; accent-color: var(--kdm-orange); }
+
+    .btn-primary {
+      width: 100%; background: var(--kdm-orange); color: white; border: none;
+      border-radius: 8px; padding: 0.85rem; font-family: 'DM Sans', sans-serif;
+      font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: background 0.15s; margin-top: 0.5rem;
+    }
+    .btn-primary:hover { background: #C94E10; }
+    .btn-primary:disabled { background: #C4B8B0; cursor: not-allowed; }
+
+    .login-error {
+      background: #FEE; border: 1px solid #F5C6C6; border-radius: 6px;
+      padding: 0.65rem 0.85rem; font-size: 0.8rem; color: var(--kdm-error);
+      margin-bottom: 1rem; display: none;
+    }
+    .login-error.visible { display: block; }
+
+    /* APP */
+    .app { display: none; }
+    .app.visible { display: block; }
+
+    /* HEADER */
+    .header {
+      background: var(--kdm-white); border-bottom: 3px solid var(--kdm-orange);
+      padding: 0.9rem 1.5rem; display: flex; align-items: center; gap: 1rem;
+      position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    }
+
+    .header-divider { width: 1px; height: 24px; background: var(--kdm-border); }
+    .header-section { font-size: 0.78rem; font-weight: 500; color: var(--kdm-gray); text-transform: uppercase; letter-spacing: 0.06em; }
+    .header-right { margin-left: auto; display: flex; align-items: center; gap: 1rem; }
+
+    .user-avatar {
+      width: 30px; height: 30px; background: var(--kdm-orange); border-radius: 50%;
+      display: flex; align-items: center; justify-content: center; color: white; font-size: 0.7rem; font-weight: 600;
+    }
+
+    .user-name { font-size: 0.82rem; font-weight: 500; color: var(--kdm-dark); }
+
+    .btn-logout {
+      background: transparent; border: 1px solid var(--kdm-border); border-radius: 6px;
+      padding: 0.35rem 0.75rem; font-family: 'DM Sans', sans-serif; font-size: 0.75rem;
+      color: var(--kdm-gray); cursor: pointer; transition: all 0.15s;
+    }
+    .btn-logout:hover { border-color: var(--kdm-error); color: var(--kdm-error); }
+
+    /* CONTAINER */
+    .container { max-width: 1100px; margin: 0 auto; padding: 2rem 1.5rem; }
+
+    /* KPI CARDS */
+    .kpi-row {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 1rem; margin-bottom: 1.75rem;
+    }
+
+    .kpi-card {
+      background: var(--kdm-white); border: 1px solid var(--kdm-border);
+      border-radius: 10px; padding: 1rem 1.25rem;
+    }
+
+    .kpi-label { font-size: 0.72rem; color: var(--kdm-gray); font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.35rem; }
+    .kpi-value { font-size: 1.6rem; font-weight: 600; color: var(--kdm-dark); line-height: 1; }
+    .kpi-value.orange { color: var(--kdm-orange); }
+    .kpi-value.red { color: var(--kdm-red); }
+    .kpi-value.green { color: var(--kdm-success); }
+    .kpi-value.blue { color: var(--kdm-blue); }
+
+    /* TOOLBAR */
+    .toolbar {
+      display: flex; align-items: center; gap: 1rem; margin-bottom: 1.25rem;
+      flex-wrap: wrap;
+    }
+
+    .filter-group { display: flex; align-items: center; gap: 0.5rem; }
+    .filter-group label { font-size: 0.78rem; color: var(--kdm-gray); white-space: nowrap; }
+    .filter-group input[type="date"] { padding: 0.5rem 0.75rem; font-size: 0.82rem; width: auto; }
+    .filter-group select { padding: 0.5rem 0.75rem; font-size: 0.82rem; width: auto; }
+
+    .btn-excel {
+      background: #1D6F42; color: white; border: none; border-radius: 7px;
+      padding: 0.55rem 1.1rem; font-family: 'DM Sans', sans-serif; font-size: 0.82rem;
+      font-weight: 600; cursor: pointer; transition: background 0.15s;
+      display: flex; align-items: center; gap: 0.4rem; margin-left: auto;
+    }
+    .btn-excel:hover { background: #155233; }
+
+    .btn-refresh {
+      background: transparent; border: 1px solid var(--kdm-border); border-radius: 7px;
+      padding: 0.55rem 0.85rem; font-family: 'DM Sans', sans-serif; font-size: 0.82rem;
+      color: var(--kdm-gray); cursor: pointer; transition: all 0.15s;
+    }
+    .btn-refresh:hover { border-color: var(--kdm-orange); color: var(--kdm-orange); }
+
+    /* TABLE */
+    .table-wrapper {
+      background: var(--kdm-white); border: 1px solid var(--kdm-border);
+      border-radius: 10px; overflow: hidden; overflow-x: auto;
+    }
+
+    table { width: 100%; border-collapse: collapse; min-width: 900px; }
+
+    thead { background: var(--kdm-dark); }
+
+    th {
+      padding: 0.75rem 1rem; text-align: left; font-size: 0.7rem;
+      font-weight: 600; color: rgba(255,255,255,0.8); text-transform: uppercase;
+      letter-spacing: 0.06em; white-space: nowrap;
+    }
+
+    td {
+      padding: 0.85rem 1rem; font-size: 0.82rem; color: var(--kdm-dark);
+      border-bottom: 1px solid var(--kdm-border); vertical-align: middle;
+    }
+
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #FAFAF8; }
+    tr.clickable { cursor: pointer; }
+
+    .mono { font-family: 'DM Mono', monospace; font-size: 0.78rem; }
+
+    /* ALERTA 24H */
+    .alerta-24h {
+      display: inline-flex; align-items: center; gap: 0.3rem;
+      background: #FEF2F2; color: var(--kdm-red); border: 1px solid #FECACA;
+      border-radius: 4px; padding: 0.2rem 0.5rem; font-size: 0.7rem; font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .dias-counter { font-family: 'DM Mono', monospace; font-size: 0.78rem; }
+    .dias-ok { color: var(--kdm-success); }
+    .dias-warn { color: var(--kdm-red); font-weight: 600; }
+
+    /* STATUS PILLS */
+    .status-pill {
+      display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.68rem;
+      font-weight: 600; padding: 0.2rem 0.6rem; border-radius: 20px;
+      text-transform: uppercase; letter-spacing: 0.04em; white-space: nowrap;
+    }
+
+    .status-pill.pendiente_aprobacion { background: #FFF0E8; color: var(--kdm-orange); }
+    .status-pill.en_correccion { background: #FFFBEB; color: var(--kdm-warning); }
+    .status-pill.aprobada { background: #EFF6FF; color: var(--kdm-blue); }
+    .status-pill.en_transito_p3 { background: #FFFBEB; color: var(--kdm-warning); }
+    .status-pill.en_transito_cd { background: #EDFAF3; color: var(--kdm-success); }
+    .status-pill.cerrada { background: #F0F0F0; color: var(--kdm-gray); }
+    .status-pill.rechazada { background: #FEE; color: var(--kdm-error); }
+
+    .empty-state { text-align: center; padding: 3rem 1rem; color: var(--kdm-gray); }
+    .empty-state .icon { font-size: 2.5rem; margin-bottom: 0.75rem; }
+    .empty-state p { font-size: 0.9rem; }
+
+    .loading-state { text-align: center; padding: 3rem; color: var(--kdm-gray); font-size: 0.9rem; }
+
+    /* MODAL */
+    .modal-overlay {
+      display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.45);
+      z-index: 200; align-items: flex-start; justify-content: center;
+      padding: 1.5rem; overflow-y: auto;
+    }
+    .modal-overlay.visible { display: flex; }
+
+    .modal {
+      background: var(--kdm-white); border-radius: 12px; width: 100%; max-width: 720px;
+      margin: auto; box-shadow: 0 8px 40px rgba(0,0,0,0.18); overflow: hidden;
+    }
+
+    .modal-header {
+      background: var(--kdm-dark); padding: 1.1rem 1.5rem;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+
+    .modal-header-left { display: flex; align-items: center; gap: 0.75rem; }
+    .modal-urg-num { font-family: 'DM Mono', monospace; font-size: 0.9rem; color: white; font-weight: 500; }
+
+    .modal-close {
+      background: transparent; border: none; color: rgba(255,255,255,0.6);
+      font-size: 1.3rem; cursor: pointer; line-height: 1; padding: 0.2rem; transition: color 0.15s;
+    }
+    .modal-close:hover { color: white; }
+
+    .modal-body { padding: 1.5rem; max-height: 70vh; overflow-y: auto; }
+
+    .detail-section { margin-bottom: 1.5rem; }
+
+    .detail-section-title {
+      font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em;
+      color: var(--kdm-gray); margin-bottom: 0.85rem; padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--kdm-border);
+    }
+
+    .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+    .detail-field { display: flex; flex-direction: column; gap: 0.2rem; }
+    .detail-label { font-size: 0.7rem; color: var(--kdm-gray); font-weight: 500; }
+    .detail-value { font-size: 0.875rem; color: var(--kdm-dark); }
+    .detail-value.mono { font-family: 'DM Mono', monospace; font-size: 0.8rem; }
+    .detail-value.empty { color: var(--kdm-border); font-style: italic; }
+
+    /* SAP SECTION */
+    .sap-section {
+      border-top: 1px solid var(--kdm-border); padding: 1.25rem 1.5rem; background: #FAFAF8;
+    }
+
+    .sap-title {
+      font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em;
+      color: var(--kdm-orange); margin-bottom: 1rem;
+    }
+
+    .sap-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+
+    .sap-field { display: flex; flex-direction: column; gap: 0.35rem; }
+    .sap-field label { font-size: 0.75rem; font-weight: 500; color: var(--kdm-dark); }
+    .sap-field input { font-family: 'DM Mono', monospace; font-size: 0.85rem; }
+
+    .pod-row {
+      display: flex; align-items: center; gap: 0.75rem;
+      background: var(--kdm-white); border: 1.5px solid var(--kdm-border);
+      border-radius: 6px; padding: 0.75rem 1rem; margin-bottom: 1rem;
+    }
+
+    .pod-row label { font-size: 0.85rem; font-weight: 500; color: var(--kdm-dark); cursor: pointer; }
+    .pod-row input[type="checkbox"] { width: 18px; height: 18px; flex-shrink: 0; cursor: pointer; }
+
+    .sap-actions { display: flex; gap: 0.75rem; flex-wrap: wrap; }
+
+    .btn-guardar-sap {
+      background: var(--kdm-orange); color: white; border: none; border-radius: 7px;
+      padding: 0.65rem 1.25rem; font-family: 'DM Sans', sans-serif; font-size: 0.85rem;
+      font-weight: 600; cursor: pointer; transition: background 0.15s;
+    }
+    .btn-guardar-sap:hover { background: #C94E10; }
+
+    .btn-cerrar-urg {
+      background: var(--kdm-success); color: white; border: none; border-radius: 7px;
+      padding: 0.65rem 1.25rem; font-family: 'DM Sans', sans-serif; font-size: 0.85rem;
+      font-weight: 600; cursor: pointer; transition: background 0.15s;
+    }
+    .btn-cerrar-urg:hover { background: #236037; }
+    .btn-cerrar-urg:disabled { background: #9CA3AF; cursor: not-allowed; }
+
+    /* ALERTA MODAL */
+    .alerta-modal {
+      background: #FEF2F2; border: 1.5px solid #FECACA; border-radius: 8px;
+      padding: 0.85rem 1rem; margin-bottom: 1rem; font-size: 0.82rem;
+      color: var(--kdm-red); display: flex; align-items: center; gap: 0.5rem;
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 600px) {
+      .container { padding: 1.25rem 1rem; }
+      .kpi-row { grid-template-columns: 1fr 1fr; }
+      .toolbar { flex-direction: column; align-items: flex-start; }
+      .btn-excel { margin-left: 0; }
+      .detail-grid { grid-template-columns: 1fr; }
+      .sap-fields { grid-template-columns: 1fr; }
+      .header { padding: 0.75rem 1rem; }
+      .user-name { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- LOGIN -->
+  <div class="login-screen" id="loginScreen">
+    <div class="login-card">
+      <div class="login-header">
+        <div class="login-logo">
+          <span class="logo-escondida">ESCONDIDA</span>
+          <div class="logo-sep"></div>
+          <span class="logo-bhp">BHP</span>
+        </div>
+        <div class="login-role-badge">Analista KDM Industrial</div>
+        <h2>Acceso al sistema</h2>
+        <p>Ingrese sus credenciales para continuar</p>
+      </div>
+      <div class="login-error" id="loginError">Correo o contraseña incorrectos.</div>
+      <div class="field">
+        <label for="loginEmail">Correo electrónico</label>
+        <input type="email" id="loginEmail" placeholder="correo@bhp.com" />
+      </div>
+      <div class="field">
+        <label for="loginPassword">Contraseña</label>
+        <input type="password" id="loginPassword" placeholder="••••••••" />
+      </div>
+      <button class="btn-primary" id="btnLogin">Ingresar</button>
+    </div>
+  </div>
+
+  <!-- APP -->
+  <div class="app" id="app">
+
+    <header class="header">
+      <div style="display:flex;align-items:center;gap:0.6rem;">
+        <span class="logo-escondida" style="font-size:0.9rem;">ESCONDIDA</span>
+        <div style="width:1px;height:20px;background:var(--kdm-border);"></div>
+        <span class="logo-bhp" style="font-size:0.9rem;">BHP</span>
+      </div>
+      <div class="header-divider"></div>
+      <span class="header-section">Analista KDM Industrial</span>
+      <div class="header-right">
+        <div style="display:flex;align-items:center;gap:0.5rem;">
+          <div class="user-avatar" id="userAvatar">--</div>
+          <span class="user-name" id="userName">--</span>
+        </div>
+        <button class="btn-logout" onclick="logout()">Cerrar sesión</button>
+      </div>
+    </header>
+
+    <div class="container">
+
+      <!-- KPI -->
+      <div class="kpi-row">
+        <div class="kpi-card">
+          <div class="kpi-label">Total urgencias</div>
+          <div class="kpi-value" id="kpi_total">—</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">En tránsito</div>
+          <div class="kpi-value orange" id="kpi_transito">—</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">⚠️ Sobre 24 hrs</div>
+          <div class="kpi-value red" id="kpi_alerta">—</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Cerradas</div>
+          <div class="kpi-value green" id="kpi_cerradas">—</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Pendientes aprobación</div>
+          <div class="kpi-value blue" id="kpi_pendientes">—</div>
+        </div>
+      </div>
+
+      <!-- TOOLBAR -->
+      <div class="toolbar">
+        <div class="filter-group">
+          <label>Desde</label>
+          <input type="date" id="filtroDesde" onchange="renderTable()" />
+        </div>
+        <div class="filter-group">
+          <label>Hasta</label>
+          <input type="date" id="filtroHasta" onchange="renderTable()" />
+        </div>
+        <div class="filter-group">
+          <label>Estado</label>
+          <select id="filtroEstado" onchange="renderTable()">
+            <option value="">Todos</option>
+            <option value="pendiente_aprobacion">Pendiente aprobación</option>
+            <option value="en_correccion">En corrección</option>
+            <option value="aprobada">Aprobada</option>
+            <option value="en_transito_p3">En tránsito — Patio 3</option>
+            <option value="en_transito_cd">En tránsito — CD</option>
+            <option value="cerrada">Cerrada</option>
+            <option value="rechazada">Rechazada</option>
+          </select>
+        </div>
+        <button class="btn-refresh" onclick="loadUrgencias()">↻ Actualizar</button>
+        <button class="btn-excel" onclick="exportarExcel()">📥 Exportar Excel</button>
+      </div>
+
+      <!-- TABLE -->
+      <div class="table-wrapper">
+        <table id="urgenciasTable">
+          <thead>
+            <tr>
+              <th>N° URG</th>
+              <th>Fecha</th>
+              <th>Proveedor</th>
+              <th>Gerencia</th>
+              <th>PO / Ítems</th>
+              <th>Estado</th>
+              <th>Destino</th>
+              <th>Días sin retirar</th>
+              <th>Mov. 261</th>
+              <th>POD</th>
+            </tr>
+          </thead>
+          <tbody id="urgenciasBody">
+            <tr><td colspan="10"><div class="loading-state">Cargando urgencias...</div></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- MODAL DETALLE -->
+  <div class="modal-overlay" id="modalOverlay" onclick="closeModalOutside(event)">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-header-left">
+          <span class="modal-urg-num" id="modalUrgNum">URG-0000</span>
+          <span class="status-pill pendiente_aprobacion" id="modalStatus">Pendiente</span>
+        </div>
+        <button class="modal-close" onclick="closeModal()">✕</button>
+      </div>
+
+      <div class="modal-body" id="modalBody"></div>
+
+      <div id="modalSAP"></div>
+    </div>
+  </div>
+
+  <script>
+    const SUPABASE_URL = 'https://dnsijobpjnirbfrlkwfq.supabase.co';
+    const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRuc2lqb2Jwam5pcmJmcmxrd2ZxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzczMjAzNDQsImV4cCI6MjA5Mjg5NjM0NH0.MRPIvr32iqoYMsh00cQ9PZq5_M9XJUKZtbfII8cMC8A';
+
+    let currentUser = null;
+    let allUrgencias = [];
+    let currentUrgencia = null;
+
+    // ─── AUTH ───────────────────────────────────────────────
+    document.getElementById('btnLogin').addEventListener('click', login);
+    document.getElementById('loginPassword').addEventListener('keydown', e => { if (e.key === 'Enter') login(); });
+
+    async function login() {
+      const email = document.getElementById('loginEmail').value.trim();
+      const password = document.getElementById('loginPassword').value;
+      const btn = document.getElementById('btnLogin');
+      const errEl = document.getElementById('loginError');
+
+      btn.disabled = true;
+      btn.textContent = 'Ingresando...';
+      errEl.classList.remove('visible');
+
+      try {
+        const res = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON },
+          body: JSON.stringify({ email, password })
+        });
+
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error_description || 'Error');
+
+        const roleRes = await fetch(`${SUPABASE_URL}/rest/v1/usuarios?email=eq.${encodeURIComponent(email)}&select=*`, {
+          headers: { 'apikey': SUPABASE_ANON, 'Authorization': `Bearer ${data.access_token}` }
+        });
+
+        const roleData = await roleRes.json();
+
+        if (!roleData.length || roleData[0].rol !== 'analista_kdm') {
+          throw new Error('No tienes acceso a esta sección.');
+        }
+
+        currentUser = { ...roleData[0], token: data.access_token };
+        showApp();
+
+      } catch (err) {
+        errEl.textContent = err.message;
+        errEl.classList.add('visible');
+        btn.disabled = false;
+        btn.textContent = 'Ingresar';
+      }
+    }
+
+    function showApp() {
+      document.getElementById('loginScreen').style.display = 'none';
+      document.getElementById('app').classList.add('visible');
+      const initials = currentUser.nombre.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+      document.getElementById('userAvatar').textContent = initials;
+      document.getElementById('userName').textContent = currentUser.nombre;
+
+      // Default date filter: last 30 days
+      const hoy = new Date();
+      const hace30 = new Date();
+      hace30.setDate(hoy.getDate() - 30);
+      document.getElementById('filtroHasta').value = hoy.toISOString().split('T')[0];
+      document.getElementById('filtroDesde').value = hace30.toISOString().split('T')[0];
+
+      loadUrgencias();
+    }
+
+    function logout() {
+      currentUser = null;
+      allUrgencias = [];
+      document.getElementById('loginScreen').style.display = 'flex';
+      document.getElementById('app').classList.remove('visible');
+      document.getElementById('loginEmail').value = '';
+      document.getElementById('loginPassword').value = '';
+    }
+
+    // ─── LOAD DATA ───────────────────────────────────────────
+    async function loadUrgencias() {
+      document.getElementById('urgenciasBody').innerHTML = '<tr><td colspan="10"><div class="loading-state">Cargando...</div></td></tr>';
+
+      try {
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/urgencias?select=*&order=created_at.desc`, {
+          headers: { 'apikey': SUPABASE_ANON, 'Authorization': `Bearer ${currentUser.token}` }
+        });
+
+        allUrgencias = await res.json();
+        updateKPIs();
+        renderTable();
+
+      } catch (err) {
+        document.getElementById('urgenciasBody').innerHTML = '<tr><td colspan="10"><div class="loading-state">Error al cargar.</div></td></tr>';
+      }
+    }
+
+    function updateKPIs() {
+      const total = allUrgencias.length;
+      const transito = allUrgencias.filter(u => u.estado === 'en_transito_p3' || u.estado === 'en_transito_cd').length;
+      const cerradas = allUrgencias.filter(u => u.estado === 'cerrada').length;
+      const pendientes = allUrgencias.filter(u => u.estado === 'pendiente_aprobacion').length;
+      const alertas = allUrgencias.filter(u => tieneAlerta24h(u)).length;
+
+      document.getElementById('kpi_total').textContent = total;
+      document.getElementById('kpi_transito').textContent = transito;
+      document.getElementById('kpi_alerta').textContent = alertas;
+      document.getElementById('kpi_cerradas').textContent = cerradas;
+      document.getElementById('kpi_pendientes').textContent = pendientes;
+    }
+
+    function tieneAlerta24h(u) {
+      if (!u.fecha_llegada) return false;
+      if (u.estado === 'cerrada' || u.pod_realizado) return false;
+      if (u.estado !== 'en_transito_p3' && u.estado !== 'en_transito_cd') return false;
+      const horas = (new Date() - new Date(u.fecha_llegada)) / (1000 * 60 * 60);
+      return horas > 24;
+    }
+
+    function diasSinRetirar(u) {
+      if (!u.fecha_llegada) return null;
+      if (u.estado === 'cerrada' || u.pod_realizado) return null;
+      if (u.estado !== 'en_transito_p3' && u.estado !== 'en_transito_cd') return null;
+      const horas = (new Date() - new Date(u.fecha_llegada)) / (1000 * 60 * 60);
+      return horas;
+    }
+
+    function renderTable() {
+      const desde = document.getElementById('filtroDesde').value;
+      const hasta = document.getElementById('filtroHasta').value;
+      const estado = document.getElementById('filtroEstado').value;
+
+      let filtered = allUrgencias.filter(u => {
+        const fecha = new Date(u.created_at);
+        if (desde && fecha < new Date(desde)) return false;
+        if (hasta && fecha > new Date(hasta + 'T23:59:59')) return false;
+        if (estado && u.estado !== estado) return false;
+        return true;
+      });
+
+      const tbody = document.getElementById('urgenciasBody');
+
+      if (!filtered.length) {
+        tbody.innerHTML = '<tr><td colspan="10"><div class="empty-state"><div class="icon">📋</div><p>No hay urgencias con los filtros seleccionados.</p></div></td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = filtered.map(u => {
+        const horas = diasSinRetirar(u);
+        const alerta = tieneAlerta24h(u);
+
+        let diasCell = '—';
+        if (horas !== null) {
+          const dias = Math.floor(horas / 24);
+          const horasRest = Math.floor(horas % 24);
+          diasCell = alerta
+            ? `<span class="alerta-24h">⚠️ ${dias}d ${horasRest}h</span>`
+            : `<span class="dias-counter dias-ok">${dias}d ${horasRest}h</span>`;
+        }
+
+        return `
+          <tr class="clickable" onclick="openModal('${u.id}')">
+            <td class="mono">${u.numero_urg}</td>
+            <td>${formatDate(u.created_at)}</td>
+            <td>${u.nombre_proveedor}</td>
+            <td>${u.gerencia}</td>
+            <td class="mono">${u.po_items}</td>
+            <td><span class="status-pill ${u.estado}">${statusLabel(u.estado)}</span></td>
+            <td>${u.destino || '—'}</td>
+            <td>${diasCell}</td>
+            <td class="mono">${u.movimiento_261 || '—'}</td>
+            <td>${u.pod_realizado ? '✅' : '—'}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    // ─── MODAL ───────────────────────────────────────────────
+    function openModal(id) {
+      currentUrgencia = allUrgencias.find(u => u.id === id);
+      if (!currentUrgencia) return;
+
+      const u = currentUrgencia;
+
+      document.getElementById('modalUrgNum').textContent = u.numero_urg;
+      const statusEl = document.getElementById('modalStatus');
+      statusEl.textContent = statusLabel(u.estado);
+      statusEl.className = `status-pill ${u.estado}`;
+
+      const alerta = tieneAlerta24h(u);
+
+      document.getElementById('modalBody').innerHTML = `
+        ${alerta ? `<div class="alerta-modal">⚠️ Esta carga lleva más de 24 horas sin ser retirada. Coordinar retiro urgente con el área solicitante.</div>` : ''}
+
+        <div class="detail-section">
+          <div class="detail-section-title">Datos de la SI</div>
+          <div class="detail-grid">
+            <div class="detail-field"><span class="detail-label">Fecha solicitud</span><span class="detail-value">${formatDate(u.fecha_solicitud)}</span></div>
+            <div class="detail-field"><span class="detail-label">Gerencia</span><span class="detail-value">${u.gerencia}</span></div>
+            <div class="detail-field"><span class="detail-label">Superintendencia</span><span class="detail-value">${u.superintendencia}</span></div>
+            <div class="detail-field"><span class="detail-label">Superintendente(a)</span><span class="detail-value">${u.nombre_superintendente}</span></div>
+            <div class="detail-field"><span class="detail-label">Centro Costo / WBS</span><span class="detail-value mono">${u.centro_costo_wbs}</span></div>
+          </div>
+        </div>
+
+        <div class="detail-section">
+          <div class="detail-section-title">Datos de la Urgencia</div>
+          <div class="detail-grid">
+            <div class="detail-field"><span class="detail-label">Proveedor</span><span class="detail-value">${u.nombre_proveedor}</span></div>
+            <div class="detail-field"><span class="detail-label">Focal Proveedor</span><span class="detail-value">${u.focal_proveedor}</span></div>
+            <div class="detail-field"><span class="detail-label">PO / Ítems</span><span class="detail-value mono">${u.po_items}</span></div>
+            <div class="detail-field"><span class="detail-label">Contacto Proveedor</span><span class="detail-value">${u.contacto_proveedor}</span></div>
+            <div class="detail-field"><span class="detail-label">Código Stock</span><span class="detail-value ${u.codigo_stock ? '' : 'empty'}">${u.codigo_stock || 'No aplica'}</span></div>
+            <div class="detail-field"><span class="detail-label">N° Reserva</span><span class="detail-value ${u.numero_reserva ? '' : 'empty'}">${u.numero_reserva || 'No aplica'}</span></div>
+          </div>
+        </div>
+
+        <div class="detail-section">
+          <div class="detail-section-title">Despacho MINTRAL</div>
+          <div class="detail-grid">
+            <div class="detail-field"><span class="detail-label">Destino</span><span class="detail-value">${u.destino || '—'}</span></div>
+            <div class="detail-field"><span class="detail-label">N° Resumen Viaje</span><span class="detail-value mono">${u.numero_resumen_viaje || '—'}</span></div>
+            <div class="detail-field"><span class="detail-label">N° Guía</span><span class="detail-value mono">${u.numero_guia || '—'}</span></div>
+            <div class="detail-field"><span class="detail-label">Expedición / Shipment</span><span class="detail-value mono">${u.expedicion_shipment || '—'}</span></div>
+            <div class="detail-field"><span class="detail-label">Conductor</span><span class="detail-value">${u.nombre_conductor || '—'}</span></div>
+            <div class="detail-field"><span class="detail-label">Patente</span><span class="detail-value mono">${u.patente_equipo || '—'}</span></div>
+            <div class="detail-field"><span class="detail-label">QTY</span><span class="detail-value">${u.qty || '—'}</span></div>
+            <div class="detail-field"><span class="detail-label">Tipo Carga</span><span class="detail-value">${u.tipo_carga || '—'}</span></div>
+            <div class="detail-field"><span class="detail-label">Receptor en Faena</span><span class="detail-value">${u.nombre_receptor || '—'}</span></div>
+            <div class="detail-field"><span class="detail-label">Despachado por</span><span class="detail-value">${u.despachado_por || '—'}</span></div>
+            <div class="detail-field"><span class="detail-label">Fecha despacho</span><span class="detail-value">${formatDate(u.fecha_despacho)}</span></div>
+          </div>
+        </div>
+
+        <div class="detail-section">
+          <div class="detail-section-title">Entrega en Sitio</div>
+          <div class="detail-grid">
+            <div class="detail-field"><span class="detail-label">Supervisor MEL 1</span><span class="detail-value">${u.nombre_supervisor_mel}</span></div>
+            <div class="detail-field"><span class="detail-label">Contacto</span><span class="detail-value">${u.contacto_supervisor_mel}</span></div>
+            ${u.nombre_supervisor_mel2 ? `<div class="detail-field"><span class="detail-label">Supervisor MEL 2</span><span class="detail-value">${u.nombre_supervisor_mel2}</span></div><div class="detail-field"><span class="detail-label">Contacto</span><span class="detail-value">${u.contacto_supervisor_mel2 || '—'}</span></div>` : ''}
+            <div class="detail-field"><span class="detail-label">UP — Punto entrega</span><span class="detail-value mono">${u.up_punto_entrega}</span></div>
+          </div>
+        </div>
+      `;
+
+      // SAP section — solo si está en tránsito o cerrada
+      const sapEl = document.getElementById('modalSAP');
+      if (['en_transito_p3', 'en_transito_cd', 'cerrada'].includes(u.estado)) {
+        const isCerrada = u.estado === 'cerrada';
+        sapEl.innerHTML = `
+          <div class="sap-section">
+            <div class="sap-title">📊 Registro SAP y Cierre</div>
+
+            <div class="sap-fields">
+              <div class="sap-field">
+                <label for="mov261">N° Movimiento 261</label>
+                <input type="text" id="mov261" value="${u.movimiento_261 || ''}" placeholder="Ej: 4900012345" ${isCerrada ? 'disabled' : ''} />
+              </div>
+              <div class="sap-field">
+                <label>Ingresado a SAP</label>
+                <div style="display:flex;align-items:center;gap:0.5rem;padding:0.65rem 0;">
+                  <input type="checkbox" id="ingresadoSAP" ${u.ingresado_sap ? 'checked' : ''} ${isCerrada ? 'disabled' : ''} />
+                  <label for="ingresadoSAP" style="font-size:0.85rem;">Confirmado</label>
+                </div>
+              </div>
+            </div>
+
+            <div class="pod-row">
+              <input type="checkbox" id="podRealizado" ${u.pod_realizado ? 'checked' : ''} ${isCerrada ? 'disabled' : ''} />
+              <label for="podRealizado">POD realizado</label>
+            </div>
+
+            ${!isCerrada ? `
+            <div class="sap-actions">
+              <button class="btn-guardar-sap" onclick="guardarSAP()">💾 Guardar registros SAP</button>
+              <button class="btn-cerrar-urg" id="btnCerrar" onclick="cerrarUrgencia()">✅ Cerrar urgencia</button>
+            </div>` : `<div style="background:#EDFAF3;border-radius:6px;padding:0.75rem 1rem;font-size:0.82rem;color:var(--kdm-success);font-weight:500;">✅ Urgencia cerrada correctamente</div>`}
+          </div>
+        `;
+      } else {
+        sapEl.innerHTML = '';
+      }
+
+      document.getElementById('modalOverlay').classList.add('visible');
+    }
+
+    function closeModal() {
+      document.getElementById('modalOverlay').classList.remove('visible');
+      currentUrgencia = null;
+    }
+
+    function closeModalOutside(e) {
+      if (e.target === document.getElementById('modalOverlay')) closeModal();
+    }
+
+    // ─── SAP ACTIONS ─────────────────────────────────────────
+    async function guardarSAP() {
+      const mov261 = document.getElementById('mov261').value.trim();
+      const ingresadoSAP = document.getElementById('ingresadoSAP').checked;
+      const podRealizado = document.getElementById('podRealizado').checked;
+
+      try {
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/urgencias?id=eq.${currentUrgencia.id}`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': SUPABASE_ANON,
+            'Authorization': `Bearer ${currentUser.token}`
+          },
+          body: JSON.stringify({ movimiento_261: mov261, ingresado_sap: ingresadoSAP, pod_realizado: podRealizado })
+        });
+
+        if (!res.ok) throw new Error('Error al guardar');
+
+        // Update local
+        currentUrgencia.movimiento_261 = mov261;
+        currentUrgencia.ingresado_sap = ingresadoSAP;
+        currentUrgencia.pod_realizado = podRealizado;
+
+        const idx = allUrgencias.findIndex(u => u.id === currentUrgencia.id);
+        if (idx !== -1) allUrgencias[idx] = { ...allUrgencias[idx], movimiento_261: mov261, ingresado_sap: ingresadoSAP, pod_realizado: podRealizado };
+
+        updateKPIs();
+        renderTable();
+
+        const btn = document.querySelector('.btn-guardar-sap');
+        if (btn) { btn.textContent = '✅ Guardado'; setTimeout(() => { btn.textContent = '💾 Guardar registros SAP'; }, 2000); }
+
+      } catch (err) {
+        alert('Error al guardar. Intente nuevamente.');
+      }
+    }
+
+    async function cerrarUrgencia() {
+      if (!confirm('¿Confirma que desea cerrar esta urgencia? Esta acción no se puede deshacer.')) return;
+
+      await guardarSAP();
+
+      try {
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/urgencias?id=eq.${currentUrgencia.id}`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': SUPABASE_ANON,
+            'Authorization': `Bearer ${currentUser.token}`
+          },
+          body: JSON.stringify({ estado: 'cerrada', fecha_entrega_cliente: new Date().toISOString() })
+        });
+
+        if (!res.ok) throw new Error('Error al cerrar');
+
+        await fetch(`${SUPABASE_URL}/rest/v1/historial_estados`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON, 'Authorization': `Bearer ${currentUser.token}` },
+          body: JSON.stringify({
+            urgencia_id: currentUrgencia.id,
+            estado_anterior: currentUrgencia.estado,
+            estado_nuevo: 'cerrada',
+            comentario: 'Urgencia cerrada por analista KDM',
+            actor: currentUser.nombre
+          })
+        });
+
+        closeModal();
+        await loadUrgencias();
+
+      } catch (err) {
+        alert('Error al cerrar la urgencia. Intente nuevamente.');
+      }
+    }
+
+    // ─── EXCEL EXPORT ────────────────────────────────────────
+    function exportarExcel() {
+      const desde = document.getElementById('filtroDesde').value;
+      const hasta = document.getElementById('filtroHasta').value;
+      const estado = document.getElementById('filtroEstado').value;
+
+      let filtered = allUrgencias.filter(u => {
+        const fecha = new Date(u.created_at);
+        if (desde && fecha < new Date(desde)) return false;
+        if (hasta && fecha > new Date(hasta + 'T23:59:59')) return false;
+        if (estado && u.estado !== estado) return false;
+        return true;
+      });
+
+      const data = filtered.map(u => ({
+        'N° Urgencia': u.numero_urg,
+        'Fecha Solicitud': formatDate(u.fecha_solicitud),
+        'Gerencia': u.gerencia,
+        'Superintendencia': u.superintendencia,
+        'Superintendente': u.nombre_superintendente,
+        'Centro Costo / WBS': u.centro_costo_wbs,
+        'Proveedor': u.nombre_proveedor,
+        'Focal Proveedor': u.focal_proveedor,
+        'Contacto Proveedor': u.contacto_proveedor,
+        'PO / Items': u.po_items,
+        'Código Stock': u.codigo_stock || '',
+        'N° Reserva': u.numero_reserva || '',
+        'Supervisor MEL 1': u.nombre_supervisor_mel,
+        'Correo Supervisor MEL 1': u.correo_supervisor_mel || '',
+        'Contacto Supervisor MEL 1': u.contacto_supervisor_mel,
+        'Supervisor MEL 2': u.nombre_supervisor_mel2 || '',
+        'Correo Supervisor MEL 2': u.correo_supervisor_mel2 || '',
+        'Contacto Supervisor MEL 2': u.contacto_supervisor_mel2 || '',
+        'UP Punto Entrega': u.up_punto_entrega,
+        'Estado': statusLabel(u.estado),
+        'Destino': u.destino || '',
+        'N° Resumen Viaje': u.numero_resumen_viaje || '',
+        'N° Guía': u.numero_guia || '',
+        'Expedición / Shipment': u.expedicion_shipment || '',
+        'Conductor': u.nombre_conductor || '',
+        'Patente': u.patente_equipo || '',
+        'QTY': u.qty || '',
+        'Tipo Carga': u.tipo_carga || '',
+        'Receptor en Faena': u.nombre_receptor || '',
+        'Despachado por': u.despachado_por || '',
+        'Fecha Despacho': formatDate(u.fecha_despacho),
+        'Mov. 261': u.movimiento_261 || '',
+        'Ingresado SAP': u.ingresado_sap ? 'Sí' : 'No',
+        'POD Realizado': u.pod_realizado ? 'Sí' : 'No',
+        'Fecha Entrega Cliente': formatDate(u.fecha_entrega_cliente),
+        'Aprobado por': u.aprobado_por || '',
+        'Fecha Aprobación': formatDate(u.fecha_aprobacion),
+        'Comentario Supervisor': u.comentario_supervisor || '',
+        'Fecha Creación': formatDate(u.created_at)
+      }));
+
+      const ws = XLSX.utils.json_to_sheet(data);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'Urgencias');
+
+      const fechaHoy = new Date().toISOString().split('T')[0];
+      XLSX.writeFile(wb, `Urgencias_KDM_${fechaHoy}.xlsx`);
+    }
+
+    // ─── HELPERS ─────────────────────────────────────────────
+    function formatDate(d) {
+      if (!d) return '—';
+      return new Date(d).toLocaleDateString('es-CL', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    }
+
+    function statusLabel(s) {
+      const labels = {
+        pendiente_aprobacion: 'Pendiente aprobación',
+        en_correccion: 'En corrección',
+        aprobada: 'Aprobada',
+        en_transito_p3: 'En tránsito — P3',
+        en_transito_cd: 'En tránsito — CD',
+        cerrada: 'Cerrada',
+        rechazada: 'Rechazada'
+      };
+      return labels[s] || s;
+    }
+  </script>
+
+</body>
+</html>
