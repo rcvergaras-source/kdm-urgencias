@@ -939,6 +939,14 @@
       currentUrgencia = allUrgencias.find(u => u.id === id);
       if (!currentUrgencia) return;
 
+      // Reset estado del modal
+      pendingAction = null;
+      document.getElementById('commentBox').classList.remove('visible');
+      document.getElementById('commentText').value = '';
+      document.getElementById('commentText').style.borderColor = '';
+      const btnConf = document.getElementById('btnConfirmar');
+      if (btnConf) { btnConf.disabled = false; btnConf.textContent = 'Confirmar'; }
+
       const u = currentUrgencia;
       document.getElementById('modalUrgNum').textContent = u.numero_urg;
 
