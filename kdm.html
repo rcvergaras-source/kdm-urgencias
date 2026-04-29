@@ -296,7 +296,44 @@
     .pod-row label { font-size: 0.85rem; font-weight: 500; color: var(--kdm-dark); cursor: pointer; }
     .pod-row input[type="checkbox"] { width: 18px; height: 18px; flex-shrink: 0; cursor: pointer; }
 
-    .sap-actions { display: flex; gap: 0.75rem; flex-wrap: wrap; }
+    .sap-actions { display: flex; flex-direction: column; gap: 0.75rem; }
+
+    .sap-buttons-row {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+
+    .btn-historial {
+      background: transparent;
+      border: 1px solid var(--kdm-border);
+      border-radius: 6px;
+      padding: 0.5rem 1rem;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.78rem;
+      color: var(--kdm-gray);
+      cursor: pointer;
+      transition: all 0.15s;
+      width: 100%;
+      text-align: left;
+    }
+    .btn-historial:hover { border-color: var(--kdm-orange); color: var(--kdm-orange); }
+
+    .historial-item {
+      display: flex;
+      gap: 0.75rem;
+      padding: 0.65rem 0;
+      border-bottom: 1px solid var(--kdm-border);
+      font-size: 0.78rem;
+    }
+    .historial-item:last-child { border-bottom: none; }
+    .historial-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--kdm-orange); flex-shrink: 0; margin-top: 4px;
+    }
+    .historial-estado { font-weight: 600; color: var(--kdm-dark); }
+    .historial-meta { color: var(--kdm-gray); margin-top: 0.1rem; }
+    .historial-comentario { color: var(--kdm-dark); margin-top: 0.2rem; font-style: italic; }
 
     .btn-problema {
       background: #F5F0FF; color: #6D28D9; border: 1.5px solid #C4B5FD;
@@ -808,7 +845,8 @@
             `;
           } else if (u.estado === 'stand_by_documentacion') {
             botonesHTML = `
-              <button class="btn-resolver" onclick="resolverProblemaDoc()">✅ Documentación resuelta</button>
+              <button class="btn-resolver" onclick="mostrarEdicionCampos()">✏️ Editar documentación</button>
+              <button class="btn-cerrar-urg" onclick="resolverProblemaDoc()">✅ Documentación resuelta</button>
             `;
           } else if (u.estado === 'cerrado_pendiente_retiro') {
             botonesHTML = `
@@ -854,10 +892,62 @@
                   <label for="receptorEntrega">Nombre de quien recibe la carga</label>
                   <input type="text" id="receptorEntrega" value="${u.receptor_entrega || ''}" placeholder="Nombre completo del receptor" />
                 </div>` : ''}
-                ${botonesHTML}
+                <div class="sap-buttons-row">
+                  ${botonesHTML}
+                </div>
               </div>` : botonesHTML}
+
+              <!-- EDICION CAMPOS (solo en stand_by) -->
+              <div id="edicionCampos" style="display:none;margin-top:1rem;background:var(--kdm-white);border:1.5px solid #C4B5FD;border-radius:8px;padding:1rem;">
+                <div style="font-size:0.78rem;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:#6D28D9;margin-bottom:0.75rem;">Seleccione los campos a editar</div>
+                <div style="display:flex;flex-direction:column;gap:0.5rem;margin-bottom:1rem;">
+                  <label style="display:flex;align-items:center;gap:0.5rem;font-size:0.85rem;cursor:pointer;">
+                    <input type="checkbox" id="edit_numero_reserva" onchange="toggleCampoEdicion('numero_reserva', this.checked)" /> N° Reserva
+                  </label>
+                  <label style="display:flex;align-items:center;gap:0.5rem;font-size:0.85rem;cursor:pointer;">
+                    <input type="checkbox" id="edit_numero_resumen_viaje" onchange="toggleCampoEdicion('numero_resumen_viaje', this.checked)" /> N° Resumen de Viaje
+                  </label>
+                  <label style="display:flex;align-items:center;gap:0.5rem;font-size:0.85rem;cursor:pointer;">
+                    <input type="checkbox" id="edit_numero_guia" onchange="toggleCampoEdicion('numero_guia', this.checked)" /> N° Guía
+                  </label>
+                  <label style="display:flex;align-items:center;gap:0.5rem;font-size:0.85rem;cursor:pointer;">
+                    <input type="checkbox" id="edit_expedicion_shipment" onchange="toggleCampoEdicion('expedicion_shipment', this.checked)" /> Expedición / Shipment
+                  </label>
+                </div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;margin-bottom:1rem;">
+                  <div class="sap-field">
+                    <label>N° Reserva</label>
+                    <input type="text" id="val_numero_reserva" value="${u.numero_reserva || ''}" disabled />
+                  </div>
+                  <div class="sap-field">
+                    <label>N° Resumen de Viaje</label>
+                    <input type="text" id="val_numero_resumen_viaje" value="${u.numero_resumen_viaje || ''}" disabled />
+                  </div>
+                  <div class="sap-field">
+                    <label>N° Guía</label>
+                    <input type="text" id="val_numero_guia" value="${u.numero_guia || ''}" disabled />
+                  </div>
+                  <div class="sap-field">
+                    <label>Expedición / Shipment</label>
+                    <input type="text" id="val_expedicion_shipment" value="${u.expedicion_shipment || ''}" disabled />
+                  </div>
+                </div>
+                <button class="btn-guardar-sap" onclick="guardarEdicionCampos()">💾 Guardar cambios</button>
+              </div>
+
+              <!-- HISTORIAL -->
+              <div style="margin-top:1rem;">
+                <button class="btn-historial" onclick="toggleHistorial('${u.id}')">📋 Ver historial de cambios</button>
+                <div id="historialContent" style="display:none;margin-top:0.75rem;"></div>
+              </div>
+              ${!isCerradoEntregado ? `` : `
+              <div style="margin-top:1rem;">
+                <button class="btn-historial" onclick="toggleHistorial('${u.id}')">📋 Ver historial de cambios</button>
+                <div id="historialContent" style="display:none;margin-top:0.75rem;"></div>
+              </div>`}
             </div>
           `;
+
         } else {
           sapEl.innerHTML = '';
         }
@@ -877,7 +967,99 @@
     }
 
     // ─── SAP ACTIONS ─────────────────────────────────────────
-    async function marcarProblemaDoc() {
+    function mostrarEdicionCampos() {
+      const el = document.getElementById('edicionCampos');
+      if (el) el.style.display = el.style.display === 'none' ? 'block' : 'none';
+    }
+
+    function toggleCampoEdicion(campo, habilitado) {
+      const input = document.getElementById('val_' + campo);
+      if (input) input.disabled = !habilitado;
+    }
+
+    async function guardarEdicionCampos() {
+      const campos = ['numero_reserva', 'numero_resumen_viaje', 'numero_guia', 'expedicion_shipment'];
+      const camposEditados = campos.filter(c => !document.getElementById('val_' + c)?.disabled);
+
+      if (!camposEditados.length) {
+        alert('Seleccione al menos un campo para editar.');
+        return;
+      }
+
+      const payload = {};
+      const resumen = [];
+      camposEditados.forEach(c => {
+        const val = document.getElementById('val_' + c)?.value.trim();
+        payload[c] = val || null;
+        const labels = {
+          numero_reserva: 'N° Reserva',
+          numero_resumen_viaje: 'N° Resumen Viaje',
+          numero_guia: 'N° Guía',
+          expedicion_shipment: 'Expedición/Shipment'
+        };
+        resumen.push(`${labels[c]}: ${val || '(vacío)'}`);
+      });
+
+      try {
+        await patchUrgencia(payload, null, null);
+        // Registrar en historial
+        await fetch(`${SUPABASE_URL}/rest/v1/historial_estados`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON, 'Authorization': `Bearer ${currentUser.token}` },
+          body: JSON.stringify({
+            urgencia_id: currentUrgencia.id,
+            estado_anterior: currentUrgencia.estado,
+            estado_nuevo: currentUrgencia.estado,
+            comentario: `Edición de documentación — ${resumen.join(' | ')}`,
+            actor: currentUser.nombre
+          })
+        });
+
+        document.getElementById('edicionCampos').style.display = 'none';
+        closeModal();
+        await loadUrgencias();
+      } catch (err) { alert('Error al guardar. Intente nuevamente.'); }
+    }
+
+    async function toggleHistorial(urgenciaId) {
+      const content = document.getElementById('historialContent');
+      const btn = document.querySelector('.btn-historial');
+
+      if (content.style.display === 'block') {
+        content.style.display = 'none';
+        btn.textContent = '📋 Ver historial de cambios';
+        return;
+      }
+
+      content.innerHTML = '<div style="font-size:0.78rem;color:var(--kdm-gray);padding:0.5rem 0;">Cargando...</div>';
+      content.style.display = 'block';
+      btn.textContent = '📋 Ocultar historial';
+
+      try {
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/historial_estados?urgencia_id=eq.${urgenciaId}&order=created_at.asc&select=*`, {
+          headers: { 'apikey': SUPABASE_ANON, 'Authorization': `Bearer ${currentUser.token}` }
+        });
+        const historial = await res.json();
+
+        if (!historial.length) {
+          content.innerHTML = '<div style="font-size:0.78rem;color:var(--kdm-gray);padding:0.5rem 0;">Sin historial registrado.</div>';
+          return;
+        }
+
+        content.innerHTML = historial.map(h => `
+          <div class="historial-item">
+            <div class="historial-dot"></div>
+            <div>
+              <div class="historial-estado">${statusLabel(h.estado_nuevo)}</div>
+              <div class="historial-meta">${formatDateTime(h.created_at)} · ${h.actor}</div>
+              ${h.comentario ? `<div class="historial-comentario">${h.comentario}</div>` : ''}
+            </div>
+          </div>
+        `).join('');
+      } catch (err) {
+        content.innerHTML = '<div style="font-size:0.78rem;color:var(--kdm-error);">Error al cargar historial.</div>';
+      }
+    }
       const comentario = prompt('Describa el problema de documentación encontrado:');
       if (comentario === null) return;
       if (!comentario.trim()) {
