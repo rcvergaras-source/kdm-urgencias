@@ -217,6 +217,7 @@
     .status-pill.recibido_p3 { background: #FFF0E8; color: var(--kdm-orange); }
     .status-pill.cerrado_pendiente_retiro { background: #EFF6FF; color: var(--kdm-blue); }
     .status-pill.cerrado_entregado { background: #EDFAF3; color: var(--kdm-success); }
+    .status-pill.stand_by_documentacion { background: #F5F0FF; color: #6D28D9; }
     .status-pill.cerrada { background: #F0F0F0; color: var(--kdm-gray); }
     .status-pill.rechazada { background: #FEE; color: var(--kdm-error); }
 
@@ -297,7 +298,19 @@
 
     .sap-actions { display: flex; gap: 0.75rem; flex-wrap: wrap; }
 
-    .btn-guardar-sap {
+    .btn-problema {
+      background: #F5F0FF; color: #6D28D9; border: 1.5px solid #C4B5FD;
+      border-radius: 7px; padding: 0.65rem 1.25rem; font-family: 'DM Sans', sans-serif;
+      font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.15s;
+    }
+    .btn-problema:hover { background: #EDE9FE; }
+
+    .btn-resolver {
+      background: #6D28D9; color: white; border: none;
+      border-radius: 7px; padding: 0.65rem 1.25rem; font-family: 'DM Sans', sans-serif;
+      font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: background 0.15s;
+    }
+    .btn-resolver:hover { background: #5B21B6; }
       background: var(--kdm-orange); color: white; border: none; border-radius: 7px;
       padding: 0.65rem 1.25rem; font-family: 'DM Sans', sans-serif; font-size: 0.85rem;
       font-weight: 600; cursor: pointer; transition: background 0.15s;
@@ -430,6 +443,7 @@
             <option value="en_transito_p3">En tránsito — Patio 3</option>
             <option value="en_transito_cd">En tránsito — CD</option>
             <option value="recibido_p3">Recibido en Patio 3</option>
+            <option value="stand_by_documentacion">Stand by — Problema documentación</option>
             <option value="cerrado_pendiente_retiro">Cerrado — Pendiente retiro</option>
             <option value="cerrado_entregado">Cerrado y entregado</option>
             <option value="rechazada">Rechazada</option>
@@ -764,7 +778,7 @@
 
       // SAP section — solo si está en estados relevantes
       const sapEl = document.getElementById('modalSAP');
-      const estadosConSAP = ['en_transito_p3', 'recibido_p3', 'en_transito_cd', 'cerrado_pendiente_retiro', 'cerrado_entregado'];
+      const estadosConSAP = ['en_transito_p3', 'recibido_p3', 'en_transito_cd', 'stand_by_documentacion', 'cerrado_pendiente_retiro', 'cerrado_entregado'];
 
       if (estadosConSAP.includes(u.estado)) {
         if (u.estado === 'en_transito_p3') {
@@ -775,24 +789,31 @@
               <button class="btn-guardar-sap" onclick="marcarRecibidoP3()">📦 Marcar como Recibido en Patio 3</button>
             </div>
           `;
-        } else if (u.estado === 'recibido_p3' || u.estado === 'cerrado_pendiente_retiro' || u.estado === 'cerrado_entregado' || u.estado === 'en_transito_cd') {
+        } else if (u.estado === 'recibido_p3' || u.estado === 'cerrado_pendiente_retiro' || u.estado === 'cerrado_entregado' || u.estado === 'en_transito_cd' || u.estado === 'stand_by_documentacion') {
           const isCerradoEntregado = u.estado === 'cerrado_entregado';
+          const isStandBy = u.estado === 'stand_by_documentacion';
 
           let botonesHTML = '';
           if (u.estado === 'recibido_p3') {
             botonesHTML = `
               <button class="btn-guardar-sap" onclick="guardarSAP()">💾 Guardar registros SAP</button>
               <button class="btn-cerrar-urg" onclick="cerrarSistemico()">✅ Cerrar — Pendiente retiro cliente</button>
-            `;
-          } else if (u.estado === 'cerrado_pendiente_retiro') {
-            botonesHTML = `
-              <button class="btn-guardar-sap" onclick="guardarSAP()">💾 Guardar registros SAP</button>
-              <button class="btn-cerrar-urg" onclick="cerrarEntregado()">🤝 Marcar como entregado a cliente</button>
+              <button class="btn-problema" onclick="marcarProblemaDoc()">⚠️ Problema de documentación</button>
             `;
           } else if (u.estado === 'en_transito_cd') {
             botonesHTML = `
               <button class="btn-guardar-sap" onclick="guardarSAP()">💾 Guardar registros SAP</button>
               <button class="btn-cerrar-urg" onclick="cerrarEntregado()">✅ Cerrar y marcar como entregado</button>
+              <button class="btn-problema" onclick="marcarProblemaDoc()">⚠️ Problema de documentación</button>
+            `;
+          } else if (u.estado === 'stand_by_documentacion') {
+            botonesHTML = `
+              <button class="btn-resolver" onclick="resolverProblemaDoc()">✅ Documentación resuelta</button>
+            `;
+          } else if (u.estado === 'cerrado_pendiente_retiro') {
+            botonesHTML = `
+              <button class="btn-guardar-sap" onclick="guardarSAP()">💾 Guardar registros SAP</button>
+              <button class="btn-cerrar-urg" onclick="cerrarEntregado()">🤝 Marcar como entregado a cliente</button>
             `;
           } else if (isCerradoEntregado) {
             botonesHTML = `<div style="background:#EDFAF3;border-radius:6px;padding:0.75rem 1rem;font-size:0.82rem;color:var(--kdm-success);font-weight:500;">✅ Urgencia cerrada y entregada correctamente</div>`;
@@ -805,6 +826,7 @@
               ${u.fecha_recepcion_p3 ? `<div style="font-size:0.78rem;color:var(--kdm-gray);margin-bottom:0.5rem;">📦 Recibido en Patio 3: <strong>${formatDateTime(u.fecha_recepcion_p3)}</strong></div>` : ''}
               ${u.fecha_cierre_sistemico ? `<div style="font-size:0.78rem;color:var(--kdm-gray);margin-bottom:0.5rem;">📋 Proceso sistémico cerrado: <strong>${formatDateTime(u.fecha_cierre_sistemico)}</strong></div>` : ''}
               ${u.fecha_entrega_cliente ? `<div style="font-size:0.78rem;color:var(--kdm-gray);margin-bottom:0.5rem;">🤝 Entregado a cliente: <strong>${formatDateTime(u.fecha_entrega_cliente)}</strong>${u.receptor_entrega ? ` — Recibe: <strong>${u.receptor_entrega}</strong>` : ''}</div>` : ''}
+              ${isStandBy ? `<div style="background:#F5F0FF;border:1.5px solid #C4B5FD;border-radius:8px;padding:0.85rem 1rem;margin-bottom:1rem;font-size:0.82rem;color:#6D28D9;"><strong>⚠️ Stand by — Problema de documentación</strong><br/>${u.problema_documentacion || ''}</div>` : ''}
 
               <div class="sap-fields" style="margin-top:1rem;">
                 <div class="sap-field">
@@ -855,7 +877,42 @@
     }
 
     // ─── SAP ACTIONS ─────────────────────────────────────────
-    async function marcarRecibidoP3() {
+    async function marcarProblemaDoc() {
+      const comentario = prompt('Describa el problema de documentación encontrado:');
+      if (comentario === null) return;
+      if (!comentario.trim()) {
+        alert('Debe ingresar una descripción del problema.');
+        return;
+      }
+      try {
+        await patchUrgencia({
+          estado: 'stand_by_documentacion',
+          estado_anterior_problema: currentUrgencia.estado,
+          problema_documentacion: comentario.trim()
+        }, 'stand_by_documentacion', `Problema de documentación: ${comentario.trim()}`);
+        closeModal();
+        await loadUrgencias();
+      } catch (err) { alert('Error al actualizar. Intente nuevamente.'); }
+    }
+
+    async function resolverProblemaDoc() {
+      const comentario = prompt('Describa cómo se resolvió el problema de documentación:');
+      if (comentario === null) return;
+      if (!comentario.trim()) {
+        alert('Debe ingresar una descripción de cómo se resolvió.');
+        return;
+      }
+      const estadoAnterior = currentUrgencia.estado_anterior_problema || 'recibido_p3';
+      try {
+        await patchUrgencia({
+          estado: estadoAnterior,
+          problema_documentacion: null,
+          estado_anterior_problema: null
+        }, estadoAnterior, `Documentación resuelta: ${comentario.trim()}`);
+        closeModal();
+        await loadUrgencias();
+      } catch (err) { alert('Error al actualizar. Intente nuevamente.'); }
+    }
       if (!confirm('¿Confirma que la carga fue recibida en Patio 3?')) return;
       try {
         await patchUrgencia({ estado: 'recibido_p3', fecha_recepcion_p3: new Date().toISOString() }, 'recibido_p3', 'Carga recibida en Patio 3');
@@ -1028,6 +1085,7 @@
         en_transito_p3: 'En tránsito — P3',
         en_transito_cd: 'En tránsito — CD',
         recibido_p3: 'Recibido en Patio 3',
+        stand_by_documentacion: 'Stand by — Documentación',
         cerrado_pendiente_retiro: 'Cerrado — Pend. retiro',
         cerrado_entregado: 'Cerrado y entregado',
         cerrada: 'Cerrada',
