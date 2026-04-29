@@ -1060,6 +1060,8 @@
         content.innerHTML = '<div style="font-size:0.78rem;color:var(--kdm-error);">Error al cargar historial.</div>';
       }
     }
+
+    async function marcarProblemaDoc() {
       const comentario = prompt('Describa el problema de documentación encontrado:');
       if (comentario === null) return;
       if (!comentario.trim()) {
