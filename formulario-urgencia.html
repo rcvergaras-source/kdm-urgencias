@@ -738,7 +738,8 @@
 
             <div class="field">
               <label for="numero_reserva">N° Reserva / Ítems <span class="optional">(si aplica)</span></label>
-              <input type="text" id="numero_reserva" name="numero_reserva" placeholder="Número de reserva SAP" />
+              <input type="text" id="numero_reserva" name="numero_reserva" placeholder="Ej: 123456-7890" maxlength="12" oninput="this.value=this.value.replace(/[^0-9\-]/g,'')" />
+              <span class="field-hint">Solo números y guiones, máximo 12 caracteres</span>
             </div>
 
           </div>
