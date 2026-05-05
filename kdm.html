@@ -179,7 +179,11 @@
       letter-spacing: 0.06em; white-space: nowrap;
     }
 
-    td {
+    th.sortable { cursor: pointer; user-select: none; }
+    th.sortable:hover { background: #2A2A2A; }
+    .sort-icon { font-size: 0.65rem; opacity: 0.5; margin-left: 0.3rem; }
+    th.sort-asc .sort-icon { opacity: 1; }
+    th.sort-desc .sort-icon { opacity: 1; }
       padding: 0.85rem 1rem; font-size: 0.82rem; color: var(--kdm-dark);
       border-bottom: 1px solid var(--kdm-border); vertical-align: middle;
     }
@@ -495,14 +499,14 @@
         <table id="urgenciasTable">
           <thead>
             <tr>
-              <th>N° URG</th>
-              <th>Fecha</th>
+              <th class="sortable" onclick="sortTable('numero_urg')">N° URG <span class="sort-icon" id="sort_numero_urg">↕</span></th>
+              <th class="sortable" onclick="sortTable('created_at')">Fecha <span class="sort-icon" id="sort_created_at">↕</span></th>
               <th>Proveedor</th>
               <th>Gerencia</th>
               <th>PO / Ítems</th>
-              <th>Estado</th>
+              <th class="sortable" onclick="sortTable('estado')">Estado <span class="sort-icon" id="sort_estado">↕</span></th>
               <th>Destino</th>
-              <th>Días sin retirar</th>
+              <th class="sortable" onclick="sortTable('dias_sin_retirar')">Días sin retirar <span class="sort-icon" id="sort_dias_sin_retirar">↕</span></th>
               <th>Mov. 261</th>
               <th>POD</th>
             </tr>
@@ -641,7 +645,27 @@
       }
     }
 
-    function updateKPIs() {
+    let sortColumn = 'created_at';
+    let sortDirection = 'desc';
+
+    function sortTable(column) {
+      if (sortColumn === column) {
+        sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+      } else {
+        sortColumn = column;
+        sortDirection = column === 'dias_sin_retirar' ? 'desc' : 'asc';
+      }
+
+      // Update sort icons
+      document.querySelectorAll('.sort-icon').forEach(el => el.textContent = '↕');
+      document.querySelectorAll('th.sortable').forEach(el => { el.classList.remove('sort-asc', 'sort-desc'); });
+      const iconEl = document.getElementById('sort_' + column);
+      const thEl = iconEl?.closest('th');
+      if (iconEl) iconEl.textContent = sortDirection === 'asc' ? '↑' : '↓';
+      if (thEl) thEl.classList.add(sortDirection === 'asc' ? 'sort-asc' : 'sort-desc');
+
+      renderTable();
+    }
       const total = allUrgencias.length;
       const transito = allUrgencias.filter(u => ['en_transito_p3', 'en_transito_cd', 'recibido_p3'].includes(u.estado)).length;
       const cerradas = allUrgencias.filter(u => u.estado === 'cerrado_entregado').length;
@@ -704,7 +728,28 @@
         return true;
       });
 
-      const tbody = document.getElementById('urgenciasBody');
+      // Aplicar ordenamiento
+      filtered.sort((a, b) => {
+        let valA, valB;
+
+        if (sortColumn === 'dias_sin_retirar') {
+          valA = horasDesdeRecepcion(a) ?? -1;
+          valB = horasDesdeRecepcion(b) ?? -1;
+        } else if (sortColumn === 'numero_urg') {
+          valA = parseInt(a.numero_urg?.replace('URG-', '') || '0');
+          valB = parseInt(b.numero_urg?.replace('URG-', '') || '0');
+        } else if (sortColumn === 'estado') {
+          valA = statusLabel(a.estado);
+          valB = statusLabel(b.estado);
+        } else {
+          valA = a[sortColumn] || '';
+          valB = b[sortColumn] || '';
+        }
+
+        if (valA < valB) return sortDirection === 'asc' ? -1 : 1;
+        if (valA > valB) return sortDirection === 'asc' ? 1 : -1;
+        return 0;
+      });
 
       if (!filtered.length) {
         tbody.innerHTML = '<tr><td colspan="10"><div class="empty-state"><div class="icon">📋</div><p>No hay urgencias con los filtros seleccionados.</p></div></td></tr>';
