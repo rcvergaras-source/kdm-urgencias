@@ -666,6 +666,8 @@
 
       renderTable();
     }
+
+    function updateKPIs() {
       const total = allUrgencias.length;
       const transito = allUrgencias.filter(u => ['en_transito_p3', 'en_transito_cd', 'recibido_p3'].includes(u.estado)).length;
       const cerradas = allUrgencias.filter(u => u.estado === 'cerrado_entregado').length;
