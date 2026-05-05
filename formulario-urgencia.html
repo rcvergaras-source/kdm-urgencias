@@ -681,6 +681,28 @@
 
           </div>
 
+          <!-- DATOS SOLICITANTE -->
+          <div style="margin-top:1rem;padding:1rem;background:#FAFAF8;border:1.5px solid var(--bhp-border);border-radius:8px;">
+            <div style="font-size:0.75rem;font-weight:600;text-transform:uppercase;letter-spacing:0.07em;color:var(--bhp-gray);margin-bottom:0.85rem;">Datos de quien realiza la solicitud</div>
+            <div class="grid-3">
+              <div class="field">
+                <label for="nombre_solicitante">Nombre completo</label>
+                <input type="text" id="nombre_solicitante" name="nombre_solicitante" placeholder="Nombre completo" required />
+                <span class="field-error" id="err_nombre_solicitante">Campo obligatorio</span>
+              </div>
+              <div class="field">
+                <label for="correo_solicitante">Correo electrónico</label>
+                <input type="email" id="correo_solicitante" name="correo_solicitante" placeholder="correo@bhp.com" required />
+                <span class="field-error" id="err_correo_solicitante">Campo obligatorio</span>
+              </div>
+              <div class="field">
+                <label for="telefono_solicitante">Teléfono de contacto</label>
+                <input type="tel" id="telefono_solicitante" name="telefono_solicitante" placeholder="+56 9 XXXX XXXX" required />
+                <span class="field-error" id="err_telefono_solicitante">Campo obligatorio</span>
+              </div>
+            </div>
+          </div>
+
           <!-- FIRMA ELECTRÓNICA -->
           <div class="firma-box" style="margin-top:1rem;">
             <p>La firma electrónica corresponde a la autorización del/la Superintendente(a) sobre esta solicitud de urgencia.</p>
@@ -895,6 +917,9 @@
         document.getElementById('centro_costo_wbs').value = u.centro_costo_wbs || '';
         document.getElementById('firma_nombre').value = u.firma_nombre || '';
         document.getElementById('firma_autoriza').checked = u.firma_autoriza || false;
+        document.getElementById('nombre_solicitante').value = u.nombre_solicitante || '';
+        document.getElementById('correo_solicitante').value = u.correo_solicitante || '';
+        document.getElementById('telefono_solicitante').value = u.telefono_solicitante || '';
         document.getElementById('nombre_proveedor').value = u.nombre_proveedor || '';
         document.getElementById('focal_proveedor').value = u.focal_proveedor || '';
         document.getElementById('contacto_proveedor').value = u.contacto_proveedor || '';
@@ -916,7 +941,8 @@
 
     const requiredFields = [
       'fecha_solicitud', 'gerencia', 'superintendencia', 'nombre_superintendente',
-      'centro_costo_wbs', 'firma_nombre', 'nombre_proveedor', 'focal_proveedor',
+      'centro_costo_wbs', 'firma_nombre', 'nombre_solicitante', 'correo_solicitante',
+      'telefono_solicitante', 'nombre_proveedor', 'focal_proveedor',
       'contacto_proveedor', 'po_items', 'nombre_supervisor_mel',
       'correo_supervisor_mel', 'contacto_supervisor_mel', 'up_punto_entrega'
     ];
@@ -981,6 +1007,9 @@
         centro_costo_wbs: document.getElementById('centro_costo_wbs').value.trim(),
         firma_nombre: document.getElementById('firma_nombre').value.trim(),
         firma_autoriza: document.getElementById('firma_autoriza').checked,
+        nombre_solicitante: document.getElementById('nombre_solicitante').value.trim(),
+        correo_solicitante: document.getElementById('correo_solicitante').value.trim(),
+        telefono_solicitante: document.getElementById('telefono_solicitante').value.trim(),
         nombre_proveedor: document.getElementById('nombre_proveedor').value.trim(),
         focal_proveedor: document.getElementById('focal_proveedor').value.trim(),
         contacto_proveedor: document.getElementById('contacto_proveedor').value.trim(),
