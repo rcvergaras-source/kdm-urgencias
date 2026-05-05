@@ -1256,6 +1256,8 @@
       const url = URL.createObjectURL(blob);
       window.open(url, '_blank');
     }
+
+    async function marcarRecibidoP3() {
       if (!confirm('¿Confirma que la carga fue recibida en Patio 3?')) return;
       try {
         await patchUrgencia({ estado: 'recibido_p3', fecha_recepcion_p3: new Date().toISOString() }, 'recibido_p3', 'Carga recibida en Patio 3');
