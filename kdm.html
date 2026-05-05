@@ -751,6 +751,8 @@
         return 0;
       });
 
+      const tbody = document.getElementById('urgenciasBody');
+
       if (!filtered.length) {
         tbody.innerHTML = '<tr><td colspan="10"><div class="empty-state"><div class="icon">📋</div><p>No hay urgencias con los filtros seleccionados.</p></div></td></tr>';
         return;
