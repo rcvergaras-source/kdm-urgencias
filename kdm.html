@@ -940,11 +940,19 @@
                 <div class="sap-field" style="width:100%;margin-bottom:0.75rem;">
                   <label for="receptorEntrega">Nombre de quien recibe la carga</label>
                   <input type="text" id="receptorEntrega" value="${u.receptor_entrega || ''}" placeholder="Nombre completo del receptor" />
+                </div>
+                <div class="sap-field" style="width:100%;margin-bottom:0.75rem;">
+                  <label>Adjuntar documentos <span style="font-weight:400;color:var(--kdm-gray);font-size:0.72rem;">(opcional — máx. 2 archivos, 3MB c/u — JPG, PNG, PDF)</span></label>
+                  <input type="file" id="archivosEntrega" multiple accept=".jpg,.jpeg,.png,.pdf" style="padding:0.5rem;font-size:0.82rem;" onchange="validarArchivos(this)" />
+                  <span id="archivosError" style="display:none;font-size:0.72rem;color:var(--kdm-error);margin-top:0.25rem;"></span>
                 </div>` : ''}
                 <div class="sap-buttons-row">
                   ${botonesHTML}
                 </div>
-              </div>` : botonesHTML}
+              </div>` : `
+              <!-- Documentos adjuntos (cerrado) -->
+              <div id="docsAdjuntos" style="margin-top:1rem;"></div>
+              ${botonesHTML}`}
 
               <!-- EDICION CAMPOS (solo en stand_by) -->
               <div id="edicionCampos" style="display:none;margin-top:1rem;background:var(--kdm-white);border:1.5px solid #C4B5FD;border-radius:8px;padding:1rem;">
@@ -1004,6 +1012,11 @@
       } // cierre if estadosConSAP
 
       document.getElementById('modalOverlay').classList.add('visible');
+
+      // Cargar documentos adjuntos si está cerrada
+      if (u.estado === 'cerrado_entregado') {
+        setTimeout(() => cargarDocumentosAdjuntos(u.id), 100);
+      }
     }
 
     function closeModal() {
@@ -1147,7 +1160,102 @@
       } catch (err) { alert('Error al actualizar. Intente nuevamente.'); }
     }
 
-    async function marcarRecibidoP3() {
+    function validarArchivos(input) {
+      const errEl = document.getElementById('archivosError');
+      const files = Array.from(input.files);
+      
+      if (files.length > 2) {
+        errEl.textContent = 'Máximo 2 archivos permitidos.';
+        errEl.style.display = 'block';
+        input.value = '';
+        return false;
+      }
+
+      for (const file of files) {
+        if (file.size > 3 * 1024 * 1024) {
+          errEl.textContent = `El archivo "${file.name}" supera los 3MB.`;
+          errEl.style.display = 'block';
+          input.value = '';
+          return false;
+        }
+      }
+
+      errEl.style.display = 'none';
+      return true;
+    }
+
+    async function subirArchivos(urgenciaId) {
+      const input = document.getElementById('archivosEntrega');
+      if (!input || !input.files.length) return [];
+
+      const archivosSubidos = [];
+      for (const file of Array.from(input.files)) {
+        const ext = file.name.split('.').pop();
+        const path = `${urgenciaId}/${Date.now()}_${file.name}`;
+
+        const res = await fetch(`${SUPABASE_URL}/storage/v1/object/urgencias-docs/${path}`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${currentUser.token}`,
+            'Content-Type': file.type
+          },
+          body: file
+        });
+
+        if (res.ok) archivosSubidos.push(path);
+      }
+      return archivosSubidos;
+    }
+
+    async function cargarDocumentosAdjuntos(urgenciaId) {
+      const docsEl = document.getElementById('docsAdjuntos');
+      if (!docsEl) return;
+
+      try {
+        const res = await fetch(`${SUPABASE_URL}/storage/v1/object/list/urgencias-docs`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${currentUser.token}`,
+            'apikey': SUPABASE_ANON
+          },
+          body: JSON.stringify({ prefix: urgenciaId + '/', limit: 10 })
+        });
+
+        const archivos = await res.json();
+        if (!archivos.length) {
+          docsEl.innerHTML = '';
+          return;
+        }
+
+        docsEl.innerHTML = `
+          <div style="margin-top:0.75rem;">
+            <div style="font-size:0.72rem;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--kdm-gray);margin-bottom:0.5rem;">📎 Documentos adjuntos</div>
+            ${archivos.map(f => `
+              <div style="display:flex;align-items:center;gap:0.5rem;padding:0.5rem 0;border-bottom:1px solid var(--kdm-border);">
+                <span style="font-size:0.82rem;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${f.name}</span>
+                <a href="${SUPABASE_URL}/storage/v1/object/urgencias-docs/${urgenciaId}/${f.name}" 
+                   target="_blank"
+                   style="font-size:0.75rem;color:var(--kdm-orange);text-decoration:none;font-weight:500;white-space:nowrap;"
+                   onclick="descargarDoc(event, '${urgenciaId}/${f.name}')">Ver →</a>
+              </div>
+            `).join('')}
+          </div>
+        `;
+      } catch (err) {
+        docsEl.innerHTML = '';
+      }
+    }
+
+    async function descargarDoc(e, path) {
+      e.preventDefault();
+      const res = await fetch(`${SUPABASE_URL}/storage/v1/object/urgencias-docs/${path}`, {
+        headers: { 'Authorization': `Bearer ${currentUser.token}` }
+      });
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      window.open(url, '_blank');
+    }
       if (!confirm('¿Confirma que la carga fue recibida en Patio 3?')) return;
       try {
         await patchUrgencia({ estado: 'recibido_p3', fecha_recepcion_p3: new Date().toISOString() }, 'recibido_p3', 'Carga recibida en Patio 3');
@@ -1194,7 +1302,18 @@
         alert('Debe ingresar el nombre de quien recibe la carga.');
         return;
       }
+
+      // Validar archivos si hay
+      const inputArchivos = document.getElementById('archivosEntrega');
+      if (inputArchivos && inputArchivos.files.length && !validarArchivos(inputArchivos)) return;
+
       await guardarSAP();
+
+      // Subir archivos primero
+      if (inputArchivos && inputArchivos.files.length) {
+        await subirArchivos(currentUrgencia.id);
+      }
+
       try {
         await patchUrgencia({
           estado: 'cerrado_entregado',
