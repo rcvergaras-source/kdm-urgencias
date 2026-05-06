@@ -228,31 +228,30 @@
     }
 
     async function procesarDecision(decision) {
-      try {
-        const payload = {
+      // Mostrar resultado inmediatamente
+      document.getElementById('loadingScreen').style.display = 'none';
+      document.getElementById('mainCard').style.display = 'block';
+      document.getElementById('urgNum').textContent = urgencia.numero_urg;
+      document.getElementById('cardBody').style.display = 'none';
+      document.getElementById('actionsArea').style.display = 'none';
+      showResult(decision);
+
+      // PATCH en segundo plano
+      fetch(`${SUPABASE_URL}/rest/v1/urgencias?id=eq.${urgencia.id}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': SUPABASE_ANON,
+          'Authorization': `Bearer ${SUPABASE_ANON}`,
+          'Prefer': 'return=minimal'
+        },
+        body: JSON.stringify({
           estado_si: decision,
           estado: decision === 'aprobada' ? 'pendiente_aprobacion' : 'rechazada_si',
           firma_autoriza: decision === 'aprobada',
           token_aprobacion: null
-        };
-
-        const res = await fetch(`${SUPABASE_URL}/rest/v1/urgencias?id=eq.${urgencia.id}`, {
-          method: 'PATCH',
-          headers: {
-            'Content-Type': 'application/json',
-            'apikey': SUPABASE_ANON,
-            'Authorization': `Bearer ${SUPABASE_ANON}`,
-            'Prefer': 'return=representation'
-          },
-          body: JSON.stringify(payload)
-        });
-
-        if (!res.ok) throw new Error('Error al procesar');
-        showResult(decision);
-
-      } catch (err) {
-        showError();
-      }
+        })
+      });
     }
 
     function mostrarFormulario() {
