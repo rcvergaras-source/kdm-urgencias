@@ -943,7 +943,17 @@
                 </div>
                 <div class="sap-field" style="width:100%;margin-bottom:0.75rem;">
                   <label>Adjuntar documentos <span style="font-weight:400;color:var(--kdm-gray);font-size:0.72rem;">(opcional — máx. 2 archivos, 3MB c/u — JPG, PNG, PDF)</span></label>
-                  <input type="file" id="archivosEntrega" multiple accept=".jpg,.jpeg,.png,.pdf" style="padding:0.5rem;font-size:0.82rem;" onchange="validarArchivos(this)" />
+                  <div id="dropZone" style="border:2px dashed var(--kdm-border);border-radius:8px;padding:1.25rem;text-align:center;cursor:pointer;transition:all 0.15s;background:#FAFAF8;"
+                    onclick="document.getElementById('archivosEntrega').click()"
+                    ondragover="event.preventDefault();this.style.borderColor='var(--kdm-orange)';this.style.background='#FFF8F5';"
+                    ondragleave="this.style.borderColor='var(--kdm-border)';this.style.background='#FAFAF8';"
+                    ondrop="handleDrop(event)">
+                    <div style="font-size:1.5rem;margin-bottom:0.35rem;">📎</div>
+                    <div style="font-size:0.82rem;color:var(--kdm-gray);">Arrastra archivos aquí o <strong style="color:var(--kdm-orange);">haz clic para seleccionar</strong></div>
+                    <div style="font-size:0.72rem;color:var(--kdm-border);margin-top:0.25rem;">JPG, PNG o PDF — máx. 3MB por archivo</div>
+                  </div>
+                  <input type="file" id="archivosEntrega" multiple accept=".jpg,.jpeg,.png,.pdf" style="display:none;" onchange="mostrarArchivosSeleccionados(this)" />
+                  <div id="archivosLista" style="margin-top:0.5rem;"></div>
                   <span id="archivosError" style="display:none;font-size:0.72rem;color:var(--kdm-error);margin-top:0.25rem;"></span>
                 </div>` : ''}
                 <div class="sap-buttons-row">
@@ -1160,7 +1170,35 @@
       } catch (err) { alert('Error al actualizar. Intente nuevamente.'); }
     }
 
-    function validarArchivos(input) {
+    function handleDrop(event) {
+      event.preventDefault();
+      const dropZone = document.getElementById('dropZone');
+      dropZone.style.borderColor = 'var(--kdm-border)';
+      dropZone.style.background = '#FAFAF8';
+
+      const input = document.getElementById('archivosEntrega');
+      const dt = new DataTransfer();
+      Array.from(event.dataTransfer.files).forEach(f => dt.items.add(f));
+      input.files = dt.files;
+      mostrarArchivosSeleccionados(input);
+    }
+
+    function mostrarArchivosSeleccionados(input) {
+      if (!validarArchivos(input)) return;
+
+      const lista = document.getElementById('archivosLista');
+      const files = Array.from(input.files);
+
+      if (!files.length) { lista.innerHTML = ''; return; }
+
+      lista.innerHTML = files.map(f => `
+        <div style="display:flex;align-items:center;gap:0.5rem;padding:0.4rem 0.6rem;background:var(--kdm-white);border:1px solid var(--kdm-border);border-radius:6px;margin-top:0.35rem;font-size:0.78rem;">
+          <span>${f.type.includes('pdf') ? '📄' : '🖼️'}</span>
+          <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${f.name}</span>
+          <span style="color:var(--kdm-gray);white-space:nowrap;">${(f.size / 1024 / 1024).toFixed(1)}MB</span>
+        </div>
+      `).join('');
+    }
       const errEl = document.getElementById('archivosError');
       const files = Array.from(input.files);
       
