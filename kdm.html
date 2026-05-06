@@ -882,15 +882,13 @@
           let botonesHTML = '';
           if (u.estado === 'recibido_p3') {
             botonesHTML = `
-              <button class="btn-guardar-sap" onclick="guardarSAP()">💾 Guardar registros SAP</button>
               <button class="btn-cerrar-urg" onclick="cerrarSistemico()">✅ Cerrar — Pendiente retiro cliente</button>
-              <button class="btn-problema" onclick="marcarProblemaDoc()">⚠️ Problema de documentación</button>
+              ${!u.movimiento_315 ? `<button class="btn-problema" onclick="marcarProblemaDoc()">⚠️ Problema de documentación</button>` : ''}
             `;
           } else if (u.estado === 'en_transito_cd') {
             botonesHTML = `
-              <button class="btn-guardar-sap" onclick="guardarSAP()">💾 Guardar registros SAP</button>
               <button class="btn-cerrar-urg" onclick="cerrarEntregado()">✅ Cerrar y marcar como entregado</button>
-              <button class="btn-problema" onclick="marcarProblemaDoc()">⚠️ Problema de documentación</button>
+              ${!u.movimiento_315 ? `<button class="btn-problema" onclick="marcarProblemaDoc()">⚠️ Problema de documentación</button>` : ''}
             `;
           } else if (u.estado === 'stand_by_documentacion') {
             botonesHTML = `
@@ -924,19 +922,19 @@
               <div class="sap-fields" style="margin-top:1rem;">
                 <div class="sap-field">
                   <label for="mov261">N° Movimiento 261</label>
-                  <input type="text" id="mov261" value="${u.movimiento_261 || ''}" placeholder="Ej: 4900012345" ${isCerradoEntregado ? 'disabled' : ''} />
+                  <input type="text" id="mov261" value="${u.movimiento_261 || ''}" placeholder="Ej: 4900012345" ${isCerradoEntregado || isStandBy ? 'disabled' : ''} />
                 </div>
                 <div class="sap-field">
                   <label>Ingresado a SAP</label>
                   <div style="display:flex;align-items:center;gap:0.5rem;padding:0.65rem 0;">
-                    <input type="checkbox" id="ingresadoSAP" ${u.ingresado_sap ? 'checked' : ''} ${isCerradoEntregado ? 'disabled' : ''} />
+                    <input type="checkbox" id="ingresadoSAP" ${u.ingresado_sap ? 'checked' : ''} ${isCerradoEntregado || isStandBy ? 'disabled' : ''} />
                     <label for="ingresadoSAP" style="font-size:0.85rem;">Confirmado</label>
                   </div>
                 </div>
               </div>
 
               <div class="pod-row">
-                <input type="checkbox" id="podRealizado" ${u.pod_realizado ? 'checked' : ''} ${isCerradoEntregado ? 'disabled' : ''} />
+                <input type="checkbox" id="podRealizado" ${u.pod_realizado ? 'checked' : ''} ${isCerradoEntregado || isStandBy ? 'disabled' : ''} />
                 <label for="podRealizado">POD realizado</label>
               </div>
 
@@ -963,6 +961,7 @@
                   <span id="archivosError" style="display:none;font-size:0.72rem;color:var(--kdm-error);margin-top:0.25rem;"></span>
                 </div>` : ''}
                 <div class="sap-buttons-row">
+                  ${!isStandBy ? `<button class="btn-guardar-sap" onclick="guardarSAP()">💾 Guardar registros SAP</button>` : ''}
                   ${botonesHTML}
                 </div>
               </div>` : `
