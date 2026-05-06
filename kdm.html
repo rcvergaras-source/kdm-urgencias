@@ -913,7 +913,13 @@
               ${u.fecha_recepcion_p3 ? `<div style="font-size:0.78rem;color:var(--kdm-gray);margin-bottom:0.5rem;">📦 Recibido en Patio 3: <strong>${formatDateTime(u.fecha_recepcion_p3)}</strong></div>` : ''}
               ${u.fecha_cierre_sistemico ? `<div style="font-size:0.78rem;color:var(--kdm-gray);margin-bottom:0.5rem;">📋 Proceso sistémico cerrado: <strong>${formatDateTime(u.fecha_cierre_sistemico)}</strong></div>` : ''}
               ${u.fecha_entrega_cliente ? `<div style="font-size:0.78rem;color:var(--kdm-gray);margin-bottom:0.5rem;">🤝 Entregado a cliente: <strong>${formatDateTime(u.fecha_entrega_cliente)}</strong>${u.receptor_entrega ? ` — Recibe: <strong>${u.receptor_entrega}</strong>` : ''}</div>` : ''}
-              ${isStandBy ? `<div style="background:#F5F0FF;border:1.5px solid #C4B5FD;border-radius:8px;padding:0.85rem 1rem;margin-bottom:1rem;font-size:0.82rem;color:#6D28D9;"><strong>⚠️ Stand by — Problema de documentación</strong><br/>${u.problema_documentacion || ''}</div>` : ''}
+              ${isStandBy ? `<div style="background:#F5F0FF;border:1.5px solid #C4B5FD;border-radius:8px;padding:0.85rem 1rem;margin-bottom:1rem;font-size:0.82rem;color:#6D28D9;">
+                <strong>⚠️ Stand by — Problema de documentación</strong><br/>
+                ${u.problema_documentacion || ''}
+                ${u.movimiento_313 ? `<div style="margin-top:0.5rem;font-family:monospace;">Mov. 313: <strong>${u.movimiento_313}</strong></div>` : ''}
+              </div>` : ''}
+              ${u.movimiento_313 && !isStandBy ? `<div style="font-size:0.78rem;color:var(--kdm-gray);margin-bottom:0.5rem;">🔒 Mov. 313 (bloqueo): <strong style="font-family:monospace;">${u.movimiento_313}</strong></div>` : ''}
+              ${u.movimiento_315 ? `<div style="font-size:0.78rem;color:var(--kdm-gray);margin-bottom:0.5rem;">🔓 Mov. 315 (liberación): <strong style="font-family:monospace;">${u.movimiento_315}</strong></div>` : ''}
 
               <div class="sap-fields" style="margin-top:1rem;">
                 <div class="sap-field">
@@ -1129,6 +1135,12 @@
     }
 
     async function marcarProblemaDoc() {
+      const mov313 = prompt('Ingrese el N° de Movimiento 313 (bloqueo de stock en tránsito SAP):');
+      if (mov313 === null) return;
+      if (!mov313.trim()) {
+        alert('Debe ingresar el N° de Movimiento 313.');
+        return;
+      }
       const comentario = prompt('Describa el problema de documentación encontrado:');
       if (comentario === null) return;
       if (!comentario.trim()) {
@@ -1139,14 +1151,21 @@
         await patchUrgencia({
           estado: 'stand_by_documentacion',
           estado_anterior_problema: currentUrgencia.estado,
-          problema_documentacion: comentario.trim()
-        }, 'stand_by_documentacion', `Problema de documentación: ${comentario.trim()}`);
+          problema_documentacion: comentario.trim(),
+          movimiento_313: mov313.trim()
+        }, 'stand_by_documentacion', `Mov. 313: ${mov313.trim()} — Problema de documentación: ${comentario.trim()}`);
         closeModal();
         await loadUrgencias();
       } catch (err) { alert('Error al actualizar. Intente nuevamente.'); }
     }
 
     async function resolverProblemaDoc() {
+      const mov315 = prompt('Ingrese el N° de Movimiento 315 (liberación de stock en tránsito SAP):');
+      if (mov315 === null) return;
+      if (!mov315.trim()) {
+        alert('Debe ingresar el N° de Movimiento 315.');
+        return;
+      }
       const comentario = prompt('Describa cómo se resolvió el problema de documentación:');
       if (comentario === null) return;
       if (!comentario.trim()) {
@@ -1158,8 +1177,9 @@
         await patchUrgencia({
           estado: estadoAnterior,
           problema_documentacion: null,
-          estado_anterior_problema: null
-        }, estadoAnterior, `Documentación resuelta: ${comentario.trim()}`);
+          estado_anterior_problema: null,
+          movimiento_315: mov315.trim()
+        }, estadoAnterior, `Mov. 315: ${mov315.trim()} — Documentación resuelta: ${comentario.trim()}`);
         closeModal();
         await loadUrgencias();
       } catch (err) { alert('Error al actualizar. Intente nuevamente.'); }
@@ -1439,6 +1459,8 @@
         'Receptor en Faena': u.nombre_receptor || '',
         'Despachado por': u.despachado_por || '',
         'Fecha Despacho': formatDate(u.fecha_despacho),
+        'Mov. 313': u.movimiento_313 || '',
+        'Mov. 315': u.movimiento_315 || '',
         'Mov. 261': u.movimiento_261 || '',
         'Ingresado SAP': u.ingresado_sap ? 'Sí' : 'No',
         'POD Realizado': u.pod_realizado ? 'Sí' : 'No',
