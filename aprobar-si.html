@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Aprobación SI — Urgencia KDM</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --orange: #E05E1B;
+      --dark: #1A1A1A;
+      --gray: #6B6B6B;
+      --light: #F5F4F1;
+      --white: #FFFFFF;
+      --border: #E0DDD8;
+      --success: #2D7D46;
+      --error: #C0392B;
+    }
+    body { font-family: 'DM Sans', sans-serif; background: var(--light); color: var(--dark); min-height: 100vh; display: flex; flex-direction: column; }
+
+    .header {
+      background: var(--white); border-bottom: 3px solid var(--orange);
+      padding: 1rem 1.5rem; display: flex; align-items: center; gap: 0.75rem;
+    }
+    .logo-e { font-weight: 600; font-size: 1rem; color: var(--dark); }
+    .logo-sep { width: 1px; height: 24px; background: var(--border); }
+    .logo-b { font-weight: 600; font-size: 1rem; color: var(--orange); letter-spacing: 0.05em; }
+
+    .container { max-width: 680px; margin: 0 auto; padding: 2.5rem 1.5rem; flex: 1; }
+
+    .card {
+      background: var(--white); border: 1px solid var(--border);
+      border-radius: 12px; overflow: hidden;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.07);
+    }
+
+    .card-header {
+      background: var(--dark); padding: 1.25rem 1.5rem;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+
+    .card-header-left { display: flex; flex-direction: column; gap: 0.25rem; }
+    .card-title { color: white; font-size: 0.9rem; font-weight: 600; }
+    .card-urg { font-family: 'DM Mono', monospace; font-size: 1.1rem; color: var(--orange); font-weight: 500; }
+
+    .status-badge {
+      display: inline-flex; align-items: center; gap: 0.35rem;
+      font-size: 0.72rem; font-weight: 600; padding: 0.25rem 0.7rem;
+      border-radius: 20px; text-transform: uppercase; letter-spacing: 0.04em;
+    }
+    .status-badge.pendiente { background: #FFF0E8; color: var(--orange); }
+    .status-badge.aprobada { background: #EDFAF3; color: var(--success); }
+    .status-badge.rechazada { background: #FEE; color: var(--error); }
+
+    .card-body { padding: 1.5rem; }
+
+    .section { margin-bottom: 1.5rem; }
+    .section-title {
+      font-size: 0.72rem; font-weight: 600; text-transform: uppercase;
+      letter-spacing: 0.08em; color: var(--gray);
+      margin-bottom: 0.85rem; padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+    .field { display: flex; flex-direction: column; gap: 0.2rem; }
+    .field-label { font-size: 0.7rem; color: var(--gray); font-weight: 500; }
+    .field-value { font-size: 0.875rem; color: var(--dark); }
+    .field-value.mono { font-family: 'DM Mono', monospace; font-size: 0.8rem; }
+    .field-value.empty { color: var(--border); font-style: italic; }
+
+    .actions {
+      border-top: 1px solid var(--border); padding: 1.5rem;
+      background: #FAFAF8;
+    }
+
+    .actions-title {
+      font-size: 0.82rem; color: var(--dark); font-weight: 500;
+      margin-bottom: 1rem; line-height: 1.5;
+    }
+
+    .actions-buttons { display: flex; gap: 1rem; flex-wrap: wrap; }
+
+    .btn-aprobar {
+      flex: 1; background: var(--success); color: white; border: none;
+      border-radius: 8px; padding: 0.85rem 1.5rem;
+      font-family: 'DM Sans', sans-serif; font-size: 0.9rem; font-weight: 600;
+      cursor: pointer; transition: background 0.15s;
+      display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+    }
+    .btn-aprobar:hover { background: #236037; }
+    .btn-aprobar:disabled { background: #9CA3AF; cursor: not-allowed; }
+
+    .btn-rechazar {
+      flex: 1; background: #FEE; color: var(--error);
+      border: 1.5px solid #F5C6C6; border-radius: 8px; padding: 0.85rem 1.5rem;
+      font-family: 'DM Sans', sans-serif; font-size: 0.9rem; font-weight: 600;
+      cursor: pointer; transition: all 0.15s;
+      display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+    }
+    .btn-rechazar:hover { background: #FECACA; }
+    .btn-rechazar:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    /* SUCCESS / ERROR SCREENS */
+    .result-screen {
+      display: none; text-align: center; padding: 3rem 2rem;
+    }
+    .result-screen.visible { display: block; }
+
+    .result-icon { font-size: 3rem; margin-bottom: 1rem; }
+    .result-screen h2 { font-size: 1.3rem; font-weight: 600; margin-bottom: 0.5rem; }
+    .result-screen p { font-size: 0.9rem; color: var(--gray); line-height: 1.6; }
+
+    .loading-screen {
+      text-align: center; padding: 3rem 2rem; color: var(--gray); font-size: 0.9rem;
+    }
+
+    .error-screen {
+      text-align: center; padding: 3rem 2rem;
+    }
+    .error-screen h2 { font-size: 1.2rem; font-weight: 600; color: var(--error); margin-bottom: 0.5rem; }
+    .error-screen p { font-size: 0.875rem; color: var(--gray); }
+
+    @media (max-width: 600px) {
+      .grid-2 { grid-template-columns: 1fr; }
+      .actions-buttons { flex-direction: column; }
+      .container { padding: 1.5rem 1rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="header">
+    <span class="logo-e">ESCONDIDA</span>
+    <div class="logo-sep"></div>
+    <span class="logo-b">BHP</span>
+  </header>
+
+  <div class="container">
+
+    <!-- LOADING -->
+    <div class="loading-screen" id="loadingScreen">
+      Cargando solicitud de urgencia...
+    </div>
+
+    <!-- ERROR -->
+    <div class="error-screen" id="errorScreen" style="display:none;">
+      <div style="font-size:2.5rem;margin-bottom:1rem;">⚠️</div>
+      <h2>Enlace inválido o expirado</h2>
+      <p>Este enlace de aprobación no es válido o ya fue utilizado anteriormente.</p>
+    </div>
+
+    <!-- FORMULARIO DE APROBACIÓN -->
+    <div class="card" id="mainCard" style="display:none;">
+      <div class="card-header">
+        <div class="card-header-left">
+          <span class="card-title">Solicitud de Urgencia — Aprobación SI</span>
+          <span class="card-urg" id="urgNum">URG-0000</span>
+        </div>
+        <span class="status-badge pendiente" id="statusBadge">Pendiente</span>
+      </div>
+
+      <div class="card-body" id="cardBody">
+        <!-- Filled dynamically -->
+      </div>
+
+      <div class="actions" id="actionsArea">
+        <p class="actions-title">Como Superintendente(a) autorizado(a), revise la información y confirme su decisión:</p>
+        <div class="actions-buttons">
+          <button class="btn-aprobar" onclick="decidir('aprobada')">✓ Aprobar solicitud</button>
+          <button class="btn-rechazar" onclick="decidir('rechazada_si')">✕ Rechazar solicitud</button>
+        </div>
+      </div>
+
+      <!-- RESULT -->
+      <div class="result-screen" id="resultScreen">
+        <div class="result-icon" id="resultIcon"></div>
+        <h2 id="resultTitle"></h2>
+        <p id="resultMsg"></p>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    const SUPABASE_URL = 'https://dnsijobpjnirbfrlkwfq.supabase.co';
+    const SUPABASE_ANON = 'sb_publishable_kUxJua1oS2c-YxCyHjhEbg_bItcFg6H';
+
+    let urgencia = null;
+
+    window.addEventListener('load', async () => {
+      const params = new URLSearchParams(window.location.search);
+      const token = params.get('token');
+
+      if (!token) {
+        showError();
+        return;
+      }
+
+      await cargarUrgencia(token);
+    });
+
+    async function cargarUrgencia(token) {
+      try {
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/urgencias?token_aprobacion=eq.${token}&select=*`, {
+          headers: { 'apikey': SUPABASE_ANON, 'Authorization': `Bearer ${SUPABASE_ANON}` }
+        });
+
+        const data = await res.json();
+
+        if (!data.length) { showError(); return; }
+
+        urgencia = data[0];
+
+        // Si ya fue procesada
+        if (urgencia.estado_si !== 'pendiente_si') {
+          showAlreadyProcessed();
+          return;
+        }
+
+        mostrarFormulario();
+
+      } catch (err) {
+        showError();
+      }
+    }
+
+    function mostrarFormulario() {
+      const u = urgencia;
+      document.getElementById('loadingScreen').style.display = 'none';
+      document.getElementById('mainCard').style.display = 'block';
+      document.getElementById('urgNum').textContent = u.numero_urg;
+
+      document.getElementById('cardBody').innerHTML = `
+        <div class="section">
+          <div class="section-title">Datos de la SI que activa la Urgencia</div>
+          <div class="grid-2">
+            <div class="field"><span class="field-label">Fecha Solicitud</span><span class="field-value">${formatDate(u.fecha_solicitud)}</span></div>
+            <div class="field"><span class="field-label">Gerencia</span><span class="field-value">${u.gerencia}</span></div>
+            <div class="field"><span class="field-label">Superintendencia</span><span class="field-value">${u.superintendencia}</span></div>
+            <div class="field"><span class="field-label">Nombre Superintendente(a)</span><span class="field-value">${u.nombre_superintendente}</span></div>
+            <div class="field"><span class="field-label">Centro Costo / WBS</span><span class="field-value mono">${u.centro_costo_wbs}</span></div>
+            <div class="field"><span class="field-label">Solicitante</span><span class="field-value">${u.nombre_solicitante || '—'}</span></div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-title">Datos de la Urgencia</div>
+          <div class="grid-2">
+            <div class="field"><span class="field-label">Proveedor</span><span class="field-value">${u.nombre_proveedor}</span></div>
+            <div class="field"><span class="field-label">Focal Proveedor</span><span class="field-value">${u.focal_proveedor}</span></div>
+            <div class="field"><span class="field-label">Contacto Proveedor</span><span class="field-value">${u.contacto_proveedor}</span></div>
+            <div class="field"><span class="field-label">PO / Ítems</span><span class="field-value mono">${u.po_items}</span></div>
+            <div class="field"><span class="field-label">Código Stock</span><span class="field-value ${u.codigo_stock ? '' : 'empty'}">${u.codigo_stock || 'No aplica'}</span></div>
+            <div class="field"><span class="field-label">N° Reserva</span><span class="field-value ${u.numero_reserva ? '' : 'empty'}">${u.numero_reserva || 'No aplica'}</span></div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-title">Datos para Entrega en el Sitio</div>
+          <div class="grid-2">
+            <div class="field"><span class="field-label">Supervisor MEL 1</span><span class="field-value">${u.nombre_supervisor_mel}</span></div>
+            <div class="field"><span class="field-label">Contacto</span><span class="field-value">${u.contacto_supervisor_mel}</span></div>
+            ${u.nombre_supervisor_mel2 ? `<div class="field"><span class="field-label">Supervisor MEL 2</span><span class="field-value">${u.nombre_supervisor_mel2}</span></div><div class="field"><span class="field-label">Contacto</span><span class="field-value">${u.contacto_supervisor_mel2 || '—'}</span></div>` : ''}
+            <div class="field"><span class="field-label">UP — Punto de Entrega</span><span class="field-value mono">${u.up_punto_entrega}</span></div>
+          </div>
+        </div>
+      `;
+    }
+
+    async function decidir(decision) {
+      const btns = document.querySelectorAll('.btn-aprobar, .btn-rechazar');
+      btns.forEach(b => b.disabled = true);
+
+      try {
+        const payload = {
+          estado_si: decision,
+          estado: decision === 'aprobada' ? 'pendiente_aprobacion' : 'rechazada_si',
+          firma_autoriza: decision === 'aprobada',
+          token_aprobacion: null // Invalidar token después de usar
+        };
+
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/urgencias?id=eq.${urgencia.id}`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': SUPABASE_ANON,
+            'Authorization': `Bearer ${SUPABASE_ANON}`,
+            'Prefer': 'return=representation'
+          },
+          body: JSON.stringify(payload)
+        });
+
+        if (!res.ok) throw new Error('Error al procesar');
+
+        showResult(decision);
+
+      } catch (err) {
+        alert('Hubo un error al procesar su decisión. Por favor intente nuevamente.');
+        btns.forEach(b => b.disabled = false);
+      }
+    }
+
+    function showResult(decision) {
+      document.getElementById('actionsArea').style.display = 'none';
+      document.getElementById('cardBody').style.display = 'none';
+      const resultScreen = document.getElementById('resultScreen');
+      resultScreen.classList.add('visible');
+
+      const statusBadge = document.getElementById('statusBadge');
+
+      if (decision === 'aprobada') {
+        document.getElementById('resultIcon').textContent = '✅';
+        document.getElementById('resultTitle').textContent = 'Solicitud aprobada';
+        document.getElementById('resultMsg').textContent = 'Ha aprobado esta solicitud de urgencia. El Supervisor de Logística BHP ha sido notificado y continuará con el proceso.';
+        statusBadge.textContent = 'Aprobada';
+        statusBadge.className = 'status-badge aprobada';
+      } else {
+        document.getElementById('resultIcon').textContent = '❌';
+        document.getElementById('resultTitle').textContent = 'Solicitud rechazada';
+        document.getElementById('resultMsg').textContent = 'Ha rechazado esta solicitud de urgencia. El solicitante ha sido notificado.';
+        statusBadge.textContent = 'Rechazada';
+        statusBadge.className = 'status-badge rechazada';
+      }
+    }
+
+    function showAlreadyProcessed() {
+      document.getElementById('loadingScreen').style.display = 'none';
+      document.getElementById('mainCard').style.display = 'block';
+      document.getElementById('urgNum').textContent = urgencia.numero_urg;
+
+      const estado = urgencia.estado_si;
+      const statusBadge = document.getElementById('statusBadge');
+
+      document.getElementById('actionsArea').style.display = 'none';
+      document.getElementById('cardBody').style.display = 'none';
+      const resultScreen = document.getElementById('resultScreen');
+      resultScreen.classList.add('visible');
+
+      if (estado === 'aprobada') {
+        document.getElementById('resultIcon').textContent = '✅';
+        document.getElementById('resultTitle').textContent = 'Ya fue aprobada';
+        document.getElementById('resultMsg').textContent = 'Esta solicitud ya fue aprobada anteriormente. No es necesario realizar ninguna acción adicional.';
+        statusBadge.textContent = 'Aprobada';
+        statusBadge.className = 'status-badge aprobada';
+      } else {
+        document.getElementById('resultIcon').textContent = '❌';
+        document.getElementById('resultTitle').textContent = 'Ya fue rechazada';
+        document.getElementById('resultMsg').textContent = 'Esta solicitud ya fue rechazada anteriormente.';
+        statusBadge.textContent = 'Rechazada';
+        statusBadge.className = 'status-badge rechazada';
+      }
+    }
+
+    function showError() {
+      document.getElementById('loadingScreen').style.display = 'none';
+      document.getElementById('errorScreen').style.display = 'block';
+    }
+
+    function formatDate(d) {
+      if (!d) return '—';
+      return new Date(d).toLocaleDateString('es-CL', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    }
+  </script>
+
+</body>
+</html>
