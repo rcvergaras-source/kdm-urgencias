@@ -368,6 +368,7 @@
       white-space: nowrap;
     }
 
+    .status-pill.pendiente_si { background: #F5F0FF; color: #6D28D9; }
     .status-pill.pendiente { background: #FFF0E8; color: var(--bhp-orange); }
     .status-pill.en_correccion { background: #FFFBEB; color: var(--bhp-warning); }
     .status-pill.aprobada { background: #EDFAF3; color: var(--bhp-success); }
@@ -714,8 +715,12 @@
 
       <!-- TABS -->
       <div class="tabs">
-        <div class="tab active" onclick="switchTab('pendiente_aprobacion')" id="tab_pendiente">
-          Pendientes
+        <div class="tab active" onclick="switchTab('pendiente_si')" id="tab_pendiente_si">
+          Pend. aprobación SI
+          <span class="tab-badge" id="badge_pendiente_si">0</span>
+        </div>
+        <div class="tab" onclick="switchTab('pendiente_aprobacion')" id="tab_pendiente">
+          Pendientes validación
           <span class="tab-badge" id="badge_pendiente">0</span>
         </div>
         <div class="tab" onclick="switchTab('en_correccion')" id="tab_correccion">
@@ -777,7 +782,7 @@
     const SUPABASE_ANON = 'sb_publishable_kUxJua1oS2c-YxCyHjhEbg_bItcFg6H';
 
     let currentUser = null;
-    let currentTab = 'pendiente_aprobacion';
+    let currentTab = 'pendiente_si';
     let allUrgencias = [];
     let currentUrgencia = null;
     let pendingAction = null;
@@ -882,18 +887,19 @@
     }
 
     function updateBadges() {
-      const counts = { pendiente_aprobacion: 0, en_correccion: 0, aprobada: 0, rechazada: 0 };
+      const counts = { pendiente_si: 0, pendiente_aprobacion: 0, en_correccion: 0, aprobada: 0, rechazada: 0 };
       allUrgencias.forEach(u => {
         if (counts[u.estado] !== undefined) counts[u.estado]++;
       });
 
+      document.getElementById('badge_pendiente_si').textContent = counts.pendiente_si;
       document.getElementById('badge_pendiente').textContent = counts.pendiente_aprobacion;
       document.getElementById('badge_correccion').textContent = counts.en_correccion;
       document.getElementById('badge_aprobada').textContent = counts.aprobada;
       document.getElementById('badge_rechazada').textContent = counts.rechazada;
 
       // Notification banner
-      const pending = counts.pendiente_aprobacion;
+      const pending = counts.pendiente_aprobacion + counts.pendiente_si;
       const banner = document.getElementById('notifBanner');
       if (pending > 0) {
         banner.classList.remove('hidden');
@@ -935,6 +941,7 @@
     function switchTab(tab) {
       currentTab = tab;
       const tabMap = {
+        pendiente_si: 'tab_pendiente_si',
         pendiente_aprobacion: 'tab_pendiente',
         en_correccion: 'tab_correccion',
         aprobada: 'tab_aprobada',
@@ -1017,7 +1024,14 @@
 
       // Build actions based on status
       const actionsEl = document.getElementById('actionButtons');
-      if (u.estado === 'pendiente_aprobacion' || u.estado === 'en_correccion') {
+      if (u.estado === 'pendiente_si') {
+        // Solo lectura — esperando aprobación del SI
+        document.getElementById('modalActions').innerHTML = `
+          <div style="background:#FFF8F0;border:1px solid #F5C8A8;border-radius:8px;padding:0.85rem 1rem;font-size:0.82rem;color:#7A3010;">
+            ⏳ Esta urgencia está pendiente de aprobación por el/la Superintendente(a) <strong>${u.si_nombre || '—'}</strong>. No es posible realizar acciones hasta que el SI apruebe o rechace.
+          </div>
+        `;
+      } else if (u.estado === 'pendiente_aprobacion' || u.estado === 'en_correccion') {
         actionsEl.innerHTML = `
           <button class="btn-aprobar" onclick="doAction('aprobada')">✓ Aprobar</button>
           <button class="btn-correccion" onclick="doAction('en_correccion')">✎ Solicitar corrección</button>
@@ -1147,10 +1161,12 @@
 
     function statusLabel(s) {
       const labels = {
+        pendiente_si: 'Pend. aprobación SI',
         pendiente_aprobacion: 'Pendiente',
         en_correccion: 'En corrección',
         aprobada: 'Aprobada',
         rechazada: 'Rechazada',
+        rechazada_si: 'Rechazada por SI',
         en_transito_p3: 'En tránsito P3',
         en_transito_cd: 'En tránsito CD',
         cerrada: 'Cerrada'
