@@ -959,9 +959,10 @@
 
       // Reset estado del modal
       pendingAction = null;
-      document.getElementById('commentBox').classList.remove('visible');
-      document.getElementById('commentText').value = '';
-      document.getElementById('commentText').style.borderColor = '';
+      const commentBox = document.getElementById('commentBox');
+      if (commentBox) commentBox.classList.remove('visible');
+      const commentText = document.getElementById('commentText');
+      if (commentText) { commentText.value = ''; commentText.style.borderColor = ''; }
       const btnConf = document.getElementById('btnConfirmar');
       if (btnConf) { btnConf.disabled = false; btnConf.textContent = 'Confirmar'; }
 
@@ -1024,22 +1025,30 @@
 
       // Build actions based on status
       const actionsEl = document.getElementById('actionButtons');
+      const modalActionsEl = document.getElementById('modalActions');
+      const pendingSIMsg = document.getElementById('pendingSIMsg') || (() => {
+        const div = document.createElement('div');
+        div.id = 'pendingSIMsg';
+        modalActionsEl.insertBefore(div, modalActionsEl.firstChild);
+        return div;
+      })();
+
       if (u.estado === 'pendiente_si') {
-        // Solo lectura — esperando aprobación del SI
-        document.getElementById('modalActions').innerHTML = `
-          <div style="background:#FFF8F0;border:1px solid #F5C8A8;border-radius:8px;padding:0.85rem 1rem;font-size:0.82rem;color:#7A3010;">
-            ⏳ Esta urgencia está pendiente de aprobación por el/la Superintendente(a) <strong>${u.si_nombre || '—'}</strong>. No es posible realizar acciones hasta que el SI apruebe o rechace.
-          </div>
-        `;
+        pendingSIMsg.style.display = 'block';
+        pendingSIMsg.innerHTML = `<div style="background:#F5F0FF;border:1px solid #C4B5FD;border-radius:8px;padding:0.85rem 1rem;font-size:0.82rem;color:#6D28D9;margin-bottom:0.75rem;">⏳ Pendiente aprobación del/la Superintendente(a) <strong>${u.si_nombre || '—'}</strong>. Las acciones se habilitarán una vez que el SI apruebe.</div>`;
+        actionsEl.innerHTML = '';
+        modalActionsEl.style.display = 'block';
       } else if (u.estado === 'pendiente_aprobacion' || u.estado === 'en_correccion') {
+        pendingSIMsg.style.display = 'none';
         actionsEl.innerHTML = `
           <button class="btn-aprobar" onclick="doAction('aprobada')">✓ Aprobar</button>
           <button class="btn-correccion" onclick="doAction('en_correccion')">✎ Solicitar corrección</button>
           <button class="btn-rechazar" onclick="doAction('rechazada')">✕ Rechazar</button>
         `;
-        document.getElementById('modalActions').style.display = 'block';
+        modalActionsEl.style.display = 'block';
       } else {
-        document.getElementById('modalActions').style.display = 'none';
+        pendingSIMsg.style.display = 'none';
+        modalActionsEl.style.display = 'none';
       }
 
       document.getElementById('commentBox').classList.remove('visible');
