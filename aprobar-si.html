@@ -192,16 +192,14 @@
     window.addEventListener('load', async () => {
       const params = new URLSearchParams(window.location.search);
       const token = params.get('token');
+      const decision = params.get('decision');
 
-      if (!token) {
-        showError();
-        return;
-      }
+      if (!token) { showError(); return; }
 
-      await cargarUrgencia(token);
+      await cargarUrgencia(token, decision);
     });
 
-    async function cargarUrgencia(token) {
+    async function cargarUrgencia(token, decision) {
       try {
         const res = await fetch(`${SUPABASE_URL}/rest/v1/urgencias?token_aprobacion=eq.${token}&select=*`, {
           headers: { 'apikey': SUPABASE_ANON, 'Authorization': `Bearer ${SUPABASE_ANON}` }
@@ -213,13 +211,44 @@
 
         urgencia = data[0];
 
-        // Si ya fue procesada
         if (urgencia.estado_si !== 'pendiente_si') {
           showAlreadyProcessed();
           return;
         }
 
-        mostrarFormulario();
+        if (decision === 'aprobada' || decision === 'rechazada') {
+          await procesarDecision(decision);
+        } else {
+          mostrarFormulario();
+        }
+
+      } catch (err) {
+        showError();
+      }
+    }
+
+    async function procesarDecision(decision) {
+      try {
+        const payload = {
+          estado_si: decision,
+          estado: decision === 'aprobada' ? 'pendiente_aprobacion' : 'rechazada_si',
+          firma_autoriza: decision === 'aprobada',
+          token_aprobacion: null
+        };
+
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/urgencias?id=eq.${urgencia.id}`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': SUPABASE_ANON,
+            'Authorization': `Bearer ${SUPABASE_ANON}`,
+            'Prefer': 'return=representation'
+          },
+          body: JSON.stringify(payload)
+        });
+
+        if (!res.ok) throw new Error('Error al procesar');
+        showResult(decision);
 
       } catch (err) {
         showError();
@@ -272,34 +301,7 @@
     async function decidir(decision) {
       const btns = document.querySelectorAll('.btn-aprobar, .btn-rechazar');
       btns.forEach(b => b.disabled = true);
-
-      try {
-        const payload = {
-          estado_si: decision,
-          estado: decision === 'aprobada' ? 'pendiente_aprobacion' : 'rechazada_si',
-          firma_autoriza: decision === 'aprobada',
-          token_aprobacion: null // Invalidar token después de usar
-        };
-
-        const res = await fetch(`${SUPABASE_URL}/rest/v1/urgencias?id=eq.${urgencia.id}`, {
-          method: 'PATCH',
-          headers: {
-            'Content-Type': 'application/json',
-            'apikey': SUPABASE_ANON,
-            'Authorization': `Bearer ${SUPABASE_ANON}`,
-            'Prefer': 'return=representation'
-          },
-          body: JSON.stringify(payload)
-        });
-
-        if (!res.ok) throw new Error('Error al procesar');
-
-        showResult(decision);
-
-      } catch (err) {
-        alert('Hubo un error al procesar su decisión. Por favor intente nuevamente.');
-        btns.forEach(b => b.disabled = false);
-      }
+      await procesarDecision(decision);
     }
 
     function showResult(decision) {
