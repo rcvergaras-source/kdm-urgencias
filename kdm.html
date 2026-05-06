@@ -1007,11 +1007,6 @@
                 <button class="btn-historial" onclick="toggleHistorial('${u.id}')">📋 Ver historial de cambios</button>
                 <div id="historialContent" style="display:none;margin-top:0.75rem;"></div>
               </div>
-              ${!isCerradoEntregado ? `` : `
-              <div style="margin-top:1rem;">
-                <button class="btn-historial" onclick="toggleHistorial('${u.id}')">📋 Ver historial de cambios</button>
-                <div id="historialContent" style="display:none;margin-top:0.75rem;"></div>
-              </div>`}
             </div>
           `;
 
@@ -1199,6 +1194,8 @@
         </div>
       `).join('');
     }
+
+    function validarArchivos(input) {
       const errEl = document.getElementById('archivosError');
       const files = Array.from(input.files);
       
