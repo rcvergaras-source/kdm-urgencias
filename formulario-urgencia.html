@@ -968,16 +968,6 @@
         }
       });
 
-      // Checkbox
-      const cb = document.getElementById('firma_autoriza');
-      const errCb = document.getElementById('err_firma_autoriza');
-      if (!cb.checked) {
-        errCb.classList.add('visible');
-        valid = false;
-      } else {
-        errCb.classList.remove('visible');
-      }
-
       return valid;
     }
 
