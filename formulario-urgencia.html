@@ -705,17 +705,22 @@
 
           <!-- FIRMA ELECTRÓNICA -->
           <div class="firma-box" style="margin-top:1rem;">
-            <p>La firma electrónica corresponde a la autorización del/la Superintendente(a) sobre esta solicitud de urgencia.</p>
-            <div class="field">
-              <label for="firma_nombre">Nombre completo del/la Superintendente(a) que autoriza</label>
-              <input type="text" id="firma_nombre" name="firma_nombre" placeholder="Ingrese su nombre completo como firma" required />
-              <span class="field-error" id="err_firma_nombre">Debe ingresar su nombre para autorizar</span>
+            <p>El/la Superintendente(a) recibirá un correo con el detalle de esta solicitud para que apruebe o rechace antes de que avance al proceso logístico.</p>
+            <div class="grid-2">
+              <div class="field">
+                <label for="si_nombre">Nombre completo del/la Superintendente(a)</label>
+                <input type="text" id="si_nombre" name="si_nombre" placeholder="Nombre completo" required />
+                <span class="field-error" id="err_si_nombre">Campo obligatorio</span>
+              </div>
+              <div class="field">
+                <label for="si_correo">Correo electrónico del/la Superintendente(a)</label>
+                <input type="email" id="si_correo" name="si_correo" placeholder="correo@bhp.com" required />
+                <span class="field-error" id="err_si_correo">Campo obligatorio</span>
+              </div>
             </div>
-            <div class="checkbox-row">
-              <input type="checkbox" id="firma_autoriza" name="firma_autoriza" required />
-              <label for="firma_autoriza">Confirmo que autorizo esta solicitud de urgencia y que la información ingresada es correcta y verificable.</label>
+            <div style="margin-top:0.75rem;background:#FFF8F0;border:1px solid #F5C8A8;border-radius:6px;padding:0.75rem 1rem;font-size:0.78rem;color:#7A3010;">
+              📧 Al enviar este formulario, el/la Superintendente(a) recibirá un correo para aprobar o rechazar esta solicitud.
             </div>
-            <span class="field-error" id="err_firma_autoriza" style="margin-top:0.35rem;">Debe confirmar la autorización para continuar</span>
           </div>
         </div>
       </div>
@@ -859,7 +864,7 @@
         </svg>
       </div>
       <h2>Solicitud enviada correctamente</h2>
-      <p>El Supervisor de Logística BHP ha sido notificado. Su número de urgencia es:</p>
+      <p>Se ha enviado un correo a <strong id="successSINombre"></strong> para que apruebe esta solicitud. Su número de urgencia es:</p>
       <div class="success-urg" id="successUrgNum">URG-0001</div>
       <p style="margin-bottom:1.5rem;">Guarde este número para hacer seguimiento de su solicitud.</p>
       <button class="btn-nueva" onclick="resetForm()">Ingresar nueva solicitud</button>
@@ -915,8 +920,8 @@
         document.getElementById('superintendencia').value = u.superintendencia || '';
         document.getElementById('nombre_superintendente').value = u.nombre_superintendente || '';
         document.getElementById('centro_costo_wbs').value = u.centro_costo_wbs || '';
-        document.getElementById('firma_nombre').value = u.firma_nombre || '';
-        document.getElementById('firma_autoriza').checked = u.firma_autoriza || false;
+        document.getElementById('si_nombre').value = u.si_nombre || u.firma_nombre || '';
+        document.getElementById('si_correo').value = u.si_correo || '';
         document.getElementById('nombre_solicitante').value = u.nombre_solicitante || '';
         document.getElementById('correo_solicitante').value = u.correo_solicitante || '';
         document.getElementById('telefono_solicitante').value = u.telefono_solicitante || '';
@@ -941,7 +946,7 @@
 
     const requiredFields = [
       'fecha_solicitud', 'gerencia', 'superintendencia', 'nombre_superintendente',
-      'centro_costo_wbs', 'firma_nombre', 'nombre_solicitante', 'correo_solicitante',
+      'centro_costo_wbs', 'si_nombre', 'si_correo', 'nombre_solicitante', 'correo_solicitante',
       'telefono_solicitante', 'nombre_proveedor', 'focal_proveedor',
       'contacto_proveedor', 'po_items', 'nombre_supervisor_mel',
       'correo_supervisor_mel', 'contacto_supervisor_mel', 'up_punto_entrega'
@@ -1005,8 +1010,12 @@
         superintendencia: document.getElementById('superintendencia').value.trim(),
         nombre_superintendente: document.getElementById('nombre_superintendente').value.trim(),
         centro_costo_wbs: document.getElementById('centro_costo_wbs').value.trim(),
-        firma_nombre: document.getElementById('firma_nombre').value.trim(),
-        firma_autoriza: document.getElementById('firma_autoriza').checked,
+        si_nombre: document.getElementById('si_nombre').value.trim(),
+        si_correo: document.getElementById('si_correo').value.trim(),
+        firma_nombre: document.getElementById('si_nombre').value.trim(),
+        firma_autoriza: false,
+        estado_si: 'pendiente_si',
+        token_aprobacion: crypto.randomUUID(),
         nombre_solicitante: document.getElementById('nombre_solicitante').value.trim(),
         correo_solicitante: document.getElementById('correo_solicitante').value.trim(),
         telefono_solicitante: document.getElementById('telefono_solicitante').value.trim(),
@@ -1066,6 +1075,8 @@
 
         document.getElementById('urgenciaForm').style.display = 'none';
         document.getElementById('successUrgNum').textContent = urgNum;
+        const siNombreEl = document.getElementById('successSINombre');
+        if (siNombreEl) siNombreEl.textContent = document.getElementById('si_nombre').value.trim();
         document.getElementById('successScreen').classList.add('visible');
         window.scrollTo({ top: 0, behavior: 'smooth' });
 
