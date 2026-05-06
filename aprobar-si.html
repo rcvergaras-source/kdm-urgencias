@@ -236,7 +236,7 @@
       document.getElementById('actionsArea').style.display = 'none';
       showResult(decision);
 
-      // PATCH en segundo plano
+      // PATCH en segundo plano con trazabilidad
       fetch(`${SUPABASE_URL}/rest/v1/urgencias?id=eq.${urgencia.id}`, {
         method: 'PATCH',
         headers: {
@@ -249,7 +249,8 @@
           estado_si: decision,
           estado: decision === 'aprobada' ? 'pendiente_aprobacion' : 'rechazada_si',
           firma_autoriza: decision === 'aprobada',
-          token_aprobacion: null
+          token_aprobacion: null,
+          aprobado_por: `SI: ${urgencia.si_nombre} (${urgencia.si_correo}) — ${decision === 'aprobada' ? 'Aprobado' : 'Rechazado'} el ${new Date().toLocaleString('es-CL')}`
         })
       });
     }
