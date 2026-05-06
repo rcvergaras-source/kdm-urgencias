@@ -983,7 +983,10 @@
             <div class="detail-field"><span class="detail-label">Superintendencia</span><span class="detail-value">${u.superintendencia}</span></div>
             <div class="detail-field"><span class="detail-label">Nombre Superintendente(a)</span><span class="detail-value">${u.nombre_superintendente}</span></div>
             <div class="detail-field"><span class="detail-label">Centro de Costo / WBS</span><span class="detail-value mono">${u.centro_costo_wbs}</span></div>
-            <div class="detail-field"><span class="detail-label">Firma / Autorización</span><span class="detail-value">${u.firma_nombre} ${u.firma_autoriza ? '✅' : '❌'}</span></div>
+            <div class="detail-field"><span class="detail-label">Superintendente(a) SI</span><span class="detail-value">${u.si_nombre || '—'}</span></div>
+            <div class="detail-field"><span class="detail-label">Solicitante</span><span class="detail-value">${u.nombre_solicitante || '—'}</span></div>
+            <div class="detail-field"><span class="detail-label">Correo solicitante</span><span class="detail-value">${u.correo_solicitante || '—'}</span></div>
+            <div class="detail-field"><span class="detail-label">Teléfono solicitante</span><span class="detail-value">${u.telefono_solicitante || '—'}</span></div>
           </div>
         </div>
 

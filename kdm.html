@@ -169,13 +169,13 @@
       border-radius: 10px; overflow: hidden; overflow-x: auto;
     }
 
-    table { width: 100%; border-collapse: collapse; min-width: 900px; }
+    table { width: 100%; border-collapse: collapse; min-width: 900px; font-size: 0.78rem; }
 
     thead { background: var(--kdm-dark); }
 
     th {
-      padding: 0.75rem 1rem; text-align: left; font-size: 0.7rem;
-      font-weight: 600; color: rgba(255,255,255,0.8); text-transform: uppercase;
+      padding: 0.55rem 0.85rem; text-align: left; font-size: 0.67rem;
+      font-weight: 600; color: rgba(255,255,255,0.75); text-transform: uppercase;
       letter-spacing: 0.06em; white-space: nowrap;
     }
 
@@ -184,8 +184,11 @@
     .sort-icon { font-size: 0.65rem; opacity: 0.5; margin-left: 0.3rem; }
     th.sort-asc .sort-icon { opacity: 1; }
     th.sort-desc .sort-icon { opacity: 1; }
-      padding: 0.85rem 1rem; font-size: 0.82rem; color: var(--kdm-dark);
+
+    td {
+      padding: 0.55rem 0.85rem; font-size: 0.78rem; color: var(--kdm-dark);
       border-bottom: 1px solid var(--kdm-border); vertical-align: middle;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 160px;
     }
 
     tr:last-child td { border-bottom: none; }
@@ -819,6 +822,10 @@
             <div class="detail-field"><span class="detail-label">Superintendencia</span><span class="detail-value">${u.superintendencia}</span></div>
             <div class="detail-field"><span class="detail-label">Superintendente(a)</span><span class="detail-value">${u.nombre_superintendente}</span></div>
             <div class="detail-field"><span class="detail-label">Centro Costo / WBS</span><span class="detail-value mono">${u.centro_costo_wbs}</span></div>
+            <div class="detail-field"><span class="detail-label">Superintendente(a) SI</span><span class="detail-value">${u.si_nombre || u.nombre_superintendente || '—'}</span></div>
+            <div class="detail-field"><span class="detail-label">Solicitante</span><span class="detail-value">${u.nombre_solicitante || '—'}</span></div>
+            <div class="detail-field"><span class="detail-label">Correo solicitante</span><span class="detail-value">${u.correo_solicitante || '—'}</span></div>
+            <div class="detail-field"><span class="detail-label">Teléfono solicitante</span><span class="detail-value">${u.telefono_solicitante || '—'}</span></div>
           </div>
         </div>
 
@@ -897,7 +904,6 @@
             `;
           } else if (u.estado === 'cerrado_pendiente_retiro') {
             botonesHTML = `
-              <button class="btn-guardar-sap" onclick="guardarSAP()">💾 Guardar registros SAP</button>
               <button class="btn-cerrar-urg" onclick="cerrarEntregado()">🤝 Marcar como entregado a cliente</button>
             `;
           } else if (isCerradoEntregado) {

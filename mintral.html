@@ -739,6 +739,15 @@
 
       document.getElementById('modalBody').innerHTML = `
         <div class="detail-section">
+          <div class="detail-section-title">Solicitante</div>
+          <div class="detail-grid">
+            <div class="detail-field"><span class="detail-label">Nombre</span><span class="detail-value">${u.nombre_solicitante || '—'}</span></div>
+            <div class="detail-field"><span class="detail-label">Correo</span><span class="detail-value">${u.correo_solicitante || '—'}</span></div>
+            <div class="detail-field"><span class="detail-label">Teléfono</span><span class="detail-value">${u.telefono_solicitante || '—'}</span></div>
+            <div class="detail-field"><span class="detail-label">SI Aprobador</span><span class="detail-value">${u.si_nombre || '—'}</span></div>
+          </div>
+        </div>
+        <div class="detail-section">
           <div class="detail-section-title">Datos de la Urgencia</div>
           <div class="detail-grid">
             <div class="detail-field"><span class="detail-label">Proveedor</span><span class="detail-value">${u.nombre_proveedor}</span></div>
