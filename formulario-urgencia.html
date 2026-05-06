@@ -1052,7 +1052,7 @@
               'Authorization': `Bearer ${SUPABASE_ANON}`,
               'Prefer': 'return=representation'
             },
-            body: JSON.stringify({ ...payload, numero_urg: 'PENDING' })
+            body: JSON.stringify({ ...payload })
           });
 
           if (!res.ok) {
