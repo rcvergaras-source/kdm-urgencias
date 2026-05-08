@@ -472,11 +472,11 @@ document.getElementById('urgForm').addEventListener('submit', async (e) => {
     document.getElementById('urgForm').style.display = 'none';
     document.getElementById('successScreen').classList.add('visible');
 
-    await fetch(`${SUPABASE_URL}/functions/v1/send-email`, {
+    fetch(`${SUPABASE_URL}/functions/v1/send-email`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPABASE_KEY}` },
       body: JSON.stringify({ urgencia_id: rec.id, tipo: 'sobredimension', evento: 'nueva_solicitud' })
-    });
+    }).catch(e => console.warn('Notificación de correo no enviada:', e));
   } catch(err) {
     console.error(err);
     alert('Error al enviar: ' + (err.message || 'Intente nuevamente'));
