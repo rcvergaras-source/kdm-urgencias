@@ -7,6 +7,7 @@ const SUPA_SERVICE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 const KDM_EMAIL = 'rvergara@kdmindustrial.cl'
 const BHP_SUPER_EMAIL = 'supervisorbhpa@kdmindustrial.cl'
 const FROM = 'Urgencias MEL <urgencias@urgenciasmel.com>'
+const SITE_URL = 'https://kdm-urgencias.vercel.app'
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
@@ -107,13 +108,23 @@ Deno.serve(async (req) => {
       `
 
       // Email al Superintendente para aprobación
-      if (nombreSuperEmail) {
+      if (nombreSuperEmail && u.token_aprobacion) {
+        const linkAprobar = `${SITE_URL}/aprobar-si?token=${u.token_aprobacion}&decision=aprobada`
+        const linkRechazar = `${SITE_URL}/aprobar-si?token=${u.token_aprobacion}&decision=rechazada`
+        const linkVer = `${SITE_URL}/aprobar-si?token=${u.token_aprobacion}`
+        const botonesAprobacion = `
+          <div style="margin:24px 0;text-align:center;">
+            <a href="${linkAprobar}" style="display:inline-block;background:#2D7D46;color:#fff;text-decoration:none;padding:12px 28px;border-radius:8px;font-weight:600;font-size:15px;margin-right:12px;">✓ Aprobar solicitud</a>
+            <a href="${linkRechazar}" style="display:inline-block;background:#fff;color:#C0392B;text-decoration:none;padding:11px 28px;border-radius:8px;font-weight:600;font-size:15px;border:1.5px solid #F5C6C6;">✕ Rechazar solicitud</a>
+          </div>
+          <p style="text-align:center;font-size:12px;color:#999;">O haz clic aquí para <a href="${linkVer}" style="color:#E05E1B;">ver el detalle completo</a> antes de decidir.</p>
+        `
         const html = templateBase(`
           <h2 style="color:#E05E1B;font-size:18px;margin:0 0 8px;">Nueva Solicitud de Urgencia — ${tipoLabel}</h2>
           <p style="color:#555;font-size:14px;">Estimado/a <strong>${u.firma_nombre || u.nombre_superintendente || ''}</strong>,</p>
           <p style="color:#555;font-size:14px;">Se ha registrado la solicitud <strong>${num}</strong> que requiere su aprobación para continuar con el proceso logístico.</p>
           ${tablaDetalle}
-          <p style="color:#555;font-size:14px;">Por favor revise y coordine la aprobación a la brevedad posible.</p>
+          ${botonesAprobacion}
         `)
         resultados.push(await enviarCorreo(nombreSuperEmail, `[Urgencia ${num}] Nueva solicitud de ${tipoLabel} requiere su aprobación`, html))
       }
