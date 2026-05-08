@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Analista KDM — Urgencias Sobredimensión</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bhp-orange: #E05E1B; --bhp-dark: #1A1A1A; --bhp-gray: #6B6B6B;
+  --bhp-light: #F5F4F1; --bhp-white: #FFFFFF; --bhp-border: #E0DDD8;
+  --bhp-success: #2D7D46; --bhp-error: #C0392B; --kdm-green: #1D6338;
+}
+body { font-family: 'DM Sans', sans-serif; background: var(--bhp-light); color: var(--bhp-dark); min-height: 100vh; }
+
+.login-screen { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 1.5rem; }
+.login-card { background: var(--bhp-white); border: 1px solid var(--bhp-border); border-radius: 12px; padding: 2.5rem 2rem; width: 100%; max-width: 400px; box-shadow: 0 4px 24px rgba(0,0,0,0.07); }
+.login-header { text-align: center; margin-bottom: 2rem; }
+.login-logo { display: flex; align-items: center; justify-content: center; gap: 0.75rem; margin-bottom: 1.25rem; }
+.logo-escondida { font-weight: 600; font-size: 1rem; color: var(--bhp-dark); }
+.logo-sep { width: 1px; height: 24px; background: var(--bhp-border); }
+.logo-bhp { font-weight: 600; font-size: 1rem; color: var(--bhp-orange); letter-spacing: 0.05em; }
+.login-role-badge { display: inline-block; background: #E8F5EE; color: var(--kdm-green); font-size: 0.7rem; font-weight: 600; padding: 0.2rem 0.7rem; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 0.75rem; border: 1px solid #A8D8B8; }
+.login-header h2 { font-size: 1.1rem; font-weight: 600; color: var(--bhp-dark); margin-bottom: 0.3rem; }
+.login-header p { font-size: 0.82rem; color: var(--bhp-gray); }
+.field { display: flex; flex-direction: column; gap: 0.35rem; margin-bottom: 1rem; }
+label { font-size: 0.78rem; font-weight: 500; color: var(--bhp-dark); }
+input[type="email"], input[type="password"], input[type="text"], textarea {
+  width: 100%; padding: 0.65rem 0.85rem; border: 1.5px solid var(--bhp-border); border-radius: 6px;
+  font-family: 'DM Sans', sans-serif; font-size: 0.875rem; color: var(--bhp-dark); background: var(--bhp-white); transition: border-color 0.15s;
+}
+input:focus, textarea:focus { outline: none; border-color: var(--kdm-green); box-shadow: 0 0 0 3px rgba(29,99,56,0.1); }
+textarea { resize: vertical; min-height: 80px; }
+.btn-primary { width: 100%; background: var(--kdm-green); color: white; border: none; border-radius: 8px; padding: 0.85rem; font-family: 'DM Sans', sans-serif; font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: background 0.15s; margin-top: 0.5rem; }
+.btn-primary:hover { background: #155228; }
+.login-error { background: #FEE; border: 1px solid #F5C6C6; border-radius: 6px; padding: 0.65rem 0.85rem; font-size: 0.8rem; color: var(--bhp-error); margin-bottom: 1rem; display: none; }
+.login-error.visible { display: block; }
+
+.app { display: none; }
+.app.visible { display: block; }
+
+.header { background: var(--bhp-white); border-bottom: 3px solid var(--kdm-green); padding: 0.9rem 1.5rem; display: flex; align-items: center; gap: 1rem; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
+.header-logo { display: flex; align-items: center; gap: 0.6rem; }
+.header-divider { width: 1px; height: 24px; background: var(--bhp-border); }
+.header-section { font-size: 0.78rem; font-weight: 500; color: var(--bhp-gray); text-transform: uppercase; letter-spacing: 0.06em; }
+.header-right { margin-left: auto; display: flex; align-items: center; gap: 1rem; }
+.role-pill { background: #E8F5EE; color: var(--kdm-green); font-size: 0.7rem; font-weight: 600; padding: 0.25rem 0.75rem; border-radius: 20px; border: 1px solid #A8D8B8; text-transform: uppercase; }
+.btn-logout { background: transparent; border: 1px solid var(--bhp-border); border-radius: 6px; padding: 0.35rem 0.75rem; font-family: 'DM Sans', sans-serif; font-size: 0.75rem; color: var(--bhp-gray); cursor: pointer; transition: all 0.15s; }
+.btn-logout:hover { border-color: var(--bhp-error); color: var(--bhp-error); }
+
+.container { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem; }
+.section-title-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem; }
+.section-title-bar h2 { font-size: 1.1rem; font-weight: 600; }
+.count-badge { background: var(--kdm-green); color: white; font-family: 'DM Mono', monospace; font-size: 0.75rem; padding: 0.2rem 0.6rem; border-radius: 4px; }
+
+.urg-card { background: var(--bhp-white); border: 1px solid var(--bhp-border); border-radius: 10px; margin-bottom: 1rem; overflow: hidden; }
+.urg-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.08); }
+.urg-card-header { padding: 1rem 1.25rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; cursor: pointer; flex-wrap: wrap; }
+.urg-card-header:hover { background: #FAFAF8; }
+.urg-id { font-family: 'DM Mono', monospace; font-size: 0.9rem; font-weight: 500; color: var(--kdm-green); }
+.urg-meta { font-size: 0.78rem; color: var(--bhp-gray); margin-top: 0.2rem; }
+.urg-badges { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+.status-pill { font-size: 0.65rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; padding: 0.25rem 0.65rem; border-radius: 20px; }
+.status-pill.despachado_ferrovial { background: #E8F5EE; color: var(--kdm-green); border: 1px solid #A8D8B8; }
+.status-pill.completado { background: #E8F5EE; color: var(--kdm-green); border: 1px solid #A8D8B8; }
+.escolta-pill { background: #FFF8E8; color: #92610A; border: 1px solid #F5DFA0; font-size: 0.65rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; padding: 0.25rem 0.65rem; border-radius: 20px; }
+
+.urg-card-body { display: none; border-top: 1px solid var(--bhp-border); padding: 1.25rem; }
+.urg-card-body.open { display: block; }
+
+.ferrovial-box { background: #1A1A1A; border-radius: 8px; padding: 1rem 1.25rem; margin-bottom: 1.25rem; }
+.ferrovial-box-title { font-size: 0.65rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #FFD100; margin-bottom: 0.75rem; }
+.ferrovial-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem; }
+.ferrovial-item label { font-size: 0.62rem; color: rgba(255,255,255,0.45); text-transform: uppercase; letter-spacing: 0.08em; display: block; margin-bottom: 0.15rem; }
+.ferrovial-item span { font-size: 0.82rem; color: rgba(255,255,255,0.9); font-family: 'DM Mono', monospace; }
+.ferrovial-full { grid-column: 1 / -1; }
+
+.traz-box { background: #F8F8F6; border: 1px solid var(--bhp-border); border-left: 3px solid var(--kdm-green); border-radius: 6px; padding: 0.65rem 1rem; margin-bottom: 1.25rem; font-size: 0.8rem; color: var(--bhp-gray); }
+.traz-box strong { color: var(--kdm-green); font-family: 'DM Mono', monospace; }
+
+.data-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.85rem; margin-bottom: 1.25rem; }
+.data-item label { font-size: 0.65rem; color: var(--bhp-gray); text-transform: uppercase; letter-spacing: 0.08em; display: block; margin-bottom: 0.2rem; }
+.data-item span { font-size: 0.85rem; }
+.full { grid-column: 1 / -1; }
+
+/* ALERTA: entrega directa */
+.alerta-directa { background: #FFF3ED; border: 2px solid var(--bhp-orange); border-radius: 8px; padding: 1rem 1.25rem; margin-bottom: 1.25rem; font-size: 0.85rem; color: #7A3010; }
+.alerta-directa strong { display: block; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--bhp-orange); margin-bottom: 0.35rem; }
+
+.action-area { border-top: 1px solid var(--bhp-border); padding-top: 1.25rem; }
+.action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+.action-grid .field { margin: 0; }
+.action-grid label { font-size: 0.75rem; font-weight: 500; display: block; margin-bottom: 0.4rem; }
+
+/* Upload respaldo */
+.upload-respaldo { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem; flex-wrap: wrap; }
+.upload-btn-green { background: var(--kdm-green); color: white; border: none; border-radius: 6px; padding: 0.55rem 1rem; font-family: 'DM Sans', sans-serif; font-size: 0.82rem; font-weight: 600; cursor: pointer; transition: background 0.15s; }
+.upload-btn-green:hover { background: #155228; }
+.file-name { font-size: 0.78rem; color: var(--bhp-gray); }
+
+.btn-complete { background: var(--kdm-green); color: white; border: none; border-radius: 6px; padding: 0.65rem 1.25rem; font-family: 'DM Sans', sans-serif; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: background 0.15s; }
+.btn-complete:hover { background: #155228; }
+
+.empty-state { text-align: center; padding: 4rem 2rem; }
+.empty-state p { color: var(--bhp-gray); font-size: 0.9rem; }
+.loading-state { text-align: center; padding: 3rem; color: var(--bhp-gray); }
+
+@media (max-width: 600px) {
+  .data-grid, .ferrovial-grid, .action-grid { grid-template-columns: 1fr; }
+  .full, .ferrovial-full { grid-column: span 1; }
+}
+</style>
+</head>
+<body>
+
+<div class="login-screen" id="loginScreen">
+  <div class="login-card">
+    <div class="login-header">
+      <div class="login-logo">
+        <span class="logo-escondida">ESCONDIDA</span>
+        <div class="logo-sep"></div>
+        <span class="logo-bhp">BHP</span>
+      </div>
+      <div class="login-role-badge">Analista KDM · Sobredimensión</div>
+      <h2>Acceso al Panel</h2>
+      <p>Ingrese sus credenciales para continuar</p>
+    </div>
+    <div class="login-error" id="loginError">Credenciales incorrectas.</div>
+    <div class="field"><label>Correo electrónico</label><input type="email" id="loginEmail" placeholder="correo@kdmindustrial.cl" /></div>
+    <div class="field"><label>Contraseña</label><input type="password" id="loginPass" placeholder="••••••••" /></div>
+    <button class="btn-primary" onclick="doLogin()">Ingresar</button>
+  </div>
+</div>
+
+<div class="app" id="appScreen">
+  <header class="header">
+    <div class="header-logo">
+      <span style="font-weight:600;font-size:1rem;color:#1A1A1A;">ESCONDIDA</span>
+      <div class="logo-sep"></div>
+      <span style="font-weight:600;font-size:1rem;color:#E05E1B;letter-spacing:0.05em;">BHP</span>
+    </div>
+    <div class="header-divider"></div>
+    <span class="header-section">KDM · Rebaja Sobredimensión</span>
+    <div class="header-right">
+      <span class="role-pill">Analista KDM</span>
+      <button class="btn-logout" onclick="doLogout()">Cerrar sesión</button>
+    </div>
+  </header>
+
+  <div class="container">
+    <div class="section-title-bar">
+      <h2>Urgencias Despachadas por Ferrovial</h2>
+      <span class="count-badge" id="totalCount">0 registros</span>
+    </div>
+    <div id="loadingState" class="loading-state">Cargando urgencias...</div>
+    <div id="listaUrgencias"></div>
+  </div>
+</div>
+
+<script>
+const SUPABASE_URL = 'https://dnsijobpjnirbfrlkwfq.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_kUxJua1oS2c-YxCyHjhEbg_bItcFg6H';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+const VALID_USERS = {
+  'analista@kdmindustrial.cl': 'kdm2024kdm',
+  'supervisorbhpa@kdmindustrial.cl': 'kdm2024sup',
+  'jarayaa@kdmindustrial.cl': 'kdm2024sup'
+};
+
+function doLogin() {
+  const email = document.getElementById('loginEmail').value.trim();
+  const pass  = document.getElementById('loginPass').value;
+  if (VALID_USERS[email] === pass) {
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('appScreen').classList.add('visible');
+    loadUrgencias();
+  } else {
+    document.getElementById('loginError').classList.add('visible');
+  }
+}
+document.getElementById('loginPass').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+function doLogout() { document.getElementById('loginScreen').style.display = 'flex'; document.getElementById('appScreen').classList.remove('visible'); }
+
+async function loadUrgencias() {
+  const { data } = await sb.from('urgencias').select('*')
+    .eq('tipo', 'sobredimension')
+    .in('estado', ['despachado_ferrovial', 'completado'])
+    .order('created_at', { ascending: false });
+
+  document.getElementById('loadingState').style.display = 'none';
+  const lista = document.getElementById('listaUrgencias');
+  lista.innerHTML = '';
+
+  if (!data?.length) {
+    lista.innerHTML = `<div class="empty-state"><p>📭 No hay urgencias despachadas por Ferrovial aún.</p></div>`;
+    return;
+  }
+  document.getElementById('totalCount').textContent = data.length + ' registro(s)';
+  data.forEach(u => renderCard(u, lista));
+}
+
+function renderCard(u, container) {
+  const urgId = 'SOBRED-' + String(u.id).padStart(4, '0');
+  const fecha  = new Date(u.created_at).toLocaleString('es-CL');
+  const escoltaBadge = u.requiere_escolta === 'si' ? `<span class="escolta-pill">🚨 Escolta</span>` : '';
+  const estadoLabel  = u.estado === 'completado' ? 'Rebaja completada' : 'Despachado — pendiente rebaja';
+
+  const ferrovialInfo = `
+    <div class="ferrovial-box">
+      <div class="ferrovial-box-title">🚛 Datos Ferrovial · OST</div>
+      <div class="ferrovial-grid">
+        <div class="ferrovial-item"><label>N° OST</label><span>${u.ost_numero || '—'}</span></div>
+        <div class="ferrovial-item"><label>N° OM</label><span>${u.ost_om || '—'}</span></div>
+        <div class="ferrovial-item"><label>N° Solicitud Ferrovial</label><span>${u.ost_solicitud || '—'}</span></div>
+        <div class="ferrovial-item"><label>Fecha Salida</label><span>${u.ost_fecha_salida || '—'}</span></div>
+        <div class="ferrovial-item"><label>Fecha Llegada</label><span>${u.ost_fecha_llegada || '—'}</span></div>
+        <div class="ferrovial-item"><label>Tramo</label><span>${u.ost_tramo || '—'}</span></div>
+        <div class="ferrovial-item"><label>Tipo Equipo</label><span>${u.ost_equipo || '—'}</span></div>
+        <div class="ferrovial-item"><label>Peso Total</label><span>${u.ost_peso || '—'} TON</span></div>
+        <div class="ferrovial-item"><label>Conductor Titular</label><span>${u.ost_conductor1 || '—'}</span></div>
+        ${u.ost_conductor2 ? `<div class="ferrovial-item ferrovial-full"><label>Conductor Adicional</label><span>${u.ost_conductor2}</span></div>` : ''}
+        ${u.ost_obs ? `<div class="ferrovial-item ferrovial-full"><label>Observaciones Ferrovial</label><span style="color:rgba(255,255,255,0.7);font-family:'DM Sans',sans-serif;font-size:0.82rem;">${u.ost_obs}</span></div>` : ''}
+      </div>
+    </div>
+    <div class="traz-box">
+      🔗 Trazabilidad: <strong>${u.ost_trazabilidad || urgId + ' → OST ' + (u.ost_numero || '—')}</strong>
+    </div>`;
+
+  const accionesHTML = u.estado !== 'completado' ? `
+    <div class="action-area">
+      <div class="alerta-directa">
+        <strong>⚡ Entrega directa a cliente — sin paso por P3</strong>
+        Ferrovial entrega directamente al área solicitante. KDM solo debe realizar la rebaja sistémica y cargar el archivo de respaldo.
+      </div>
+      <div class="action-grid">
+        <div class="field">
+          <label>N° Movimiento SAP 261</label>
+          <input type="text" id="sap-${u.id}" placeholder="Ej: 4900012345" />
+        </div>
+        <div class="field">
+          <label>N° Guía de Despacho</label>
+          <input type="text" id="guia-${u.id}" placeholder="Guía del proveedor" />
+        </div>
+      </div>
+      <div class="upload-respaldo">
+        <input type="file" id="respaldo-${u.id}" accept=".pdf,image/*" style="display:none" onchange="setFileName(${u.id})" />
+        <button class="upload-btn-green" onclick="document.getElementById('respaldo-${u.id}').click()">📎 Cargar archivo respaldo</button>
+        <span class="file-name" id="fileName-${u.id}">Sin archivo seleccionado</span>
+      </div>
+      <button class="btn-complete" onclick="completar(${u.id})">✓ Confirmar Rebaja en Sistema</button>
+    </div>` :
+    `<div style="background:#E8F5EE;border:1px solid #A8D8B8;border-radius:8px;padding:1rem;font-size:0.85rem;color:#1D6338;margin-top:0.5rem;">
+      ✓ <strong>Rebaja completada</strong> · SAP 261: ${u.sap_mov261 || '—'} · Guía: ${u.guia_despacho || '—'}
+    </div>`;
+
+  const div = document.createElement('div');
+  div.className = 'urg-card';
+  div.innerHTML = `
+    <div class="urg-card-header" onclick="this.nextElementSibling.classList.toggle('open')">
+      <div>
+        <div class="urg-id">${urgId}</div>
+        <div class="urg-meta">${u.gerencia || '—'} · ${u.nombre_super || '—'} · ${fecha}</div>
+      </div>
+      <div class="urg-badges">${escoltaBadge}<span class="status-pill ${u.estado}">${estadoLabel}</span></div>
+    </div>
+    <div class="urg-card-body">
+      ${ferrovialInfo}
+      <div class="data-grid">
+        <div class="data-item"><label>Proveedor</label><span>${u.proveedor || '—'}</span></div>
+        <div class="data-item"><label>OC / Ítems</label><span>${u.po_items || '—'}</span></div>
+        <div class="data-item"><label>Supervisor MEL</label><span>${u.supervisor_mel || '—'}</span></div>
+        <div class="data-item"><label>UP Entrega</label><span>${u.up_entrega || '—'}</span></div>
+        <div class="data-item"><label>Contacto MEL</label><span>${u.contacto_mel || '—'}</span></div>
+        <div class="data-item"><label>Fecha Solicitud</label><span>${u.fecha_solicitud || '—'}</span></div>
+        ${u.descripcion ? `<div class="data-item full"><label>Descripción Carga</label><span>${u.descripcion}</span></div>` : ''}
+      </div>
+      ${accionesHTML}
+    </div>`;
+  container.appendChild(div);
+}
+
+function setFileName(id) {
+  const f = document.getElementById('respaldo-' + id).files[0];
+  document.getElementById('fileName-' + id).textContent = f ? f.name : 'Sin archivo seleccionado';
+}
+
+async function completar(id) {
+  const sap  = document.getElementById('sap-'  + id)?.value?.trim() || '';
+  const guia = document.getElementById('guia-' + id)?.value?.trim() || '';
+  if (!sap) { alert('Ingrese el N° de Movimiento SAP 261 antes de confirmar.'); return; }
+
+  const { error } = await sb.from('urgencias').update({
+    estado: 'completado',
+    sap_mov261:       sap,
+    guia_despacho:    guia,
+    kdm_completado_at: new Date().toISOString()
+  }).eq('id', id);
+
+  if (!error) {
+    await fetch(`${SUPABASE_URL}/functions/v1/send-email`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPABASE_KEY}` },
+      body: JSON.stringify({ urgencia_id: id, tipo: 'sobredimension', evento: 'completado' })
+    });
+    loadUrgencias();
+  } else {
+    alert('Error: ' + error.message);
+  }
+}
+</script>
+</body>
+</html>

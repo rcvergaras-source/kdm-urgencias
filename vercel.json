@@ -1,10 +1,16 @@
 {
   "rewrites": [
-    { "source": "/", "destination": "/formulario-urgencia.html" },
-    { "source": "/formulario", "destination": "/formulario-urgencia.html" },
-    { "source": "/supervisor", "destination": "/supervisor.html" },
-    { "source": "/mintral", "destination": "/mintral.html" },
-    { "source": "/kdm", "destination": "/kdm.html" },
-    { "source": "/aprobar-si", "destination": "/aprobar-si.html" }
+    { "source": "/",                    "destination": "/index.html" },
+    { "source": "/carga-general",       "destination": "/formulario-urgencia.html" },
+    { "source": "/sobredimension",      "destination": "/sobredimension.html" },
+
+    { "source": "/supervisor",          "destination": "/supervisor.html" },
+    { "source": "/mintral",             "destination": "/mintral.html" },
+    { "source": "/kdm",                 "destination": "/kdm.html" },
+    { "source": "/aprobar-si",          "destination": "/aprobar-si.html" },
+
+    { "source": "/sobred-supervisor",   "destination": "/sobred-supervisor.html" },
+    { "source": "/sobred-ferrovial",    "destination": "/sobred-ferrovial.html" },
+    { "source": "/sobred-kdm",          "destination": "/sobred-kdm.html" }
   ]
 }

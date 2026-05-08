@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Ferrovial — Urgencias Sobredimensión</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --fv-yellow: #FFD100;
+  --fv-yellow-dark: #E6BC00;
+  --fv-black: #1A1A1A;
+  --fv-dark2: #2C2C2C;
+  --fv-gray: #6B6B6B;
+  --fv-light: #F7F6F2;
+  --fv-white: #FFFFFF;
+  --fv-border: #E0DDD8;
+  --fv-success: #2D7D46;
+  --fv-error: #C0392B;
+}
+body { font-family: 'DM Sans', sans-serif; background: var(--fv-light); color: var(--fv-black); min-height: 100vh; }
+
+/* LOGIN */
+.login-screen { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 1.5rem; background: var(--fv-black); }
+.login-card { background: var(--fv-white); border-radius: 14px; padding: 2.5rem 2rem; width: 100%; max-width: 400px; box-shadow: 0 8px 40px rgba(0,0,0,0.4); }
+.login-header { text-align: center; margin-bottom: 2rem; }
+.fv-logo-box { background: var(--fv-yellow); border-radius: 10px; padding: 0.6rem 1.25rem; display: inline-flex; align-items: center; gap: 0.5rem; margin-bottom: 1.25rem; }
+.fv-logo-text { font-weight: 700; font-size: 1.1rem; color: var(--fv-black); letter-spacing: 0.05em; }
+.login-role-badge { display: inline-block; background: #FFFBE0; color: #8A6E00; font-size: 0.7rem; font-weight: 600; padding: 0.2rem 0.7rem; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 0.75rem; border: 1px solid #F0D840; }
+.login-header h2 { font-size: 1.1rem; font-weight: 600; color: var(--fv-black); margin-bottom: 0.3rem; }
+.login-header p { font-size: 0.82rem; color: var(--fv-gray); }
+.field { display: flex; flex-direction: column; gap: 0.35rem; margin-bottom: 1rem; }
+label { font-size: 0.78rem; font-weight: 500; color: var(--fv-black); }
+input[type="email"], input[type="password"], input[type="text"], input[type="date"], input[type="number"], textarea {
+  width: 100%; padding: 0.65rem 0.85rem; border: 1.5px solid var(--fv-border); border-radius: 6px;
+  font-family: 'DM Sans', sans-serif; font-size: 0.875rem; color: var(--fv-black); background: var(--fv-white); transition: border-color 0.15s;
+}
+input:focus, textarea:focus { outline: none; border-color: var(--fv-yellow-dark); box-shadow: 0 0 0 3px rgba(255,209,0,0.2); }
+textarea { resize: vertical; min-height: 80px; }
+.btn-primary { width: 100%; background: var(--fv-yellow); color: var(--fv-black); border: none; border-radius: 8px; padding: 0.85rem; font-family: 'DM Sans', sans-serif; font-size: 0.9rem; font-weight: 700; cursor: pointer; transition: background 0.15s; margin-top: 0.5rem; }
+.btn-primary:hover { background: var(--fv-yellow-dark); }
+.login-error { background: #FEE; border: 1px solid #F5C6C6; border-radius: 6px; padding: 0.65rem 0.85rem; font-size: 0.8rem; color: var(--fv-error); margin-bottom: 1rem; display: none; }
+.login-error.visible { display: block; }
+
+/* APP */
+.app { display: none; }
+.app.visible { display: block; }
+
+.header { background: var(--fv-black); padding: 0.9rem 1.5rem; display: flex; align-items: center; gap: 1rem; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 12px rgba(0,0,0,0.3); }
+.fv-logo-sm { background: var(--fv-yellow); border-radius: 6px; padding: 0.3rem 0.75rem; font-weight: 700; font-size: 0.85rem; color: var(--fv-black); letter-spacing: 0.05em; }
+.header-divider { width: 1px; height: 24px; background: rgba(255,255,255,0.15); }
+.header-section { font-size: 0.78rem; font-weight: 500; color: rgba(255,255,255,0.6); text-transform: uppercase; letter-spacing: 0.06em; }
+.header-right { margin-left: auto; display: flex; align-items: center; gap: 1rem; }
+.role-pill { background: rgba(255,209,0,0.15); color: var(--fv-yellow); font-size: 0.7rem; font-weight: 600; padding: 0.25rem 0.75rem; border-radius: 20px; border: 1px solid rgba(255,209,0,0.3); text-transform: uppercase; letter-spacing: 0.05em; }
+.btn-logout { background: transparent; border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; padding: 0.35rem 0.75rem; font-family: 'DM Sans', sans-serif; font-size: 0.75rem; color: rgba(255,255,255,0.6); cursor: pointer; transition: all 0.15s; }
+.btn-logout:hover { border-color: var(--fv-error); color: #F08080; }
+
+.notif-banner { background: var(--fv-yellow); color: var(--fv-black); padding: 0.75rem 1.5rem; display: flex; align-items: center; gap: 0.75rem; font-size: 0.85rem; font-weight: 600; }
+.notif-banner.hidden { display: none; }
+.notif-dot { width: 28px; height: 28px; background: var(--fv-black); color: var(--fv-yellow); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 700; flex-shrink: 0; }
+
+.container { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem; }
+.section-title-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 0.75rem; }
+.section-title-bar h2 { font-size: 1.1rem; font-weight: 600; }
+.count-badge { background: var(--fv-black); color: var(--fv-yellow); font-family: 'DM Mono', monospace; font-size: 0.75rem; padding: 0.2rem 0.6rem; border-radius: 4px; }
+
+/* URGENCIA CARD */
+.urg-card { background: var(--fv-white); border: 1px solid var(--fv-border); border-radius: 10px; margin-bottom: 1rem; overflow: hidden; transition: box-shadow 0.15s; }
+.urg-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.08); }
+.urg-card-header { padding: 1rem 1.25rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; cursor: pointer; flex-wrap: wrap; }
+.urg-card-header:hover { background: #FAFAF8; }
+.urg-id { font-family: 'DM Mono', monospace; font-size: 0.9rem; font-weight: 500; color: var(--fv-black); }
+.urg-meta { font-size: 0.78rem; color: var(--fv-gray); margin-top: 0.2rem; }
+.urg-badges { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+.status-pill { font-size: 0.65rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; padding: 0.25rem 0.65rem; border-radius: 20px; }
+.status-pill.aprobado_supervisor { background: #FFFBE0; color: #8A6E00; border: 1px solid #F0D840; }
+.status-pill.despachado_ferrovial { background: #E8F5EE; color: #1D6338; border: 1px solid #A8D8B8; }
+.escolta-pill { background: #FFF8E8; color: #92610A; border: 1px solid #F5DFA0; font-size: 0.65rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; padding: 0.25rem 0.65rem; border-radius: 20px; }
+
+.urg-card-body { display: none; border-top: 1px solid var(--fv-border); padding: 1.25rem; }
+.urg-card-body.open { display: block; }
+
+/* INFO URGENCIA */
+.data-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.85rem; margin-bottom: 1.25rem; }
+.data-item label { font-size: 0.65rem; color: var(--fv-gray); text-transform: uppercase; letter-spacing: 0.08em; display: block; margin-bottom: 0.2rem; }
+.data-item span { font-size: 0.85rem; color: var(--fv-black); }
+.full { grid-column: 1 / -1; }
+
+.medidas-box { background: #FFFBE0; border: 1px solid #F0D840; border-radius: 6px; padding: 0.85rem 1rem; margin-bottom: 1.25rem; font-size: 0.85rem; color: #5A4A00; }
+
+/* OST UPLOAD SECTION */
+.ost-section { border: 2px dashed var(--fv-border); border-radius: 10px; padding: 1.5rem; margin-bottom: 1.25rem; transition: border-color 0.2s; }
+.ost-section.has-data { border-style: solid; border-color: var(--fv-yellow-dark); background: #FFFDF0; }
+.ost-title { font-size: 0.78rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--fv-black); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; }
+.ost-badge { background: var(--fv-yellow); color: var(--fv-black); font-size: 0.65rem; padding: 0.15rem 0.5rem; border-radius: 3px; font-weight: 700; }
+
+.upload-area { display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem; flex-wrap: wrap; }
+.upload-btn { background: var(--fv-black); color: var(--fv-yellow); border: none; border-radius: 6px; padding: 0.6rem 1.1rem; font-family: 'DM Sans', sans-serif; font-size: 0.82rem; font-weight: 600; cursor: pointer; transition: background 0.15s; white-space: nowrap; }
+.upload-btn:hover { background: var(--fv-dark2); }
+.upload-hint { font-size: 0.78rem; color: var(--fv-gray); }
+.parsing-status { font-size: 0.78rem; color: var(--fv-gray); padding: 0.5rem 0.75rem; background: #F8F8F6; border-radius: 6px; display: none; }
+.parsing-status.visible { display: block; }
+.parsing-status.success { background: #E8F5EE; color: #1D6338; }
+.parsing-status.error { background: #FEE; color: var(--fv-error); }
+
+/* TRAZABILIDAD */
+.trazabilidad-box { background: var(--fv-black); border-radius: 8px; padding: 0.85rem 1rem; margin-bottom: 1.25rem; display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
+.traz-label { font-size: 0.7rem; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 0.08em; }
+.traz-link { display: flex; align-items: center; gap: 0.5rem; }
+.traz-id { font-family: 'DM Mono', monospace; font-size: 0.85rem; font-weight: 500; color: var(--fv-yellow); }
+.traz-arrow { color: rgba(255,255,255,0.3); font-size: 0.9rem; }
+.traz-ost { font-family: 'DM Mono', monospace; font-size: 0.85rem; color: rgba(255,255,255,0.8); }
+
+/* OST FIELDS */
+.ost-fields { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; }
+.ost-fields .field { margin: 0; }
+.ost-fields .span-2 { grid-column: span 2; }
+.field-readonly input { background: #F8F8F6; color: var(--fv-gray); }
+
+/* ACTION AREA */
+.action-area { border-top: 1px solid var(--fv-border); padding-top: 1.25rem; margin-top: 0.5rem; }
+.action-area > label { font-size: 0.75rem; font-weight: 500; color: var(--fv-black); display: block; margin-bottom: 0.4rem; }
+.action-btns { display: flex; gap: 0.75rem; margin-top: 0.75rem; flex-wrap: wrap; }
+.btn-despacho { background: var(--fv-yellow); color: var(--fv-black); border: none; border-radius: 6px; padding: 0.65rem 1.25rem; font-family: 'DM Sans', sans-serif; font-size: 0.85rem; font-weight: 700; cursor: pointer; transition: background 0.15s; }
+.btn-despacho:hover { background: var(--fv-yellow-dark); }
+.btn-despacho:disabled { background: #DDD; color: #999; cursor: not-allowed; }
+
+.empty-state { text-align: center; padding: 4rem 2rem; }
+.empty-state p { color: var(--fv-gray); font-size: 0.9rem; }
+.loading-state { text-align: center; padding: 3rem; color: var(--fv-gray); }
+
+@media (max-width: 600px) {
+  .data-grid, .ost-fields { grid-template-columns: 1fr; }
+  .full, .ost-fields .span-2 { grid-column: span 1; }
+}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div class="login-screen" id="loginScreen">
+  <div class="login-card">
+    <div class="login-header">
+      <div class="fv-logo-box">
+        <span class="fv-logo-text">FERROVIAL</span>
+      </div>
+      <div style="font-size:0.72rem;color:var(--fv-gray);margin-bottom:1rem;">Ingeniería y Montaje</div>
+      <div class="login-role-badge">Operador Logístico · Sobredimensión</div>
+      <h2>Acceso al Panel</h2>
+      <p>Ingrese sus credenciales para continuar</p>
+    </div>
+    <div class="login-error" id="loginError">Credenciales incorrectas. Intente nuevamente.</div>
+    <div class="field"><label>Correo electrónico</label><input type="email" id="loginEmail" placeholder="correo@ferrovial.cl" /></div>
+    <div class="field"><label>Contraseña</label><input type="password" id="loginPass" placeholder="••••••••" /></div>
+    <button class="btn-primary" onclick="doLogin()">Ingresar</button>
+  </div>
+</div>
+
+<!-- APP -->
+<div class="app" id="appScreen">
+  <header class="header">
+    <div class="fv-logo-sm">FERROVIAL</div>
+    <div class="header-divider"></div>
+    <span class="header-section">Urgencias Sobredimensión · MEL</span>
+    <div class="header-right">
+      <span class="role-pill">Operador Logístico</span>
+      <button class="btn-logout" onclick="doLogout()">Cerrar sesión</button>
+    </div>
+  </header>
+
+  <div class="notif-banner hidden" id="notifBanner">
+    <div class="notif-dot" id="notifCount">0</div>
+    <span>urgencia(s) aprobadas por Supervisor BHP pendientes de despacho</span>
+  </div>
+
+  <div class="container">
+    <div class="section-title-bar">
+      <h2>Urgencias Aprobadas — Pendientes de Despacho</h2>
+      <span class="count-badge" id="totalCount">0 registros</span>
+    </div>
+    <div id="loadingState" class="loading-state">Cargando urgencias...</div>
+    <div id="listaUrgencias"></div>
+  </div>
+</div>
+
+<script>
+const SUPABASE_URL = 'https://dnsijobpjnirbfrlkwfq.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_kUxJua1oS2c-YxCyHjhEbg_bItcFg6H';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+const VALID_USERS = {
+  'ferrovial@kdmindustrial.cl': 'kdm2024ferrovial',
+  'supervisorbhpa@kdmindustrial.cl': 'kdm2024sup',
+  'jarayaa@kdmindustrial.cl': 'kdm2024sup'
+};
+
+function doLogin() {
+  const email = document.getElementById('loginEmail').value.trim();
+  const pass  = document.getElementById('loginPass').value;
+  if (VALID_USERS[email] === pass) {
+    document.getElementById('loginError').classList.remove('visible');
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('appScreen').classList.add('visible');
+    loadUrgencias();
+  } else {
+    document.getElementById('loginError').classList.add('visible');
+  }
+}
+document.getElementById('loginPass').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+function doLogout() {
+  document.getElementById('loginScreen').style.display = 'flex';
+  document.getElementById('appScreen').classList.remove('visible');
+}
+
+async function loadUrgencias() {
+  const { data } = await sb.from('urgencias').select('*')
+    .eq('tipo', 'sobredimension')
+    .in('estado', ['aprobado_supervisor', 'despachado_ferrovial'])
+    .order('created_at', { ascending: false });
+
+  document.getElementById('loadingState').style.display = 'none';
+  const lista = document.getElementById('listaUrgencias');
+  lista.innerHTML = '';
+
+  if (!data?.length) {
+    lista.innerHTML = `<div class="empty-state"><p>📭 No hay urgencias aprobadas por el Supervisor BHP aún.</p></div>`;
+    return;
+  }
+
+  const pendientes = data.filter(u => u.estado === 'aprobado_supervisor').length;
+  document.getElementById('totalCount').textContent = data.length + ' registro(s)';
+  if (pendientes > 0) {
+    document.getElementById('notifCount').textContent = pendientes;
+    document.getElementById('notifBanner').classList.remove('hidden');
+  }
+
+  data.forEach(u => renderCard(u, lista));
+}
+
+function renderCard(u, container) {
+  const urgId = 'SOBRED-' + String(u.id).padStart(4, '0');
+  const fecha  = new Date(u.created_at).toLocaleString('es-CL');
+  const escoltaBadge = u.requiere_escolta === 'si' ? `<span class="escolta-pill">🚨 Escolta</span>` : '';
+  const estadoLabel  = u.estado === 'despachado_ferrovial' ? 'Despachado' : 'Pendiente despacho';
+
+  const div = document.createElement('div');
+  div.className = 'urg-card';
+  div.id = 'card-' + u.id;
+  div.innerHTML = `
+    <div class="urg-card-header" onclick="toggleCard(${u.id})">
+      <div>
+        <div class="urg-id">${urgId}</div>
+        <div class="urg-meta">${u.gerencia || '—'} · ${u.nombre_super || '—'} · ${fecha}</div>
+      </div>
+      <div class="urg-badges">
+        ${escoltaBadge}
+        <span class="status-pill ${u.estado}">${estadoLabel}</span>
+      </div>
+    </div>
+    <div class="urg-card-body" id="body-${u.id}">
+
+      <!-- DATOS DE LA URGENCIA -->
+      <div class="medidas-box">
+        📐 <strong>Dimensiones:</strong> Alto: ${u.medida_alto}m · Ancho: ${u.medida_ancho}m · Largo: ${u.medida_largo}m &nbsp;|&nbsp;
+        <strong>Peso: ${u.peso_carga} TON</strong>
+        ${u.requiere_escolta === 'si' ? ' &nbsp;<strong style="color:#7A5000">🚨 ESCOLTA REQUERIDA</strong>' : ''}
+      </div>
+
+      <div class="data-grid">
+        <div class="data-item"><label>Proveedor</label><span>${u.proveedor || '—'}</span></div>
+        <div class="data-item"><label>OC / Ítems</label><span>${u.po_items || '—'}</span></div>
+        <div class="data-item"><label>Contacto Proveedor</label><span>${u.contacto_proveedor || '—'}</span></div>
+        <div class="data-item"><label>Supervisor MEL</label><span>${u.supervisor_mel || '—'}</span></div>
+        <div class="data-item"><label>Contacto MEL</label><span>${u.contacto_mel || '—'}</span></div>
+        <div class="data-item"><label>UP Entrega</label><span>${u.up_entrega || '—'}</span></div>
+        ${u.descripcion ? `<div class="data-item full"><label>Descripción Carga</label><span>${u.descripcion}</span></div>` : ''}
+        ${u.obs_supervisor ? `<div class="data-item full"><label>Obs. Supervisor BHP</label><span>${u.obs_supervisor}</span></div>` : ''}
+      </div>
+
+      ${u.estado === 'despachado_ferrovial' ? `
+        <div style="background:#E8F5EE;border:1px solid #A8D8B8;border-radius:8px;padding:1rem 1.25rem;font-size:0.85rem;color:#1D6338;">
+          ✓ <strong>Despachado</strong> · OST N°: ${u.ost_numero || '—'} · OM N°: ${u.ost_om || '—'}
+        </div>
+      ` : renderOSTForm(u)}
+    </div>`;
+  container.appendChild(div);
+}
+
+function renderOSTForm(u) {
+  const urgId = 'SOBRED-' + String(u.id).padStart(4, '0');
+  return `
+    <!-- TRAZABILIDAD -->
+    <div class="trazabilidad-box">
+      <div>
+        <div class="traz-label">Trazabilidad</div>
+      </div>
+      <div class="traz-link">
+        <span class="traz-id">${urgId}</span>
+        <span class="traz-arrow">→</span>
+        <span class="traz-ost" id="trazOst-${u.id}">OST N° pendiente</span>
+      </div>
+    </div>
+
+    <!-- OST UPLOAD -->
+    <div class="ost-section" id="ostSection-${u.id}">
+      <div class="ost-title">
+        <span>Orden de Servicio de Transporte (OST)</span>
+        <span class="ost-badge">AUTO-LECTURA</span>
+      </div>
+      <div class="upload-area">
+        <input type="file" id="ostFile-${u.id}" accept=".pdf,image/*" style="display:none" onchange="parseOST(${u.id}, this)" />
+        <button class="upload-btn" onclick="document.getElementById('ostFile-${u.id}').click()">📎 Subir OST (PDF o imagen)</button>
+        <span class="upload-hint">El sistema leerá automáticamente los datos del documento</span>
+      </div>
+      <div class="parsing-status" id="parseStatus-${u.id}">Procesando documento...</div>
+
+      <!-- CAMPOS OST -->
+      <div class="ost-fields" id="ostFields-${u.id}">
+        <div class="field">
+          <label>N° OST (Orden de Servicio Transporte)</label>
+          <input type="text" id="ost_numero-${u.id}" placeholder="Ej: 345009" />
+        </div>
+        <div class="field">
+          <label>N° OM (Orden de Manifiesto)</label>
+          <input type="text" id="ost_om-${u.id}" placeholder="Ej: 327240" />
+        </div>
+        <div class="field">
+          <label>Fecha Salida</label>
+          <input type="text" id="ost_fecha_salida-${u.id}" placeholder="Ej: 01-02-2025 14:00" />
+        </div>
+        <div class="field">
+          <label>Fecha Llegada Estimada</label>
+          <input type="text" id="ost_fecha_llegada-${u.id}" placeholder="Ej: 02-02-2025 10:00" />
+        </div>
+        <div class="field">
+          <label>Tramo (Origen → Destino)</label>
+          <input type="text" id="ost_tramo-${u.id}" placeholder="Ej: LA NEGRA / MEL" />
+        </div>
+        <div class="field">
+          <label>Tipo de Equipo</label>
+          <input type="text" id="ost_equipo-${u.id}" placeholder="Ej: CAMA BAJA hasta 20" />
+        </div>
+        <div class="field field-readonly">
+          <label>OC (desde formulario)</label>
+          <input type="text" id="ost_oc-${u.id}" value="${u.po_items || ''}" readonly />
+        </div>
+        <div class="field">
+          <label>N° Solicitud Interna Ferrovial</label>
+          <input type="text" id="ost_solicitud-${u.id}" placeholder="Ej: 638576" />
+        </div>
+        <div class="field">
+          <label>Peso Total (TON)</label>
+          <input type="text" id="ost_peso-${u.id}" placeholder="Ej: 18.000" />
+        </div>
+        <div class="field">
+          <label>Cantidad Total</label>
+          <input type="text" id="ost_cantidad-${u.id}" placeholder="Ej: 1" />
+        </div>
+        <div class="field span-2">
+          <label>Conductor Titular</label>
+          <input type="text" id="ost_conductor1-${u.id}" placeholder="Nombre conductor titular" />
+        </div>
+        <div class="field span-2">
+          <label>Conductor Adicional <span style="font-weight:400;color:var(--fv-gray);font-size:0.72rem;">(si aplica)</span></label>
+          <input type="text" id="ost_conductor2-${u.id}" placeholder="Nombre conductor adicional" />
+        </div>
+        <div class="field span-2">
+          <label>Descripción de Carga</label>
+          <input type="text" id="ost_carga-${u.id}" placeholder="Descripción del material transportado" />
+        </div>
+        <div class="field span-2">
+          <label>Observaciones</label>
+          <textarea id="ost_obs-${u.id}" placeholder="Observaciones o condiciones especiales del transporte..."></textarea>
+        </div>
+      </div>
+    </div>
+
+    <div class="action-area">
+      <div style="background:#FFFBE0;border:1px solid #F0D840;border-radius:6px;padding:0.75rem 1rem;font-size:0.78rem;color:#5A4A00;margin-bottom:1rem;">
+        ⚠️ Al confirmar el despacho, KDM será notificado automáticamente para proceder con la rebaja en sistema.
+      </div>
+      <button class="btn-despacho" onclick="confirmarDespacho(${u.id})">✓ Confirmar Despacho</button>
+    </div>`;
+}
+
+function toggleCard(id) {
+  document.getElementById('body-' + id).classList.toggle('open');
+}
+
+// ── OST PARSING via Claude API ──────────────────────────────────────────
+async function parseOST(urgId, input) {
+  const file = input.files[0];
+  if (!file) return;
+
+  const statusEl = document.getElementById('parseStatus-' + urgId);
+  const sectionEl = document.getElementById('ostSection-' + urgId);
+  statusEl.textContent = '⏳ Leyendo documento OST...';
+  statusEl.className = 'parsing-status visible';
+
+  try {
+    // Convert file to base64
+    const base64 = await new Promise((res, rej) => {
+      const r = new FileReader();
+      r.onload = () => res(r.result.split(',')[1]);
+      r.onerror = rej;
+      r.readAsDataURL(file);
+    });
+
+    const isImage = file.type.startsWith('image/');
+    const mediaType = isImage ? file.type : 'application/pdf';
+
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        messages: [{
+          role: 'user',
+          content: [
+            {
+              type: isImage ? 'image' : 'document',
+              source: { type: 'base64', media_type: mediaType, data: base64 }
+            },
+            {
+              type: 'text',
+              text: `Extrae los datos de esta Orden de Servicio de Transporte (OST) de Ferrovial y responde SOLO en JSON válido sin backticks ni explicaciones:
+{
+  "ost_numero": "número de OST (solo el número, ej: 345009)",
+  "ost_om": "número de OM o Orden de Manifiesto (ej: 327240)",
+  "fecha_salida": "fecha y hora de salida (ej: 01-02-2025 14:00)",
+  "fecha_llegada": "fecha y hora de llegada estimada (ej: 02-02-2025 10:00)",
+  "tramo": "origen y destino separados por / (ej: LA NEGRA / MEL)",
+  "tipo_equipo": "tipo de equipo de transporte (ej: CAMA BAJA hasta 20)",
+  "oc": "número de orden de compra u OC (ej: 4517288781)",
+  "n_solicitud": "número de solicitud interna Ferrovial (ej: 638576)",
+  "peso_total": "peso total (ej: 18.000)",
+  "cantidad_total": "cantidad total de items",
+  "conductor_titular": "nombre del conductor titular",
+  "conductor_adicional": "nombre del conductor adicional o null si no hay",
+  "descripcion_carga": "descripción del material transportado"
+}`
+            }
+          ]
+        }]
+      })
+    });
+
+    const data = await response.json();
+    const text = data.content?.find(b => b.type === 'text')?.text || '';
+    const clean = text.replace(/```json|```/g, '').trim();
+    const parsed = JSON.parse(clean);
+
+    // Fill fields
+    const set = (field, val) => {
+      const el = document.getElementById(`ost_${field}-${urgId}`);
+      if (el && val && val !== 'null') el.value = val;
+    };
+    set('numero',     parsed.ost_numero);
+    set('om',         parsed.ost_om);
+    set('fecha_salida', parsed.fecha_salida);
+    set('fecha_llegada', parsed.fecha_llegada);
+    set('tramo',      parsed.tramo);
+    set('equipo',     parsed.tipo_equipo);
+    set('solicitud',  parsed.n_solicitud);
+    set('peso',       parsed.peso_total);
+    set('cantidad',   parsed.cantidad_total);
+    set('conductor1', parsed.conductor_titular);
+    set('conductor2', parsed.conductor_adicional);
+    set('carga',      parsed.descripcion_carga);
+
+    // Update trazabilidad
+    if (parsed.ost_numero) {
+      document.getElementById('trazOst-' + urgId).textContent = 'OST N° ' + parsed.ost_numero;
+    }
+
+    sectionEl.classList.add('has-data');
+    statusEl.textContent = '✓ Datos extraídos automáticamente. Revise y corrija si es necesario.';
+    statusEl.className = 'parsing-status visible success';
+
+  } catch (err) {
+    console.error(err);
+    statusEl.textContent = '⚠️ No se pudo leer automáticamente. Complete los campos manualmente.';
+    statusEl.className = 'parsing-status visible error';
+  }
+}
+
+async function confirmarDespacho(id) {
+  const get = field => document.getElementById(`ost_${field}-${id}`)?.value?.trim() || null;
+
+  const ostNumero = get('numero');
+  if (!ostNumero) {
+    alert('Debe ingresar al menos el N° OST antes de confirmar el despacho.');
+    return;
+  }
+
+  const urgId = 'SOBRED-' + String(id).padStart(4, '0');
+
+  const payload = {
+    estado: 'despachado_ferrovial',
+    ost_numero:        ostNumero,
+    ost_om:            get('om'),
+    ost_fecha_salida:  get('fecha_salida'),
+    ost_fecha_llegada: get('fecha_llegada'),
+    ost_tramo:         get('tramo'),
+    ost_equipo:        get('equipo'),
+    ost_solicitud:     get('solicitud'),
+    ost_peso:          get('peso'),
+    ost_cantidad:      get('cantidad'),
+    ost_conductor1:    get('conductor1'),
+    ost_conductor2:    get('conductor2'),
+    ost_carga:         get('carga'),
+    ost_obs:           get('obs'),
+    ost_trazabilidad:  urgId + ' → OST ' + ostNumero,
+    ferrovial_at:      new Date().toISOString()
+  };
+
+  const { error } = await sb.from('urgencias').update(payload).eq('id', id);
+  if (!error) {
+    await fetch(`${SUPABASE_URL}/functions/v1/send-email`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPABASE_KEY}` },
+      body: JSON.stringify({ urgencia_id: id, tipo: 'sobredimension', evento: 'despachado_ferrovial' })
+    });
+    loadUrgencias();
+  } else {
+    alert('Error al guardar: ' + error.message);
+  }
+}
+</script>
+</body>
+</html>
