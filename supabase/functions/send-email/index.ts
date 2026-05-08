@@ -77,53 +77,70 @@ Deno.serve(async (req) => {
 
     // ── NUEVA SOLICITUD ──────────────────────────────────────────────
     if (evento === 'nueva_solicitud') {
+      const esSobred = tipo === 'sobredimension'
+      const tipoLabel = esSobred ? 'Sobredimensión' : 'Carga General'
+      const nombreSuperEmail = esSobred ? u.email_super : u.si_correo
+
       const tablaDetalle = `
         <table style="border-collapse:collapse;width:100%;margin:16px 0;">
           ${filaDetalle('N° Urgencia', num)}
-          ${filaDetalle('Tipo', 'Sobredimensión')}
+          ${filaDetalle('Tipo', tipoLabel)}
           ${filaDetalle('Gerencia', u.gerencia)}
           ${filaDetalle('Superintendencia', u.superintendencia)}
           ${filaDetalle('Centro de Costo / WBS', u.centro_costo_wbs)}
           ${filaDetalle('Proveedor', u.nombre_proveedor)}
           ${filaDetalle('PO / Ítems', u.po_items)}
-          ${filaDetalle('Dimensiones (m)', `Alto ${u.medida_alto} / Ancho ${u.medida_ancho} / Largo ${u.medida_largo}`)}
-          ${filaDetalle('Peso (TON)', u.peso_carga)}
-          ${filaDetalle('Requiere escolta', u.requiere_escolta === 'si' ? '⚠️ SÍ' : 'No')}
-          ${filaDetalle('Descripción', u.descripcion)}
-          ${filaDetalle('Justificación', u.justificacion)}
+          ${esSobred ? filaDetalle('Dimensiones (m)', `Alto ${u.medida_alto} / Ancho ${u.medida_ancho} / Largo ${u.medida_largo}`) : ''}
+          ${esSobred ? filaDetalle('Peso (TON)', u.peso_carga) : ''}
+          ${esSobred ? filaDetalle('Requiere escolta', u.requiere_escolta === 'si' ? '⚠️ SÍ' : 'No') : ''}
+          ${esSobred ? filaDetalle('Descripción', u.descripcion) : ''}
+          ${esSobred ? filaDetalle('Justificación', u.justificacion) : ''}
           ${filaDetalle('Supervisor MEL', u.nombre_supervisor_mel)}
           ${filaDetalle('Contacto MEL', u.contacto_supervisor_mel)}
           ${filaDetalle('Punto de entrega', u.up_punto_entrega)}
+          ${!esSobred && u.nombre_solicitante ? filaDetalle('Solicitante', u.nombre_solicitante) : ''}
+          ${!esSobred && u.correo_solicitante ? filaDetalle('Correo solicitante', u.correo_solicitante) : ''}
         </table>
       `
 
       // Email al Superintendente para aprobación
-      if (u.email_super) {
+      if (nombreSuperEmail) {
         const html = templateBase(`
-          <h2 style="color:#E05E1B;font-size:18px;margin:0 0 8px;">Nueva Solicitud de Urgencia Sobredimensión</h2>
+          <h2 style="color:#E05E1B;font-size:18px;margin:0 0 8px;">Nueva Solicitud de Urgencia — ${tipoLabel}</h2>
           <p style="color:#555;font-size:14px;">Estimado/a <strong>${u.firma_nombre || u.nombre_superintendente || ''}</strong>,</p>
           <p style="color:#555;font-size:14px;">Se ha registrado la solicitud <strong>${num}</strong> que requiere su aprobación para continuar con el proceso logístico.</p>
           ${tablaDetalle}
           <p style="color:#555;font-size:14px;">Por favor revise y coordine la aprobación a la brevedad posible.</p>
         `)
-        resultados.push(await enviarCorreo(u.email_super, `[Urgencia ${num}] Nueva solicitud de sobredimensión requiere su aprobación`, html))
+        resultados.push(await enviarCorreo(nombreSuperEmail, `[Urgencia ${num}] Nueva solicitud de ${tipoLabel} requiere su aprobación`, html))
+      }
+
+      // Email al solicitante (solo carga general)
+      if (!esSobred && u.correo_solicitante) {
+        const html = templateBase(`
+          <h2 style="color:#E05E1B;font-size:18px;margin:0 0 8px;">Solicitud de Urgencia Registrada</h2>
+          <p style="color:#555;font-size:14px;">Estimado/a <strong>${u.nombre_solicitante || ''}</strong>,</p>
+          <p style="color:#555;font-size:14px;">Su solicitud de urgencia ha sido registrada con el número <strong>${num}</strong>. Se ha notificado al Superintendente para su aprobación.</p>
+          ${tablaDetalle}
+        `)
+        resultados.push(await enviarCorreo(u.correo_solicitante, `[Urgencia ${num}] Su solicitud fue registrada correctamente`, html))
       }
 
       // Email al Supervisor BHP
       const htmlBHP = templateBase(`
-        <h2 style="color:#E05E1B;font-size:18px;margin:0 0 8px;">Nueva Solicitud de Urgencia Sobredimensión</h2>
+        <h2 style="color:#E05E1B;font-size:18px;margin:0 0 8px;">Nueva Solicitud de Urgencia — ${tipoLabel}</h2>
         <p style="color:#555;font-size:14px;">Se ha registrado una nueva solicitud de urgencia que requiere gestión logística:</p>
         ${tablaDetalle}
       `)
-      resultados.push(await enviarCorreo(BHP_SUPER_EMAIL, `[Urgencia ${num}] Nueva solicitud sobredimensión`, htmlBHP))
+      resultados.push(await enviarCorreo(BHP_SUPER_EMAIL, `[Urgencia ${num}] Nueva solicitud ${tipoLabel}`, htmlBHP))
 
       // Email a KDM
       const htmlKDM = templateBase(`
-        <h2 style="color:#E05E1B;font-size:18px;margin:0 0 8px;">Nueva Urgencia Sobredimensión — Acción requerida</h2>
-        <p style="color:#555;font-size:14px;">Se ha recibido una nueva solicitud de urgencia sobredimensión:</p>
+        <h2 style="color:#E05E1B;font-size:18px;margin:0 0 8px;">Nueva Urgencia ${tipoLabel} — Acción requerida</h2>
+        <p style="color:#555;font-size:14px;">Se ha recibido una nueva solicitud de urgencia:</p>
         ${tablaDetalle}
       `)
-      resultados.push(await enviarCorreo(KDM_EMAIL, `[Urgencia ${num}] Nueva solicitud sobredimensión — KDM`, htmlKDM))
+      resultados.push(await enviarCorreo(KDM_EMAIL, `[Urgencia ${num}] Nueva solicitud ${tipoLabel} — KDM`, htmlKDM))
     }
 
     // ── COMPLETADO (KDM) ─────────────────────────────────────────────

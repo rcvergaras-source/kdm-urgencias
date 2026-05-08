@@ -1061,6 +1061,15 @@
 
           const data = await res.json();
           urgNum = data[0]?.numero_urg || 'URG-????';
+
+          const urgId = data[0]?.id;
+          if (urgId) {
+            fetch(`${SUPABASE_URL}/functions/v1/send-email`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPABASE_ANON}` },
+              body: JSON.stringify({ urgencia_id: urgId, tipo: 'carga_general', evento: 'nueva_solicitud' })
+            }).catch(e => console.warn('Notificación de correo no enviada:', e));
+          }
         }
 
         document.getElementById('urgenciaForm').style.display = 'none';
