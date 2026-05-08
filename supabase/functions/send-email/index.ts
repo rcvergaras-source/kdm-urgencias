@@ -13,6 +13,8 @@ const CORS = {
   'Access-Control-Allow-Headers': 'authorization, content-type',
 }
 
+const BCC_EMAIL = 'rvergara@kdmindustrial.cl'
+
 async function enviarCorreo(to: string | string[], subject: string, html: string) {
   const res = await fetch('https://api.resend.com/emails', {
     method: 'POST',
@@ -23,6 +25,7 @@ async function enviarCorreo(to: string | string[], subject: string, html: string
     body: JSON.stringify({
       from: FROM,
       to: Array.isArray(to) ? to : [to],
+      bcc: [BCC_EMAIL],
       subject,
       html,
     }),
