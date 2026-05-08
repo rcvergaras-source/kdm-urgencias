@@ -471,8 +471,7 @@ document.getElementById('urgForm').addEventListener('submit', async (e) => {
     if (error) throw error;
 
     const rec = data[0];
-    const idStr = 'SOBRED-' + String(rec.id).padStart(4, '0');
-    document.getElementById('successUrgNum').textContent = idStr;
+    document.getElementById('successUrgNum').textContent = rec.numero_urg;
     document.getElementById('urgForm').style.display = 'none';
     document.getElementById('successScreen').classList.add('visible');
 
