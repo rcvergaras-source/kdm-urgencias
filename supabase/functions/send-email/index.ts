@@ -101,12 +101,13 @@ Deno.serve(async (req) => {
           ${filaDetalle('Supervisor MEL', u.nombre_supervisor_mel)}
           ${filaDetalle('Contacto MEL', u.contacto_supervisor_mel)}
           ${filaDetalle('Punto de entrega', u.up_punto_entrega)}
-          ${!esSobred && u.nombre_solicitante ? filaDetalle('Solicitante', u.nombre_solicitante) : ''}
-          ${!esSobred && u.correo_solicitante ? filaDetalle('Correo solicitante', u.correo_solicitante) : ''}
+          ${u.nombre_solicitante ? filaDetalle('Solicitante', u.nombre_solicitante) : ''}
+          ${u.correo_solicitante ? filaDetalle('Correo solicitante', u.correo_solicitante) : ''}
+          ${u.telefono_solicitante ? filaDetalle('Teléfono solicitante', u.telefono_solicitante) : ''}
         </table>
       `
 
-      // Email al Superintendente para aprobación
+      // Email al Superintendente para aprobación (SI)
       if (nombreSuperEmail && u.token_aprobacion) {
         const linkVer = `${SITE_URL}/aprobar-si?token=${u.token_aprobacion}`
         const botonesAprobacion = `
@@ -125,8 +126,9 @@ Deno.serve(async (req) => {
         resultados.push(await enviarCorreo(OTROS_EMAIL, `[Urgencia ${num}] Nueva solicitud de ${tipoLabel} requiere su aprobación`, html))
       }
 
-      // Email al solicitante (solo carga general)
+      // Email al solicitante (carga general y sobredimensión)
       if (!esSobred) {
+        // Carga general: confirmación al solicitante
         const html = templateBase(`
           <h2 style="color:#E05E1B;font-size:18px;margin:0 0 8px;">Solicitud de Urgencia Registrada</h2>
           <p style="color:#555;font-size:14px;">Estimado/a <strong>${u.nombre_solicitante || ''}</strong>,</p>
@@ -134,6 +136,16 @@ Deno.serve(async (req) => {
           ${tablaDetalle}
         `)
         resultados.push(await enviarCorreo(OTROS_EMAIL, `[Urgencia ${num}] Su solicitud fue registrada correctamente`, html))
+      } else if (u.correo_solicitante) {
+        // Sobredimensión: confirmación al solicitante
+        const html = templateBase(`
+          <h2 style="color:#E05E1B;font-size:18px;margin:0 0 8px;">Solicitud de Sobredimensión Registrada</h2>
+          <p style="color:#555;font-size:14px;">Estimado/a <strong>${u.nombre_solicitante || ''}</strong>,</p>
+          <p style="color:#555;font-size:14px;">Su solicitud de urgencia sobredimensión ha sido registrada con el número <strong>${num}</strong>. Se ha notificado al Superintendente(a) para su aprobación antes de continuar el proceso logístico.</p>
+          ${tablaDetalle}
+          <p style="color:#888;font-size:13px;margin-top:16px;">Recibirá una notificación cuando el estado cambie.</p>
+        `)
+        resultados.push(await enviarCorreo(OTROS_EMAIL, `[${num}] Su solicitud de sobredimensión fue registrada`, html))
       }
 
       // Email al Supervisor BHP
