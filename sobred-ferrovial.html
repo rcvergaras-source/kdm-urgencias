@@ -66,6 +66,40 @@ textarea { resize: vertical; min-height: 80px; }
 .section-title-bar h2 { font-size: 1.1rem; font-weight: 600; }
 .count-badge { background: var(--fv-black); color: var(--fv-yellow); font-family: 'DM Mono', monospace; font-size: 0.75rem; padding: 0.2rem 0.6rem; border-radius: 4px; }
 
+/* TABS */
+.tabs {
+  display: flex;
+  gap: 0.25rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 2px solid var(--fv-border);
+}
+.tab {
+  padding: 0.6rem 1.1rem;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--fv-gray);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  transition: all 0.15s;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+.tab:hover { color: var(--fv-black); }
+.tab.active { color: var(--fv-yellow-dark); border-bottom-color: var(--fv-yellow-dark); }
+.tab-badge {
+  background: var(--fv-yellow);
+  color: var(--fv-black);
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 0.1rem 0.45rem;
+  border-radius: 20px;
+  min-width: 18px;
+  text-align: center;
+}
+.tab-badge.gray { background: var(--fv-border); color: var(--fv-gray); }
+
 /* URGENCIA CARD */
 .urg-card { background: var(--fv-white); border: 1px solid var(--fv-border); border-radius: 10px; margin-bottom: 1rem; overflow: hidden; transition: box-shadow 0.15s; }
 .urg-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.08); }
@@ -172,13 +206,20 @@ textarea { resize: vertical; min-height: 80px; }
 
   <div class="notif-banner hidden" id="notifBanner">
     <div class="notif-dot" id="notifCount">0</div>
-    <span>urgencia(s) aprobadas por Supervisor BHP pendientes de despacho</span>
+    <span id="notifText">urgencia(s) aprobadas por Supervisor BHP pendientes de despacho</span>
   </div>
 
   <div class="container">
-    <div class="section-title-bar">
-      <h2>Urgencias Aprobadas — Pendientes de Despacho</h2>
-      <span class="count-badge" id="totalCount">0 registros</span>
+    <!-- TABS -->
+    <div class="tabs">
+      <div class="tab active" onclick="switchTab('aprobado_supervisor')" id="tab_aprobado_supervisor">
+        Pendiente despacho
+        <span class="tab-badge" id="badge_aprobado_supervisor">0</span>
+      </div>
+      <div class="tab" onclick="switchTab('despachado_ferrovial')" id="tab_despachado_ferrovial">
+        Despachados
+        <span class="tab-badge gray" id="badge_despachado_ferrovial">0</span>
+      </div>
     </div>
     <div id="loadingState" class="loading-state">Cargando urgencias...</div>
     <div id="listaUrgencias"></div>
@@ -196,11 +237,15 @@ const VALID_USERS = {
   'jarayaa@kdmindustrial.cl': 'kdm2024sup'
 };
 
+let currentTab = 'aprobado_supervisor';
+let allUrgencias = [];
+
 function doLogin() {
   const email = document.getElementById('loginEmail').value.trim();
   const pass  = document.getElementById('loginPass').value;
   if (VALID_USERS[email] === pass) {
     document.getElementById('loginError').classList.remove('visible');
+    sessionStorage.setItem('sobred_ferrovial_session', JSON.stringify({ email }));
     document.getElementById('loginScreen').style.display = 'none';
     document.getElementById('appScreen').classList.add('visible');
     loadUrgencias();
@@ -209,34 +254,78 @@ function doLogin() {
   }
 }
 document.getElementById('loginPass').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+
 function doLogout() {
+  sessionStorage.removeItem('sobred_ferrovial_session');
+  allUrgencias = [];
   document.getElementById('loginScreen').style.display = 'flex';
   document.getElementById('appScreen').classList.remove('visible');
 }
 
+// Restaurar sesión al cargar
+window.addEventListener('load', () => {
+  const saved = sessionStorage.getItem('sobred_ferrovial_session');
+  if (saved) {
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('appScreen').classList.add('visible');
+    loadUrgencias();
+  }
+});
+
 async function loadUrgencias() {
+  document.getElementById('loadingState').style.display = 'block';
+  document.getElementById('listaUrgencias').innerHTML = '';
+
   const { data } = await sb.from('urgencias').select('*')
     .eq('tipo', 'sobredimension')
     .in('estado', ['aprobado_supervisor', 'despachado_ferrovial'])
     .order('created_at', { ascending: false });
 
   document.getElementById('loadingState').style.display = 'none';
+
+  allUrgencias = data || [];
+  updateBadges();
+  renderTab();
+}
+
+function updateBadges() {
+  const pendientes = allUrgencias.filter(u => u.estado === 'aprobado_supervisor').length;
+  const despachados = allUrgencias.filter(u => u.estado === 'despachado_ferrovial').length;
+
+  document.getElementById('badge_aprobado_supervisor').textContent = pendientes;
+  document.getElementById('badge_despachado_ferrovial').textContent = despachados;
+
+  const badgeDes = document.getElementById('badge_despachado_ferrovial');
+  badgeDes.className = despachados > 0 ? 'tab-badge' : 'tab-badge gray';
+
+  const banner = document.getElementById('notifBanner');
+  if (pendientes > 0) {
+    banner.classList.remove('hidden');
+    document.getElementById('notifCount').textContent = pendientes;
+    document.getElementById('notifText').textContent = pendientes === 1
+      ? 'urgencia aprobada por Supervisor BHP pendiente de despacho'
+      : 'urgencias aprobadas por Supervisor BHP pendientes de despacho';
+  } else {
+    banner.classList.add('hidden');
+  }
+}
+
+function renderTab() {
   const lista = document.getElementById('listaUrgencias');
   lista.innerHTML = '';
-
-  if (!data?.length) {
-    lista.innerHTML = `<div class="empty-state"><p>📭 No hay urgencias aprobadas por el Supervisor BHP aún.</p></div>`;
+  const filtered = allUrgencias.filter(u => u.estado === currentTab);
+  if (!filtered.length) {
+    lista.innerHTML = `<div class="empty-state"><p>📭 No hay urgencias en este estado.</p></div>`;
     return;
   }
+  filtered.forEach(u => renderCard(u, lista));
+}
 
-  const pendientes = data.filter(u => u.estado === 'aprobado_supervisor').length;
-  document.getElementById('totalCount').textContent = data.length + ' registro(s)';
-  if (pendientes > 0) {
-    document.getElementById('notifCount').textContent = pendientes;
-    document.getElementById('notifBanner').classList.remove('hidden');
-  }
-
-  data.forEach(u => renderCard(u, lista));
+function switchTab(tab) {
+  currentTab = tab;
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab_' + tab).classList.add('active');
+  renderTab();
 }
 
 function renderCard(u, container) {
