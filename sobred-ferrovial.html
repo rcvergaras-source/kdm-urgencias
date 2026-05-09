@@ -436,11 +436,11 @@ function renderOSTForm(u) {
         </div>
         <div class="field">
           <label>Fecha Salida</label>
-          <input type="text" id="ost_fecha_salida-${u.id}" placeholder="Ej: 01-02-2025 14:00" />
+          <input type="datetime-local" id="ost_fecha_salida-${u.id}" />
         </div>
         <div class="field">
           <label>Fecha Llegada Estimada</label>
-          <input type="text" id="ost_fecha_llegada-${u.id}" placeholder="Ej: 02-02-2025 10:00" />
+          <input type="datetime-local" id="ost_fecha_llegada-${u.id}" />
         </div>
         <div class="field">
           <label>Tramo (Origen → Destino)</label>
@@ -555,10 +555,18 @@ async function processOSTFile(urgId, file) {
       const el = document.getElementById(`ost_${field}-${urgId}`);
       if (el && val && val !== 'null') el.value = val;
     };
+    const setDatetime = (field, val) => {
+      if (!val || val === 'null') return;
+      const el = document.getElementById(`ost_${field}-${urgId}`);
+      if (!el) return;
+      // Convierte "01-02-2025 14:00" → "2025-02-01T14:00"
+      const m = val.match(/(\d{2})-(\d{2})-(\d{4})\s+(\d{2}:\d{2})/);
+      el.value = m ? `${m[3]}-${m[2]}-${m[1]}T${m[4]}` : val;
+    };
     set('numero',       parsed.ost_numero);
     set('om',           parsed.ost_om);
-    set('fecha_salida', parsed.fecha_salida);
-    set('fecha_llegada',parsed.fecha_llegada);
+    setDatetime('fecha_salida',  parsed.fecha_salida);
+    setDatetime('fecha_llegada', parsed.fecha_llegada);
     set('tramo',        parsed.tramo);
     set('equipo',       parsed.tipo_equipo);
     set('solicitud',    parsed.n_solicitud);
