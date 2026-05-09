@@ -4,8 +4,10 @@ const RESEND_KEY = Deno.env.get('RESEND_API_KEY')!
 const SUPA_URL = Deno.env.get('SUPABASE_URL')!
 const SUPA_SERVICE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 
+// MODO PRUEBA — reemplazar con correos reales en producción
 const KDM_EMAIL = 'rvergara@kdmindustrial.cl'
-const BHP_SUPER_EMAIL = 'supervisorbhpa@kdmindustrial.cl'
+const BHP_SUPER_EMAIL = 'rvergara@kdmindustrial.cl'   // PRUEBA → real: supervisorbhpa@kdmindustrial.cl
+const OTROS_EMAIL = 'rcvergara.s@gmail.com'            // PRUEBA → real: correo del SI/solicitante
 const FROM = 'Urgencias MEL <urgencias@urgenciasmel.com>'
 const SITE_URL = 'https://kdm-urgencias.vercel.app'
 
@@ -13,8 +15,6 @@ const CORS = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, content-type',
 }
-
-const BCC_EMAIL = 'rvergara@kdmindustrial.cl'
 
 async function enviarCorreo(to: string | string[], subject: string, html: string) {
   const res = await fetch('https://api.resend.com/emails', {
@@ -26,7 +26,6 @@ async function enviarCorreo(to: string | string[], subject: string, html: string
     body: JSON.stringify({
       from: FROM,
       to: Array.isArray(to) ? to : [to],
-      bcc: [BCC_EMAIL],
       subject,
       html,
     }),
@@ -123,18 +122,18 @@ Deno.serve(async (req) => {
           ${tablaDetalle}
           ${botonesAprobacion}
         `)
-        resultados.push(await enviarCorreo(nombreSuperEmail, `[Urgencia ${num}] Nueva solicitud de ${tipoLabel} requiere su aprobación`, html))
+        resultados.push(await enviarCorreo(OTROS_EMAIL, `[Urgencia ${num}] Nueva solicitud de ${tipoLabel} requiere su aprobación`, html))
       }
 
       // Email al solicitante (solo carga general)
-      if (!esSobred && u.correo_solicitante) {
+      if (!esSobred) {
         const html = templateBase(`
           <h2 style="color:#E05E1B;font-size:18px;margin:0 0 8px;">Solicitud de Urgencia Registrada</h2>
           <p style="color:#555;font-size:14px;">Estimado/a <strong>${u.nombre_solicitante || ''}</strong>,</p>
           <p style="color:#555;font-size:14px;">Su solicitud de urgencia ha sido registrada con el número <strong>${num}</strong>. Se ha notificado al Superintendente para su aprobación.</p>
           ${tablaDetalle}
         `)
-        resultados.push(await enviarCorreo(u.correo_solicitante, `[Urgencia ${num}] Su solicitud fue registrada correctamente`, html))
+        resultados.push(await enviarCorreo(OTROS_EMAIL, `[Urgencia ${num}] Su solicitud fue registrada correctamente`, html))
       }
 
       // Email al Supervisor BHP
@@ -196,8 +195,7 @@ Deno.serve(async (req) => {
         ${filaDetalle('Proveedor', u.nombre_proveedor)}
         ${filaDetalle('Punto de entrega', u.up_punto_entrega)}
       `)
-      const destinatarios = [KDM_EMAIL, BHP_SUPER_EMAIL]
-      if (u.email_super) destinatarios.push(u.email_super)
+      const destinatarios = [KDM_EMAIL, BHP_SUPER_EMAIL, OTROS_EMAIL]
       resultados.push(await enviarCorreo(destinatarios, `[Urgencia ${num}] ${titulo}`, html))
     }
 
