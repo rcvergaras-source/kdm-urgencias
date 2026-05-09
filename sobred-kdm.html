@@ -466,6 +466,8 @@ async function completar(id) {
   const guia = document.getElementById('guia-' + id)?.value?.trim() || '';
   if (!sap)  { alert('Ingrese el N° de Movimiento SAP 261 antes de confirmar.'); return; }
   if (!guia) { alert('Ingrese el N° de Guía de Despacho antes de confirmar.'); return; }
+  const respaldo = document.getElementById('respaldo-' + id)?.files[0];
+  if (!respaldo) { alert('Debe cargar el archivo de respaldo antes de confirmar.'); return; }
 
   const { error } = await sb.from('urgencias').update({
     estado: 'completado',
