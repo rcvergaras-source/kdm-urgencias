@@ -80,6 +80,9 @@ textarea { resize: vertical; min-height: 90px; }
 .urg-badges { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
 
 .status-pill { font-size: 0.65rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; padding: 0.25rem 0.65rem; border-radius: 20px; }
+.status-pill.pendiente_si         { background: #F3F0FF; color: #5B21B6; border: 1px solid #C4B5FD; }
+.status-pill.rechazada_si         { background: #FEE; color: var(--bhp-error); border: 1px solid #F5C6C6; }
+.status-pill.pendiente_aprobacion { background: #FFF8E8; color: #92610A; border: 1px solid #F5DFA0; }
 .status-pill.pendiente_supervisor { background: #FFF8E8; color: #92610A; border: 1px solid #F5DFA0; }
 .status-pill.aprobado_supervisor  { background: #E8F5EE; color: #1D6338; border: 1px solid #A8D8B8; }
 .status-pill.rechazado_supervisor { background: #FEE; color: var(--bhp-error); border: 1px solid #F5C6C6; }
@@ -207,7 +210,16 @@ function doLogout() {
 }
 
 function estadoLabel(s) {
-  return { pendiente_supervisor:'Pendiente revisión', aprobado_supervisor:'Aprobado', rechazado_supervisor:'Rechazado', pendiente_mintral:'En MINTRAL', aprobado_mintral:'Completado' }[s] || s;
+  return {
+    pendiente_si:         'Pendiente aprobación SI',
+    rechazada_si:         'Rechazada por SI',
+    pendiente_aprobacion: 'Pendiente revisión Supervisor',
+    pendiente_supervisor: 'Pendiente revisión Supervisor',
+    aprobado_supervisor:  'Aprobado por Supervisor',
+    rechazado_supervisor: 'Rechazado por Supervisor',
+    pendiente_mintral:    'En MINTRAL',
+    aprobado_mintral:     'Completado',
+  }[s] || s;
 }
 
 async function loadUrgencias() {
@@ -235,27 +247,39 @@ async function loadUrgencias() {
 }
 
 function renderCard(u, container) {
-  const id = 'SOBRED-' + String(u.id).padStart(4, '0');
+  const num = u.numero_urg || ('SOBRED-' + String(u.id).slice(0,8));
   const fecha = new Date(u.created_at).toLocaleString('es-CL');
   const escoltaBadge = u.requiere_escolta === 'si' ? `<span class="escolta-pill">🚨 Escolta</span>` : '';
-  const acciones = u.estado === 'pendiente_supervisor' ? `
+
+  const puedeActuar = u.estado === 'pendiente_aprobacion' || u.estado === 'pendiente_supervisor';
+
+  const acciones = puedeActuar ? `
     <div class="action-area">
       <label>Observaciones del Supervisor BHP (opcional)</label>
       <textarea id="obs-${u.id}" placeholder="Ingrese observaciones o comentarios..."></textarea>
       <div class="action-btns">
-        <button class="btn-approve" onclick="accion(${u.id},'aprobar')">✓ Aprobar y enviar a MINTRAL</button>
-        <button class="btn-reject"  onclick="accion(${u.id},'rechazar')">✗ Rechazar</button>
+        <button class="btn-approve" onclick="accion('${u.id}','aprobar')">✓ Aprobar y enviar a MINTRAL</button>
+        <button class="btn-reject"  onclick="accion('${u.id}','rechazar')">✗ Rechazar</button>
       </div>
-    </div>` : `<p style="font-size:0.82rem;color:var(--bhp-gray)">Estado actual: <strong>${estadoLabel(u.estado)}</strong>${u.obs_supervisor ? ` · "${u.obs_supervisor}"` : ''}</p>`;
+    </div>`
+  : u.estado === 'pendiente_si' ? `
+    <div style="background:#F3F0FF;border:1px solid #C4B5FD;border-radius:6px;padding:0.85rem 1rem;font-size:0.82rem;color:#5B21B6;">
+      ⏳ <strong>Esperando aprobación del Superintendente(a)</strong> — Las acciones estarán disponibles una vez que el/la SI apruebe la solicitud.
+    </div>`
+  : u.estado === 'rechazada_si' ? `
+    <div style="background:#FEE;border:1px solid #F5C6C6;border-radius:6px;padding:0.85rem 1rem;font-size:0.82rem;color:#C0392B;">
+      ✕ <strong>Solicitud rechazada por el/la Superintendente(a).</strong> No requiere acción.
+    </div>`
+  : `<p style="font-size:0.82rem;color:var(--bhp-gray)">Estado actual: <strong>${estadoLabel(u.estado)}</strong>${u.obs_supervisor ? ` · "${u.obs_supervisor}"` : ''}</p>`;
 
   const div = document.createElement('div');
   div.className = 'urg-card';
   div.id = 'card-' + u.id;
   div.innerHTML = `
-    <div class="urg-card-header" onclick="toggleCard(${u.id})">
+    <div class="urg-card-header" onclick="toggleCard('${u.id}')">
       <div>
-        <div class="urg-id">${id}</div>
-        <div class="urg-meta">${u.gerencia || '—'} · ${u.nombre_super || '—'} · ${fecha}</div>
+        <div class="urg-id">${num}</div>
+        <div class="urg-meta">${u.gerencia || '—'} · ${u.nombre_superintendente || '—'} · ${fecha}</div>
       </div>
       <div class="urg-badges">
         ${escoltaBadge}
@@ -269,20 +293,19 @@ function renderCard(u, container) {
       </div>
       <div class="data-grid">
         <div class="data-item"><label>Superintendencia</label><span>${u.superintendencia || '—'}</span></div>
-        <div class="data-item"><label>Centro Costo/WBS</label><span>${u.centro_costo || '—'}</span></div>
+        <div class="data-item"><label>Centro Costo/WBS</label><span>${u.centro_costo_wbs || '—'}</span></div>
         <div class="data-item"><label>Fecha Solicitud</label><span>${u.fecha_solicitud || '—'}</span></div>
-        <div class="data-item"><label>Proveedor</label><span>${u.proveedor || '—'}</span></div>
+        <div class="data-item"><label>Proveedor</label><span>${u.nombre_proveedor || '—'}</span></div>
         <div class="data-item"><label>Focal Proveedor</label><span>${u.focal_proveedor || '—'}</span></div>
         <div class="data-item"><label>Contacto</label><span>${u.contacto_proveedor || '—'}</span></div>
         <div class="data-item"><label>PO / Ítems</label><span>${u.po_items || '—'}</span></div>
         <div class="data-item"><label>Cód. Stock</label><span>${u.codigo_stock || '—'}</span></div>
-        <div class="data-item"><label>N° Reserva</label><span>${u.n_reserva || '—'}</span></div>
-        <div class="data-item"><label>Supervisor MEL</label><span>${u.supervisor_mel || '—'}</span></div>
-        <div class="data-item"><label>Contacto MEL</label><span>${u.contacto_mel || '—'}</span></div>
-        <div class="data-item"><label>UP Entrega</label><span>${u.up_entrega || '—'}</span></div>
+        <div class="data-item"><label>N° Reserva</label><span>${u.numero_reserva || '—'}</span></div>
+        <div class="data-item"><label>Supervisor MEL</label><span>${u.nombre_supervisor_mel || '—'}</span></div>
+        <div class="data-item"><label>Contacto MEL</label><span>${u.contacto_supervisor_mel || '—'}</span></div>
+        <div class="data-item"><label>UP Entrega</label><span>${u.up_punto_entrega || '—'}</span></div>
         ${u.descripcion ? `<div class="data-item full"><label>Descripción</label><span>${u.descripcion}</span></div>` : ''}
         ${u.justificacion ? `<div class="data-item full"><label>Justificación</label><span>${u.justificacion}</span></div>` : ''}
-        ${u.observaciones ? `<div class="data-item full"><label>Observaciones</label><span>${u.observaciones}</span></div>` : ''}
       </div>
       ${acciones}
     </div>`;
@@ -290,7 +313,7 @@ function renderCard(u, container) {
 }
 
 function toggleCard(id) {
-  document.getElementById('body-' + id).classList.toggle('open');
+  document.getElementById('body-' + id)?.classList.toggle('open');
 }
 
 async function accion(id, tipo) {
