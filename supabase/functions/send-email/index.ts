@@ -181,6 +181,9 @@ Deno.serve(async (req) => {
     const estadosNotificables: Record<string, string> = {
       aprobada: 'Solicitud Aprobada por Supervisor BHP',
       rechazada: 'Solicitud Rechazada por Supervisor BHP',
+      en_correccion: 'Corrección Solicitada por Supervisor BHP',
+      aprobado_supervisor: 'Solicitud Aprobada por Supervisor BHP',
+      rechazado_supervisor: 'Solicitud Rechazada por Supervisor BHP',
       en_transito_p3: 'En Tránsito hacia Patio 3',
       recibido_p3: 'Recibido en Patio 3',
       cerrado_entregado: 'Urgencia Cerrada — Entregada',
