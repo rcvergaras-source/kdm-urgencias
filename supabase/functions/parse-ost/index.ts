@@ -62,6 +62,8 @@ serve(async (req) => {
   "cantidad_total": "cantidad total de items",
   "conductor_titular": "nombre del conductor titular",
   "conductor_adicional": "nombre del conductor adicional o null",
+  "patente_tracto": "patente o placa del tracto/camión",
+  "patente_acoplado": "patente o placa del acoplado/remolque o null",
   "descripcion_carga": "descripción del material transportado"
 }`
             }

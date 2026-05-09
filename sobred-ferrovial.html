@@ -454,6 +454,14 @@ function renderOSTForm(u) {
           <label>Tipo de Equipo</label>
           <input type="text" id="ost_equipo-${u.id}" placeholder="Ej: CAMA BAJA hasta 20" />
         </div>
+        <div class="field">
+          <label>Patente Tracto</label>
+          <input type="text" id="ost_patente_tracto-${u.id}" placeholder="Ej: ABCD12" style="text-transform:uppercase" />
+        </div>
+        <div class="field">
+          <label>Patente Acoplado</label>
+          <input type="text" id="ost_patente_acoplado-${u.id}" placeholder="Ej: EFGH34" style="text-transform:uppercase" />
+        </div>
         <div class="field field-readonly">
           <label>OC (desde formulario)</label>
           <input type="text" id="ost_oc-${u.id}" value="${u.po_items || ''}" readonly />
@@ -581,9 +589,11 @@ async function processOSTFile(urgId, file) {
     set('solicitud',    parsed.n_solicitud);
     set('peso',         parsed.peso_total);
     set('cantidad',     parsed.cantidad_total);
-    set('conductor1',   parsed.conductor_titular);
-    set('conductor2',   parsed.conductor_adicional);
-    set('carga',        parsed.descripcion_carga);
+    set('conductor1',      parsed.conductor_titular);
+    set('conductor2',      parsed.conductor_adicional);
+    set('patente_tracto',  parsed.patente_tracto);
+    set('patente_acoplado',parsed.patente_acoplado);
+    set('carga',           parsed.descripcion_carga);
 
     if (parsed.ost_numero) {
       document.getElementById('trazOst-' + urgId).textContent = 'OST N° ' + parsed.ost_numero;
@@ -621,6 +631,8 @@ async function confirmarDespacho(id) {
     ost_fecha_salida:  get('fecha_salida'),
     ost_fecha_llegada: get('fecha_llegada'),
     ost_tramo:         [get('origen'), get('destino')].filter(Boolean).join(' / '),
+    ost_patente_tracto:   get('patente_tracto'),
+    ost_patente_acoplado: get('patente_acoplado'),
     ost_equipo:        get('equipo'),
     ost_solicitud:     get('solicitud'),
     ost_peso:          get('peso'),
