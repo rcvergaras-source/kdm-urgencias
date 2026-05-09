@@ -11,25 +11,24 @@
 :root {
   --bhp-orange: #E05E1B; --bhp-dark: #1A1A1A; --bhp-gray: #6B6B6B;
   --bhp-light: #F5F4F1; --bhp-white: #FFFFFF; --bhp-border: #E0DDD8;
-  --bhp-success: #2D7D46; --bhp-error: #C0392B; --kdm-green: #1D6338;
+  --bhp-error: #C0392B; --kdm-green: #1D6338;
 }
 body { font-family: 'DM Sans', sans-serif; background: var(--bhp-light); color: var(--bhp-dark); min-height: 100vh; }
 
+/* LOGIN */
 .login-screen { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 1.5rem; }
 .login-card { background: var(--bhp-white); border: 1px solid var(--bhp-border); border-radius: 12px; padding: 2.5rem 2rem; width: 100%; max-width: 400px; box-shadow: 0 4px 24px rgba(0,0,0,0.07); }
 .login-header { text-align: center; margin-bottom: 2rem; }
 .login-logo { display: flex; align-items: center; justify-content: center; gap: 0.75rem; margin-bottom: 1.25rem; }
-.logo-escondida { font-weight: 600; font-size: 1rem; color: var(--bhp-dark); }
 .logo-sep { width: 1px; height: 24px; background: var(--bhp-border); }
-.logo-bhp { font-weight: 600; font-size: 1rem; color: var(--bhp-orange); letter-spacing: 0.05em; }
 .login-role-badge { display: inline-block; background: #E8F5EE; color: var(--kdm-green); font-size: 0.7rem; font-weight: 600; padding: 0.2rem 0.7rem; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 0.75rem; border: 1px solid #A8D8B8; }
-.login-header h2 { font-size: 1.1rem; font-weight: 600; color: var(--bhp-dark); margin-bottom: 0.3rem; }
+.login-header h2 { font-size: 1.1rem; font-weight: 600; margin-bottom: 0.3rem; }
 .login-header p { font-size: 0.82rem; color: var(--bhp-gray); }
 .field { display: flex; flex-direction: column; gap: 0.35rem; margin-bottom: 1rem; }
-label { font-size: 0.78rem; font-weight: 500; color: var(--bhp-dark); }
+label { font-size: 0.78rem; font-weight: 500; }
 input[type="email"], input[type="password"], input[type="text"], textarea {
   width: 100%; padding: 0.65rem 0.85rem; border: 1.5px solid var(--bhp-border); border-radius: 6px;
-  font-family: 'DM Sans', sans-serif; font-size: 0.875rem; color: var(--bhp-dark); background: var(--bhp-white); transition: border-color 0.15s;
+  font-family: 'DM Sans', sans-serif; font-size: 0.875rem; background: var(--bhp-white); transition: border-color 0.15s;
 }
 input:focus, textarea:focus { outline: none; border-color: var(--kdm-green); box-shadow: 0 0 0 3px rgba(29,99,56,0.1); }
 textarea { resize: vertical; min-height: 80px; }
@@ -38,11 +37,10 @@ textarea { resize: vertical; min-height: 80px; }
 .login-error { background: #FEE; border: 1px solid #F5C6C6; border-radius: 6px; padding: 0.65rem 0.85rem; font-size: 0.8rem; color: var(--bhp-error); margin-bottom: 1rem; display: none; }
 .login-error.visible { display: block; }
 
+/* APP */
 .app { display: none; }
 .app.visible { display: block; }
-
 .header { background: var(--bhp-white); border-bottom: 3px solid var(--kdm-green); padding: 0.9rem 1.5rem; display: flex; align-items: center; gap: 1rem; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
-.header-logo { display: flex; align-items: center; gap: 0.6rem; }
 .header-divider { width: 1px; height: 24px; background: var(--bhp-border); }
 .header-section { font-size: 0.78rem; font-weight: 500; color: var(--bhp-gray); text-transform: uppercase; letter-spacing: 0.06em; }
 .header-right { margin-left: auto; display: flex; align-items: center; gap: 1rem; }
@@ -50,100 +48,116 @@ textarea { resize: vertical; min-height: 80px; }
 .btn-logout { background: transparent; border: 1px solid var(--bhp-border); border-radius: 6px; padding: 0.35rem 0.75rem; font-family: 'DM Sans', sans-serif; font-size: 0.75rem; color: var(--bhp-gray); cursor: pointer; transition: all 0.15s; }
 .btn-logout:hover { border-color: var(--bhp-error); color: var(--bhp-error); }
 
+/* CONTAINER & TABS */
 .container { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem; }
-.section-title-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem; }
-.section-title-bar h2 { font-size: 1.1rem; font-weight: 600; }
-.count-badge { background: var(--kdm-green); color: white; font-family: 'DM Mono', monospace; font-size: 0.75rem; padding: 0.2rem 0.6rem; border-radius: 4px; }
-
-/* TABS */
-.tabs {
-  display: flex;
-  gap: 0.25rem;
-  margin-bottom: 1.5rem;
-  border-bottom: 2px solid var(--bhp-border);
-}
-.tab {
-  padding: 0.6rem 1.1rem;
-  font-size: 0.82rem;
-  font-weight: 500;
-  color: var(--bhp-gray);
-  cursor: pointer;
-  border-bottom: 2px solid transparent;
-  margin-bottom: -2px;
-  transition: all 0.15s;
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-}
+.tabs { display: flex; gap: 0.25rem; margin-bottom: 1.5rem; border-bottom: 2px solid var(--bhp-border); }
+.tab { padding: 0.6rem 1.1rem; font-size: 0.82rem; font-weight: 500; color: var(--bhp-gray); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all 0.15s; display: flex; align-items: center; gap: 0.4rem; }
 .tab:hover { color: var(--bhp-dark); }
 .tab.active { color: var(--kdm-green); border-bottom-color: var(--kdm-green); }
-.tab-badge {
-  background: var(--kdm-green);
-  color: white;
-  font-size: 0.65rem;
-  font-weight: 700;
-  padding: 0.1rem 0.45rem;
-  border-radius: 20px;
-  min-width: 18px;
-  text-align: center;
-}
+.tab-badge { background: var(--kdm-green); color: white; font-size: 0.65rem; font-weight: 700; padding: 0.1rem 0.45rem; border-radius: 20px; min-width: 18px; text-align: center; }
 .tab-badge.gray { background: var(--bhp-border); color: var(--bhp-gray); }
 
-.urg-card { background: var(--bhp-white); border: 1px solid var(--bhp-border); border-radius: 10px; margin-bottom: 1rem; overflow: hidden; }
-.urg-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.08); }
-.urg-card-header { padding: 1rem 1.25rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; cursor: pointer; flex-wrap: wrap; }
-.urg-card-header:hover { background: #FAFAF8; }
+/* CARDS */
+.urg-card { background: var(--bhp-white); border: 1px solid var(--bhp-border); border-radius: 10px; margin-bottom: 0.75rem; cursor: pointer; transition: box-shadow 0.15s, transform 0.1s; display: flex; align-items: center; padding: 1rem 1.25rem; gap: 1rem; }
+.urg-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.1); transform: translateY(-1px); }
+.urg-card-info { flex: 1; min-width: 0; }
 .urg-id { font-family: 'DM Mono', monospace; font-size: 0.9rem; font-weight: 500; color: var(--kdm-green); }
 .urg-meta { font-size: 0.78rem; color: var(--bhp-gray); margin-top: 0.2rem; }
-.urg-badges { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+.urg-badges { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; flex-shrink: 0; }
 .status-pill { font-size: 0.65rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; padding: 0.25rem 0.65rem; border-radius: 20px; }
-.status-pill.despachado_ferrovial { background: #E8F5EE; color: var(--kdm-green); border: 1px solid #A8D8B8; }
+.status-pill.despachado_ferrovial { background: #E8F0FF; color: #2A5BA8; border: 1px solid #B0C8FF; }
 .status-pill.completado { background: #E8F5EE; color: var(--kdm-green); border: 1px solid #A8D8B8; }
 .escolta-pill { background: #FFF8E8; color: #92610A; border: 1px solid #F5DFA0; font-size: 0.65rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; padding: 0.25rem 0.65rem; border-radius: 20px; }
+.card-arrow { color: var(--bhp-gray); font-size: 1.2rem; flex-shrink: 0; }
 
-.urg-card-body { display: none; border-top: 1px solid var(--bhp-border); padding: 1.25rem; }
-.urg-card-body.open { display: block; }
+/* RESUMEN TABLE */
+.resumen-wrap { overflow-x: auto; border-radius: 10px; border: 1px solid var(--bhp-border); }
+.resumen-table { width: 100%; border-collapse: collapse; background: #fff; font-size: 0.82rem; }
+.resumen-table thead tr { background: #1A1A1A; color: #fff; }
+.resumen-table th { padding: 0.75rem 1rem; text-align: left; font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.08em; white-space: nowrap; }
+.resumen-table tbody tr { border-top: 1px solid var(--bhp-border); cursor: pointer; transition: background 0.1s; }
+.resumen-table tbody tr:nth-child(even) { background: #FAFAF8; }
+.resumen-table tbody tr:hover { background: #EFF7F2; }
+.resumen-table td { padding: 0.65rem 1rem; }
 
-.ferrovial-box { background: #1A1A1A; border-radius: 8px; padding: 1rem 1.25rem; margin-bottom: 1.25rem; }
+/* MODAL */
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 200; display: flex; align-items: flex-start; justify-content: center; padding: 1.5rem 1rem 2rem; overflow-y: auto; opacity: 0; pointer-events: none; transition: opacity 0.2s; }
+.modal-overlay.visible { opacity: 1; pointer-events: all; }
+.modal { background: var(--bhp-white); border-radius: 14px; width: 100%; max-width: 780px; box-shadow: 0 20px 60px rgba(0,0,0,0.25); display: flex; flex-direction: column; max-height: calc(100vh - 3rem); transform: translateY(20px); transition: transform 0.2s; }
+.modal-overlay.visible .modal { transform: translateY(0); }
+
+.modal-header { padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--bhp-border); display: flex; align-items: center; gap: 1rem; flex-shrink: 0; }
+.modal-header-title { flex: 1; }
+.modal-num { font-family: 'DM Mono', monospace; font-size: 1.1rem; font-weight: 600; color: var(--kdm-green); }
+.modal-close { background: none; border: 1px solid var(--bhp-border); border-radius: 6px; width: 32px; height: 32px; font-size: 1rem; cursor: pointer; color: var(--bhp-gray); transition: all 0.15s; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.modal-close:hover { border-color: var(--bhp-error); color: var(--bhp-error); }
+
+.modal-body { padding: 1.5rem; overflow-y: auto; flex: 1; }
+
+.modal-section { margin-bottom: 1.75rem; }
+.modal-section:last-child { margin-bottom: 0; }
+.modal-section-title { font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--bhp-gray); border-bottom: 1px solid var(--bhp-border); padding-bottom: 0.5rem; margin-bottom: 1rem; }
+
+.info-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.85rem; }
+.info-item label { font-size: 0.62rem; color: var(--bhp-gray); text-transform: uppercase; letter-spacing: 0.08em; display: block; margin-bottom: 0.2rem; }
+.info-item span { font-size: 0.85rem; color: var(--bhp-dark); }
+.info-full { grid-column: 1 / -1; }
+
+.medidas-alert { background: #FFFBE0; border: 1px solid #F0D840; border-radius: 6px; padding: 0.85rem 1rem; margin-bottom: 1rem; font-size: 0.85rem; color: #5A4A00; }
+.escolta-alert { background: #FFF8E8; border: 1px solid #F5DFA0; border-radius: 6px; padding: 0.85rem 1rem; margin-bottom: 1rem; font-size: 0.85rem; color: #7A5000; font-weight: 600; }
+.obs-sup-box { background: #FFF8E8; border: 1px solid #F5DFA0; border-radius: 6px; padding: 0.65rem 0.85rem; }
+.obs-sup-box label { color: #92610A !important; }
+
+.ferrovial-box { background: #1A1A1A; border-radius: 8px; padding: 1.1rem 1.25rem; }
 .ferrovial-box-title { font-size: 0.65rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #FFD100; margin-bottom: 0.75rem; }
 .ferrovial-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem; }
 .ferrovial-item label { font-size: 0.62rem; color: rgba(255,255,255,0.45); text-transform: uppercase; letter-spacing: 0.08em; display: block; margin-bottom: 0.15rem; }
 .ferrovial-item span { font-size: 0.82rem; color: rgba(255,255,255,0.9); font-family: 'DM Mono', monospace; }
 .ferrovial-full { grid-column: 1 / -1; }
+.traz-line { font-size: 0.75rem; color: var(--bhp-gray); padding: 0.5rem 0 0; }
+.traz-line strong { color: var(--kdm-green); font-family: 'DM Mono', monospace; }
 
-.traz-box { background: #F8F8F6; border: 1px solid var(--bhp-border); border-left: 3px solid var(--kdm-green); border-radius: 6px; padding: 0.65rem 1rem; margin-bottom: 1.25rem; font-size: 0.8rem; color: var(--bhp-gray); }
-.traz-box strong { color: var(--kdm-green); font-family: 'DM Mono', monospace; }
+.kdm-closure-box { background: #E8F5EE; border: 1px solid #A8D8B8; border-radius: 8px; padding: 1rem 1.25rem; }
+.kdm-closure-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem; margin-bottom: 0.75rem; }
+.kdm-closure-item label { font-size: 0.62rem; color: #155228; text-transform: uppercase; letter-spacing: 0.08em; display: block; margin-bottom: 0.15rem; font-weight: 600; }
+.kdm-closure-item span { font-size: 0.85rem; color: #0F3D22; font-weight: 500; }
+.respaldo-link { display: inline-flex; align-items: center; gap: 0.4rem; background: var(--kdm-green); color: white; border-radius: 5px; padding: 0.4rem 0.85rem; font-size: 0.8rem; font-weight: 600; text-decoration: none; }
+.respaldo-link:hover { background: #155228; }
 
-.data-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.85rem; margin-bottom: 1.25rem; }
-.data-item label { font-size: 0.65rem; color: var(--bhp-gray); text-transform: uppercase; letter-spacing: 0.08em; display: block; margin-bottom: 0.2rem; }
-.data-item span { font-size: 0.85rem; }
-.full { grid-column: 1 / -1; }
+/* HISTORIAL */
+.historial { position: relative; padding-left: 2rem; }
+.historial::before { content: ''; position: absolute; left: 0.65rem; top: 0.6rem; bottom: 0.6rem; width: 2px; background: var(--bhp-border); }
+.hist-event { position: relative; margin-bottom: 1.25rem; }
+.hist-event:last-child { margin-bottom: 0; }
+.hist-dot { position: absolute; left: -1.65rem; top: 0.1rem; width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; border: 2px solid var(--bhp-white); }
+.hist-date { font-size: 0.7rem; color: var(--bhp-gray); font-family: 'DM Mono', monospace; margin-bottom: 0.15rem; }
+.hist-title { font-size: 0.85rem; font-weight: 600; color: var(--bhp-dark); margin-bottom: 0.2rem; }
+.hist-detail { font-size: 0.78rem; color: var(--bhp-gray); }
 
-/* ALERTA: entrega directa */
-.alerta-directa { background: #FFF3ED; border: 2px solid var(--bhp-orange); border-radius: 8px; padding: 1rem 1.25rem; margin-bottom: 1.25rem; font-size: 0.85rem; color: #7A3010; }
-.alerta-directa strong { display: block; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--bhp-orange); margin-bottom: 0.35rem; }
-
-.action-area { border-top: 1px solid var(--bhp-border); padding-top: 1.25rem; }
+/* MODAL FOOTER */
+.modal-footer { border-top: 2px solid var(--bhp-border); padding: 1.25rem 1.5rem; background: #FAFAF8; flex-shrink: 0; }
+.modal-footer-title { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--bhp-gray); margin-bottom: 1rem; }
+.alerta-directa { background: #FFF3ED; border: 2px solid var(--bhp-orange); border-radius: 8px; padding: 0.85rem 1rem; margin-bottom: 1rem; font-size: 0.82rem; color: #7A3010; }
+.alerta-directa strong { display: block; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--bhp-orange); margin-bottom: 0.2rem; }
 .action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
 .action-grid .field { margin: 0; }
-.action-grid label { font-size: 0.75rem; font-weight: 500; display: block; margin-bottom: 0.4rem; }
-
-/* Upload respaldo */
-.upload-respaldo { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem; flex-wrap: wrap; }
-.upload-btn-green { background: var(--kdm-green); color: white; border: none; border-radius: 6px; padding: 0.55rem 1rem; font-family: 'DM Sans', sans-serif; font-size: 0.82rem; font-weight: 600; cursor: pointer; transition: background 0.15s; }
-.upload-btn-green:hover { background: #155228; }
-.file-name { font-size: 0.78rem; color: var(--bhp-gray); }
-
-.btn-complete { background: var(--kdm-green); color: white; border: none; border-radius: 6px; padding: 0.65rem 1.25rem; font-family: 'DM Sans', sans-serif; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: background 0.15s; }
+.drop-zone-sm { border: 2px dashed var(--bhp-border); border-radius: 8px; padding: 1rem; text-align: center; cursor: pointer; transition: all 0.2s; position: relative; margin-bottom: 1rem; }
+.drop-zone-sm:hover, .drop-zone-sm.drag-over { border-color: var(--kdm-green); background: #F0F7F3; }
+.drop-zone-sm input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+.drop-zone-sm .drop-txt { font-size: 0.82rem; color: var(--bhp-gray); }
+.drop-zone-sm .drop-txt span { color: var(--kdm-green); text-decoration: underline; }
+.drop-zone-sm .file-ok { font-size: 0.82rem; color: var(--kdm-green); font-weight: 600; }
+.btn-complete { background: var(--kdm-green); color: white; border: none; border-radius: 6px; padding: 0.75rem 1.5rem; font-family: 'DM Sans', sans-serif; font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: background 0.15s; width: 100%; }
 .btn-complete:hover { background: #155228; }
+.btn-complete:disabled { background: #9CAE9E; cursor: not-allowed; }
 
 .empty-state { text-align: center; padding: 4rem 2rem; }
 .empty-state p { color: var(--bhp-gray); font-size: 0.9rem; }
 .loading-state { text-align: center; padding: 3rem; color: var(--bhp-gray); }
 
 @media (max-width: 600px) {
-  .data-grid, .ferrovial-grid, .action-grid { grid-template-columns: 1fr; }
-  .full, .ferrovial-full { grid-column: span 1; }
+  .info-grid, .ferrovial-grid, .kdm-closure-grid, .action-grid { grid-template-columns: 1fr; }
+  .info-full, .ferrovial-full { grid-column: span 1; }
 }
 </style>
 </head>
@@ -153,9 +167,9 @@ textarea { resize: vertical; min-height: 80px; }
   <div class="login-card">
     <div class="login-header">
       <div class="login-logo">
-        <span class="logo-escondida">ESCONDIDA</span>
+        <span style="font-weight:600;font-size:1rem;">ESCONDIDA</span>
         <div class="logo-sep"></div>
-        <span class="logo-bhp">BHP</span>
+        <span style="font-weight:600;font-size:1rem;color:#E05E1B;letter-spacing:0.05em;">BHP</span>
       </div>
       <div class="login-role-badge">Analista KDM · Sobredimensión</div>
       <h2>Acceso al Panel</h2>
@@ -170,9 +184,9 @@ textarea { resize: vertical; min-height: 80px; }
 
 <div class="app" id="appScreen">
   <header class="header">
-    <div class="header-logo">
-      <span style="font-weight:600;font-size:1rem;color:#1A1A1A;">ESCONDIDA</span>
-      <div class="logo-sep"></div>
+    <div style="display:flex;align-items:center;gap:0.6rem;">
+      <span style="font-weight:600;font-size:1rem;">ESCONDIDA</span>
+      <div class="header-divider"></div>
       <span style="font-weight:600;font-size:1rem;color:#E05E1B;letter-spacing:0.05em;">BHP</span>
     </div>
     <div class="header-divider"></div>
@@ -184,23 +198,34 @@ textarea { resize: vertical; min-height: 80px; }
   </header>
 
   <div class="container">
-    <!-- TABS -->
     <div class="tabs">
       <div class="tab active" onclick="switchTab('despachado_ferrovial')" id="tab_despachado_ferrovial">
-        Pendiente rebaja
-        <span class="tab-badge" id="badge_despachado_ferrovial">0</span>
+        Pendiente rebaja <span class="tab-badge" id="badge_despachado_ferrovial">0</span>
       </div>
       <div class="tab" onclick="switchTab('completado')" id="tab_completado">
-        Completados
-        <span class="tab-badge gray" id="badge_completado">0</span>
+        Completados <span class="tab-badge gray" id="badge_completado">0</span>
       </div>
       <div class="tab" onclick="switchTab('resumen')" id="tab_resumen">
-        Resumen general
-        <span class="tab-badge gray" id="badge_resumen">0</span>
+        Resumen general <span class="tab-badge gray" id="badge_resumen">0</span>
       </div>
     </div>
     <div id="loadingState" class="loading-state">Cargando urgencias...</div>
     <div id="listaUrgencias"></div>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModalOutside(event)">
+  <div class="modal" id="modal">
+    <div class="modal-header">
+      <div class="modal-header-title">
+        <div class="modal-num" id="modalNum">—</div>
+        <div id="modalPill" style="margin-top:0.3rem;"></div>
+      </div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+    <div class="modal-footer" id="modalFooter" style="display:none"></div>
   </div>
 </div>
 
@@ -218,7 +243,10 @@ const VALID_USERS = {
 
 let currentTab = 'despachado_ferrovial';
 let allUrgencias = [];
+let modalUrgId   = null;
+let selectedFile = null;
 
+// ── AUTH ──────────────────────────────────────────────────────────────
 function doLogin() {
   const email = document.getElementById('loginEmail').value.trim();
   const pass  = document.getElementById('loginPass').value;
@@ -240,7 +268,6 @@ function doLogout() {
   document.getElementById('appScreen').classList.remove('visible');
 }
 
-// Restaurar sesión al cargar
 window.addEventListener('load', () => {
   const saved = sessionStorage.getItem('sobred_kdm_session');
   if (saved) {
@@ -250,125 +277,52 @@ window.addEventListener('load', () => {
   }
 });
 
+// ── DATA ──────────────────────────────────────────────────────────────
 async function loadUrgencias() {
   document.getElementById('loadingState').style.display = 'block';
   document.getElementById('listaUrgencias').innerHTML = '';
-
   const { data } = await sb.from('urgencias').select('*')
     .eq('tipo', 'sobredimension')
     .order('created_at', { ascending: false });
-
   document.getElementById('loadingState').style.display = 'none';
-
   allUrgencias = data || [];
   updateBadges();
   renderTab();
 }
 
 function updateBadges() {
-  const pendientes = allUrgencias.filter(u => u.estado === 'despachado_ferrovial').length;
-  const completados = allUrgencias.filter(u => u.estado === 'completado').length;
-
-  document.getElementById('badge_despachado_ferrovial').textContent = pendientes;
-  document.getElementById('badge_completado').textContent = completados;
+  const pend = allUrgencias.filter(u => u.estado === 'despachado_ferrovial').length;
+  const comp = allUrgencias.filter(u => u.estado === 'completado').length;
+  document.getElementById('badge_despachado_ferrovial').textContent = pend;
+  document.getElementById('badge_completado').textContent = comp;
   document.getElementById('badge_resumen').textContent = allUrgencias.length;
-
-  const badgeComp = document.getElementById('badge_completado');
-  badgeComp.className = completados > 0 ? 'tab-badge' : 'tab-badge gray';
-  const badgeRes = document.getElementById('badge_resumen');
-  badgeRes.className = allUrgencias.length > 0 ? 'tab-badge' : 'tab-badge gray';
+  document.getElementById('badge_completado').className = comp > 0 ? 'tab-badge' : 'tab-badge gray';
+  document.getElementById('badge_resumen').className = allUrgencias.length > 0 ? 'tab-badge' : 'tab-badge gray';
 }
 
 function estadoLabel(s) {
-  return {
-    pendiente_si:         'Pend. aprobación SI',
-    rechazada_si:         'Rechazada por SI',
-    pendiente_aprobacion: 'Pend. Supervisor BHP',
-    en_correccion:        'En corrección',
-    aprobado_supervisor:  'Aprobado Supervisor',
-    rechazado_supervisor: 'Rechazado Supervisor',
-    despachado_ferrovial: 'Despachado Ferrovial',
-    completado:           'Rebaja completada',
-  }[s] || s;
+  return { pendiente_si:'Pend. aprobación SI', rechazada_si:'Rechazada SI',
+    pendiente_aprobacion:'Pend. Supervisor BHP', en_correccion:'En corrección',
+    aprobado_supervisor:'Aprobado Supervisor', rechazado_supervisor:'Rechazado Supervisor',
+    despachado_ferrovial:'Despachado Ferrovial', completado:'Rebaja completada' }[s] || s;
 }
 
-function renderTab() {
-  const lista = document.getElementById('listaUrgencias');
-  lista.innerHTML = '';
-
-  if (currentTab === 'resumen') {
-    renderResumen(lista);
-    return;
-  }
-
-  const filtered = allUrgencias.filter(u => u.estado === currentTab);
-  if (!filtered.length) {
-    lista.innerHTML = `<div class="empty-state"><p>📭 No hay urgencias en este estado.</p></div>`;
-    return;
-  }
-  filtered.forEach(u => renderCard(u, lista));
-}
-
-function renderResumen(lista) {
-  if (!allUrgencias.length) {
-    lista.innerHTML = `<div class="empty-state"><p>📭 No hay urgencias registradas.</p></div>`;
-    return;
-  }
-
-  const estadoPill = (s) => {
-    const colores = {
-      pendiente_si:         'background:#F3F0FF;color:#5B21B6',
-      rechazada_si:         'background:#FEE;color:#C0392B',
-      pendiente_aprobacion: 'background:#FFF8E8;color:#92610A',
-      en_correccion:        'background:#FFF8E8;color:#B45309',
-      aprobado_supervisor:  'background:#E8F5EE;color:#1D6338',
-      rechazado_supervisor: 'background:#FEE;color:#C0392B',
-      despachado_ferrovial: 'background:#E8F0FF;color:#2A5BA8',
-      completado:           'background:#E8F5EE;color:#1D6338',
-    };
-    const css = colores[s] || 'background:#F0F0F0;color:#555';
-    return `<span style="font-size:0.65rem;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;padding:0.2rem 0.5rem;border-radius:12px;white-space:nowrap;${css}">${estadoLabel(s)}</span>`;
+function estadoPillHtml(s) {
+  const map = {
+    pendiente_si:'background:#F3F0FF;color:#5B21B6;border-color:#C4B5FD',
+    rechazada_si:'background:#FEE;color:#C0392B;border-color:#F5C6C6',
+    pendiente_aprobacion:'background:#FFF8E8;color:#92610A;border-color:#F5DFA0',
+    en_correccion:'background:#FFF8E8;color:#B45309;border-color:#FCD34D',
+    aprobado_supervisor:'background:#FFFBE0;color:#8A6E00;border-color:#F0D840',
+    rechazado_supervisor:'background:#FEE;color:#C0392B;border-color:#F5C6C6',
+    despachado_ferrovial:'background:#E8F0FF;color:#2A5BA8;border-color:#B0C8FF',
+    completado:'background:#E8F5EE;color:#1D6338;border-color:#A8D8B8',
   };
-
-  const table = document.createElement('div');
-  table.style.cssText = 'overflow-x:auto;';
-  table.innerHTML = `
-    <table style="width:100%;border-collapse:collapse;background:#fff;border:1px solid #E0DDD8;border-radius:10px;overflow:hidden;font-size:0.82rem;">
-      <thead>
-        <tr style="background:#1A1A1A;color:#fff;">
-          <th style="padding:0.75rem 1rem;text-align:left;font-size:0.65rem;text-transform:uppercase;letter-spacing:0.08em;white-space:nowrap;">N° Urgencia</th>
-          <th style="padding:0.75rem 1rem;text-align:left;font-size:0.65rem;text-transform:uppercase;letter-spacing:0.08em;white-space:nowrap;">Fecha</th>
-          <th style="padding:0.75rem 1rem;text-align:left;font-size:0.65rem;text-transform:uppercase;letter-spacing:0.08em;white-space:nowrap;">Gerencia</th>
-          <th style="padding:0.75rem 1rem;text-align:left;font-size:0.65rem;text-transform:uppercase;letter-spacing:0.08em;white-space:nowrap;">Proveedor</th>
-          <th style="padding:0.75rem 1rem;text-align:left;font-size:0.65rem;text-transform:uppercase;letter-spacing:0.08em;white-space:nowrap;">PO / Ítems</th>
-          <th style="padding:0.75rem 1rem;text-align:left;font-size:0.65rem;text-transform:uppercase;letter-spacing:0.08em;white-space:nowrap;">Escolta</th>
-          <th style="padding:0.75rem 1rem;text-align:left;font-size:0.65rem;text-transform:uppercase;letter-spacing:0.08em;white-space:nowrap;">Estado</th>
-          <th style="padding:0.75rem 1rem;text-align:left;font-size:0.65rem;text-transform:uppercase;letter-spacing:0.08em;white-space:nowrap;">OST N°</th>
-          <th style="padding:0.75rem 1rem;text-align:left;font-size:0.65rem;text-transform:uppercase;letter-spacing:0.08em;white-space:nowrap;">SAP 261</th>
-        </tr>
-      </thead>
-      <tbody>
-        ${allUrgencias.map((u, i) => {
-          const num  = u.numero_urg || ('SOBRED-' + String(u.id).slice(0, 8));
-          const fecha = u.fecha_solicitud || new Date(u.created_at).toLocaleDateString('es-CL');
-          const bg = i % 2 === 0 ? '#fff' : '#FAFAF8';
-          return `<tr style="border-top:1px solid #E0DDD8;background:${bg};">
-            <td style="padding:0.65rem 1rem;font-family:'DM Mono',monospace;color:#1D6338;font-weight:500;">${num}</td>
-            <td style="padding:0.65rem 1rem;white-space:nowrap;">${fecha}</td>
-            <td style="padding:0.65rem 1rem;">${u.gerencia || '—'}</td>
-            <td style="padding:0.65rem 1rem;">${u.nombre_proveedor || '—'}</td>
-            <td style="padding:0.65rem 1rem;font-family:'DM Mono',monospace;font-size:0.78rem;">${u.po_items || '—'}</td>
-            <td style="padding:0.65rem 1rem;">${u.requiere_escolta === 'si' ? '🚨 Sí' : 'No'}</td>
-            <td style="padding:0.65rem 1rem;">${estadoPill(u.estado)}</td>
-            <td style="padding:0.65rem 1rem;font-family:'DM Mono',monospace;font-size:0.78rem;">${u.ost_numero || '—'}</td>
-            <td style="padding:0.65rem 1rem;font-family:'DM Mono',monospace;font-size:0.78rem;">${u.sap_mov261 || '—'}</td>
-          </tr>`;
-        }).join('')}
-      </tbody>
-    </table>`;
-  lista.appendChild(table);
+  const css = map[s] || 'background:#F0F0F0;color:#555;border-color:#DDD';
+  return `<span style="display:inline-block;font-size:0.65rem;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;padding:0.22rem 0.6rem;border-radius:20px;border:1px solid;${css}">${estadoLabel(s)}</span>`;
 }
 
+// ── TABS ──────────────────────────────────────────────────────────────
 function switchTab(tab) {
   currentTab = tab;
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
@@ -376,115 +330,360 @@ function switchTab(tab) {
   renderTab();
 }
 
-function renderCard(u, container) {
-  const num   = u.numero_urg || ('SOBRED-' + String(u.id).slice(0, 8));
-  const fecha  = new Date(u.created_at).toLocaleString('es-CL');
-  const escoltaBadge = u.requiere_escolta === 'si' ? `<span class="escolta-pill">🚨 Escolta</span>` : '';
-  const estadoLabel  = u.estado === 'completado' ? 'Rebaja completada' : 'Despachado — pendiente rebaja';
+function renderTab() {
+  const lista = document.getElementById('listaUrgencias');
+  lista.innerHTML = '';
+  if (currentTab === 'resumen') { renderResumen(lista); return; }
 
-  const ferrovialInfo = `
-    <div class="ferrovial-box">
-      <div class="ferrovial-box-title">🚛 Datos Ferrovial · OST</div>
-      <div class="ferrovial-grid">
-        <div class="ferrovial-item"><label>N° OST</label><span>${u.ost_numero || '—'}</span></div>
-        <div class="ferrovial-item"><label>N° OM</label><span>${u.ost_om || '—'}</span></div>
-        <div class="ferrovial-item"><label>N° Solicitud Ferrovial</label><span>${u.ost_solicitud || '—'}</span></div>
-        <div class="ferrovial-item"><label>Fecha Salida</label><span>${u.ost_fecha_salida || '—'}</span></div>
-        <div class="ferrovial-item"><label>Fecha Llegada</label><span>${u.ost_fecha_llegada || '—'}</span></div>
-        <div class="ferrovial-item"><label>Tramo</label><span>${u.ost_tramo || '—'}</span></div>
-        <div class="ferrovial-item"><label>Tipo Equipo</label><span>${u.ost_equipo || '—'}</span></div>
-        <div class="ferrovial-item"><label>Peso Total</label><span>${u.ost_peso || '—'} TON</span></div>
-        <div class="ferrovial-item"><label>Conductor Titular</label><span>${u.ost_conductor1 || '—'}</span></div>
-        ${u.ost_conductor2 ? `<div class="ferrovial-item ferrovial-full"><label>Conductor Adicional</label><span>${u.ost_conductor2}</span></div>` : ''}
-        ${u.ost_obs ? `<div class="ferrovial-item ferrovial-full"><label>Observaciones Ferrovial</label><span style="color:rgba(255,255,255,0.7);font-family:'DM Sans',sans-serif;font-size:0.82rem;">${u.ost_obs}</span></div>` : ''}
-      </div>
-    </div>
-    <div class="traz-box">
-      🔗 Trazabilidad: <strong>${u.ost_trazabilidad || num + ' → OST ' + (u.ost_numero || '—')}</strong>
-    </div>`;
-
-  const accionesHTML = u.estado !== 'completado' ? `
-    <div class="action-area">
-      <div class="alerta-directa">
-        <strong>⚡ Entrega directa a cliente — sin paso por P3</strong>
-        Ferrovial entrega directamente al área solicitante. KDM solo debe realizar la rebaja sistémica y cargar el archivo de respaldo.
-      </div>
-      <div class="action-grid">
-        <div class="field">
-          <label>N° Movimiento SAP 261</label>
-          <input type="text" id="sap-${u.id}" placeholder="Ej: 4900012345" />
-        </div>
-        <div class="field">
-          <label>N° Guía de Despacho</label>
-          <input type="text" id="guia-${u.id}" placeholder="Guía del proveedor" />
-        </div>
-      </div>
-      <div class="upload-respaldo">
-        <input type="file" id="respaldo-${u.id}" accept=".pdf,image/*" style="display:none" onchange="setFileName('${u.id}')" />
-        <button class="upload-btn-green" onclick="document.getElementById('respaldo-${u.id}').click()">📎 Cargar archivo respaldo</button>
-        <span class="file-name" id="fileName-${u.id}">Sin archivo seleccionado</span>
-      </div>
-      <button class="btn-complete" onclick="completar('${u.id}')">✓ Confirmar Rebaja en Sistema</button>
-    </div>` :
-    `<div style="background:#E8F5EE;border:1px solid #A8D8B8;border-radius:8px;padding:1rem;font-size:0.85rem;color:#1D6338;margin-top:0.5rem;">
-      ✓ <strong>Rebaja completada</strong> · SAP 261: ${u.sap_mov261 || '—'} · Guía: ${u.guia_despacho || '—'}
-    </div>`;
-
-  const div = document.createElement('div');
-  div.className = 'urg-card';
-  div.innerHTML = `
-    <div class="urg-card-header" onclick="this.nextElementSibling.classList.toggle('open')">
-      <div>
+  const filtered = allUrgencias.filter(u => u.estado === currentTab);
+  if (!filtered.length) {
+    lista.innerHTML = `<div class="empty-state"><p>📭 No hay urgencias en este estado.</p></div>`;
+    return;
+  }
+  filtered.forEach(u => {
+    const num   = u.numero_urg || ('SOBRED-' + String(u.id).slice(0, 8));
+    const fecha = new Date(u.created_at).toLocaleString('es-CL');
+    const escoltaBadge = u.requiere_escolta === 'si' ? `<span class="escolta-pill">🚨 Escolta</span>` : '';
+    const label = u.estado === 'completado' ? 'Rebaja completada' : 'Pendiente rebaja';
+    const div = document.createElement('div');
+    div.className = 'urg-card';
+    div.onclick = () => openModal(u.id);
+    div.innerHTML = `
+      <div class="urg-card-info">
         <div class="urg-id">${num}</div>
-        <div class="urg-meta">${u.gerencia || '—'} · ${u.nombre_superintendente || '—'} · ${fecha}</div>
+        <div class="urg-meta">${u.nombre_proveedor || '—'} · ${u.gerencia || '—'} · ${fecha}</div>
       </div>
-      <div class="urg-badges">${escoltaBadge}<span class="status-pill ${u.estado}">${estadoLabel}</span></div>
-    </div>
-    <div class="urg-card-body">
-      ${ferrovialInfo}
-      <div class="data-grid">
-        <div class="data-item"><label>Proveedor</label><span>${u.nombre_proveedor || '—'}</span></div>
-        <div class="data-item"><label>OC / Ítems</label><span>${u.po_items || '—'}</span></div>
-        <div class="data-item"><label>Supervisor MEL</label><span>${u.nombre_supervisor_mel || '—'}</span></div>
-        <div class="data-item"><label>UP Entrega</label><span>${u.up_punto_entrega || '—'}</span></div>
-        <div class="data-item"><label>Contacto MEL</label><span>${u.contacto_supervisor_mel || '—'}</span></div>
-        <div class="data-item"><label>Fecha Solicitud</label><span>${u.fecha_solicitud || '—'}</span></div>
-        ${u.descripcion ? `<div class="data-item full"><label>Descripción Carga</label><span>${u.descripcion}</span></div>` : ''}
+      <div class="urg-badges">
+        ${escoltaBadge}
+        <span class="status-pill ${u.estado}">${label}</span>
       </div>
-      ${accionesHTML}
+      <span class="card-arrow">›</span>`;
+    lista.appendChild(div);
+  });
+}
+
+function renderResumen(lista) {
+  if (!allUrgencias.length) {
+    lista.innerHTML = `<div class="empty-state"><p>📭 No hay urgencias registradas.</p></div>`;
+    return;
+  }
+  const wrap = document.createElement('div');
+  wrap.className = 'resumen-wrap';
+  wrap.innerHTML = `
+    <table class="resumen-table">
+      <thead><tr>
+        <th>N° Urgencia</th><th>Fecha</th><th>Gerencia</th><th>Proveedor</th>
+        <th>PO / Ítems</th><th>Escolta</th><th>Estado</th><th>OST N°</th><th>SAP 261</th>
+      </tr></thead>
+      <tbody>
+        ${allUrgencias.map(u => {
+          const num   = u.numero_urg || ('SOBRED-' + String(u.id).slice(0, 8));
+          const fecha = u.fecha_solicitud || new Date(u.created_at).toLocaleDateString('es-CL');
+          return `<tr onclick="openModal('${u.id}')">
+            <td style="font-family:'DM Mono',monospace;color:#1D6338;font-weight:500;">${num}</td>
+            <td style="white-space:nowrap;">${fecha}</td>
+            <td>${u.gerencia || '—'}</td>
+            <td>${u.nombre_proveedor || '—'}</td>
+            <td style="font-family:'DM Mono',monospace;font-size:0.78rem;">${u.po_items || '—'}</td>
+            <td>${u.requiere_escolta === 'si' ? '🚨 Sí' : 'No'}</td>
+            <td>${estadoPillHtml(u.estado)}</td>
+            <td style="font-family:'DM Mono',monospace;font-size:0.78rem;">${u.ost_numero || '—'}</td>
+            <td style="font-family:'DM Mono',monospace;font-size:0.78rem;">${u.sap_mov261 || '—'}</td>
+          </tr>`;
+        }).join('')}
+      </tbody>
+    </table>`;
+  lista.appendChild(wrap);
+}
+
+// ── MODAL ──────────────────────────────────────────────────────────────
+function openModal(id) {
+  const u = allUrgencias.find(x => x.id === id || String(x.id) === String(id));
+  if (!u) return;
+  modalUrgId   = u.id;
+  selectedFile = null;
+
+  const num = u.numero_urg || ('SOBRED-' + String(u.id).slice(0, 8));
+  document.getElementById('modalNum').textContent  = num;
+  document.getElementById('modalPill').innerHTML   = estadoPillHtml(u.estado);
+  document.getElementById('modalBody').innerHTML   = buildModalBody(u, num);
+
+  const footer = document.getElementById('modalFooter');
+  if (u.estado === 'despachado_ferrovial') {
+    footer.style.display = 'block';
+    footer.innerHTML = buildFooter();
+  } else {
+    footer.style.display = 'none';
+  }
+
+  document.getElementById('modalOverlay').classList.add('visible');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('visible');
+  document.body.style.overflow = '';
+  modalUrgId = null; selectedFile = null;
+}
+function closeModalOutside(e) { if (e.target === document.getElementById('modalOverlay')) closeModal(); }
+
+function v(x) { return x || '—'; }
+
+function buildModalBody(u, num) {
+  // ── Sección 1: Datos de la Solicitud ──────────────────────────────
+  const sec1 = `
+    <div class="modal-section">
+      <div class="modal-section-title">1 · Datos de la Solicitud</div>
+      <div class="info-grid">
+        <div class="info-item"><label>Fecha Solicitud</label><span>${v(u.fecha_solicitud)}</span></div>
+        <div class="info-item"><label>Gerencia</label><span>${v(u.gerencia)}</span></div>
+        <div class="info-item"><label>Superintendencia</label><span>${v(u.superintendencia)}</span></div>
+        <div class="info-item"><label>Nombre Superintendente</label><span>${v(u.nombre_superintendente)}</span></div>
+        <div class="info-item"><label>CC / WBS</label><span>${v(u.cc_wbs)}</span></div>
+        <div class="info-item"><label>SI que activa</label><span>${v(u.nombre_si)}</span></div>
+        <div class="info-item"><label>Correo SI</label><span>${v(u.correo_si)}</span></div>
+        ${u.nombre_solicitante ? `<div class="info-item"><label>Nombre Solicitante</label><span>${u.nombre_solicitante}</span></div>` : ''}
+        ${u.correo_solicitante ? `<div class="info-item"><label>Correo Solicitante</label><span>${u.correo_solicitante}</span></div>` : ''}
+        ${u.telefono_solicitante ? `<div class="info-item"><label>Teléfono Solicitante</label><span>${u.telefono_solicitante}</span></div>` : ''}
+      </div>
     </div>`;
-  container.appendChild(div);
+
+  // ── Sección 2: Datos de la Urgencia ──────────────────────────────
+  const escoltaAlert = u.requiere_escolta === 'si'
+    ? `<div class="escolta-alert">🚨 ESCOLTA REQUERIDA — coordinar antes del ingreso</div>` : '';
+  const obsSup = u.obs_supervisor
+    ? `<div class="info-item info-full obs-sup-box"><label>Obs. Supervisor BHP</label><span>${u.obs_supervisor}</span></div>` : '';
+
+  const sec2 = `
+    <div class="modal-section">
+      <div class="modal-section-title">2 · Datos de la Urgencia</div>
+      <div class="medidas-alert">
+        📐 <strong>Dimensiones:</strong> Alto: ${v(u.medida_alto)}m · Ancho: ${v(u.medida_ancho)}m · Largo: ${v(u.medida_largo)}m &nbsp;|&nbsp;
+        <strong>Peso: ${v(u.peso_carga)} TON</strong>
+      </div>
+      ${escoltaAlert}
+      <div class="info-grid">
+        <div class="info-item"><label>Proveedor</label><span>${v(u.nombre_proveedor)}</span></div>
+        <div class="info-item"><label>Focal Proveedor</label><span>${v(u.focal_proveedor)}</span></div>
+        <div class="info-item"><label>Contacto Proveedor</label><span>${v(u.contacto_proveedor)}</span></div>
+        <div class="info-item"><label>OC / Ítems</label><span>${v(u.po_items)}</span></div>
+        <div class="info-item"><label>Código Stock</label><span>${v(u.codigo_stock)}</span></div>
+        <div class="info-item"><label>N° Reserva</label><span>${v(u.numero_reserva)}</span></div>
+        <div class="info-item"><label>Alto (m)</label><span>${v(u.medida_alto)}</span></div>
+        <div class="info-item"><label>Ancho (m)</label><span>${v(u.medida_ancho)}</span></div>
+        <div class="info-item"><label>Largo (m)</label><span>${v(u.medida_largo)}</span></div>
+        <div class="info-item"><label>Peso (TON)</label><span>${v(u.peso_carga)}</span></div>
+        <div class="info-item"><label>Requiere Escolta</label><span>${u.requiere_escolta === 'si' ? '🚨 Sí' : 'No'}</span></div>
+        ${u.descripcion ? `<div class="info-item info-full"><label>Descripción Carga</label><span>${u.descripcion}</span></div>` : ''}
+        ${u.justificacion ? `<div class="info-item info-full"><label>Justificación</label><span>${u.justificacion}</span></div>` : ''}
+        ${obsSup}
+      </div>
+    </div>`;
+
+  // ── Sección 3: Entrega en Sitio ──────────────────────────────────
+  const sec3 = `
+    <div class="modal-section">
+      <div class="modal-section-title">3 · Entrega en Sitio</div>
+      <div class="info-grid">
+        <div class="info-item"><label>Supervisor MEL</label><span>${v(u.nombre_supervisor_mel)}</span></div>
+        <div class="info-item"><label>Contacto MEL</label><span>${v(u.contacto_supervisor_mel)}</span></div>
+        <div class="info-item"><label>UP / Punto de Entrega</label><span>${v(u.up_punto_entrega)}</span></div>
+      </div>
+    </div>`;
+
+  // ── Sección 4: Ferrovial / OST ───────────────────────────────────
+  let sec4 = '';
+  if (u.ost_numero) {
+    const fmtDate = (d) => d ? new Date(d).toLocaleString('es-CL') : '—';
+    sec4 = `
+      <div class="modal-section">
+        <div class="modal-section-title">4 · Despacho Ferrovial · OST</div>
+        <div class="ferrovial-box">
+          <div class="ferrovial-box-title">🚛 Orden de Servicio de Transporte</div>
+          <div class="ferrovial-grid">
+            <div class="ferrovial-item"><label>N° OST</label><span>${v(u.ost_numero)}</span></div>
+            <div class="ferrovial-item"><label>N° OM</label><span>${v(u.ost_om)}</span></div>
+            <div class="ferrovial-item"><label>N° Solicitud Ferrovial</label><span>${v(u.ost_solicitud)}</span></div>
+            <div class="ferrovial-item"><label>Fecha Salida</label><span>${fmtDate(u.ost_fecha_salida)}</span></div>
+            <div class="ferrovial-item"><label>Fecha Llegada Estimada</label><span>${fmtDate(u.ost_fecha_llegada)}</span></div>
+            <div class="ferrovial-item"><label>Tramo</label><span>${v(u.ost_tramo)}</span></div>
+            <div class="ferrovial-item"><label>Tipo de Equipo</label><span>${v(u.ost_equipo)}</span></div>
+            <div class="ferrovial-item"><label>Patente Tracto</label><span>${v(u.ost_patente_tracto)}</span></div>
+            <div class="ferrovial-item"><label>Patente Acoplado</label><span>${v(u.ost_patente_acoplado)}</span></div>
+            <div class="ferrovial-item"><label>Peso Total</label><span>${u.ost_peso ? u.ost_peso + ' TON' : '—'}</span></div>
+            <div class="ferrovial-item"><label>Cantidad</label><span>${v(u.ost_cantidad)}</span></div>
+            <div class="ferrovial-item ferrovial-full"><label>Conductor Titular</label><span>${v(u.ost_conductor1)}</span></div>
+            ${u.ost_conductor2 ? `<div class="ferrovial-item ferrovial-full"><label>Conductor Adicional</label><span>${u.ost_conductor2}</span></div>` : ''}
+            ${u.ost_carga ? `<div class="ferrovial-item ferrovial-full"><label>Descripción Carga</label><span style="font-family:'DM Sans',sans-serif;">${u.ost_carga}</span></div>` : ''}
+            ${u.ost_obs  ? `<div class="ferrovial-item ferrovial-full"><label>Observaciones</label><span style="font-family:'DM Sans',sans-serif;color:rgba(255,255,255,0.7);">${u.ost_obs}</span></div>` : ''}
+          </div>
+        </div>
+        ${u.ost_trazabilidad ? `<div class="traz-line">🔗 <strong>${u.ost_trazabilidad}</strong></div>` : ''}
+      </div>`;
+  }
+
+  // ── Sección 5: Cierre KDM ────────────────────────────────────────
+  let sec5 = '';
+  if (u.estado === 'completado') {
+    const fechaCierre = u.kdm_completado_at ? new Date(u.kdm_completado_at).toLocaleString('es-CL') : '—';
+    const archivo = u.respaldo_url
+      ? `<a class="respaldo-link" href="${u.respaldo_url}" target="_blank" rel="noopener">📎 Ver archivo de respaldo</a>`
+      : `<span style="font-size:0.78rem;color:var(--bhp-gray);">Sin archivo adjunto</span>`;
+    sec5 = `
+      <div class="modal-section">
+        <div class="modal-section-title">5 · Cierre KDM</div>
+        <div class="kdm-closure-box">
+          <div class="kdm-closure-grid">
+            <div class="kdm-closure-item"><label>N° Mov. SAP 261</label><span>${v(u.sap_mov261)}</span></div>
+            <div class="kdm-closure-item"><label>N° Guía Despacho</label><span>${v(u.guia_despacho)}</span></div>
+            <div class="kdm-closure-item"><label>Fecha Cierre</label><span>${fechaCierre}</span></div>
+          </div>
+          ${archivo}
+        </div>
+      </div>`;
+  }
+
+  // ── Sección Historial ────────────────────────────────────────────
+  const sec6 = buildHistorialSection(u);
+
+  return sec1 + sec2 + sec3 + sec4 + sec5 + sec6;
 }
 
-function setFileName(id) {
-  const f = document.getElementById('respaldo-' + id).files[0];
-  document.getElementById('fileName-' + id).textContent = f ? f.name : 'Sin archivo seleccionado';
+function buildHistorialSection(u) {
+  const events = [];
+
+  events.push({ date: u.created_at, icon:'📝', bg:'#F3F0FF', color:'#5B21B6',
+    title:'Solicitud creada',
+    detail:`${u.nombre_solicitante || 'Solicitante'} · ${u.gerencia || ''}` });
+
+  if (u.estado === 'rechazada_si') {
+    events.push({ date:null, icon:'❌', bg:'#FEE', color:'#C0392B', title:'Rechazada por SI', detail:'' });
+  } else if (!['pendiente_si'].includes(u.estado)) {
+    events.push({ date:null, icon:'✅', bg:'#E8F5EE', color:'#1D6338',
+      title:'Aprobada por SI', detail: u.nombre_si || '' });
+  }
+
+  if (u.estado === 'en_correccion') {
+    events.push({ date:null, icon:'🔄', bg:'#FFF8E8', color:'#B45309',
+      title:'Enviada a corrección por Supervisor BHP', detail: u.obs_supervisor || '' });
+  } else if (u.estado === 'rechazado_supervisor') {
+    events.push({ date:null, icon:'❌', bg:'#FEE', color:'#C0392B',
+      title:'Rechazada por Supervisor BHP', detail: u.obs_supervisor || '' });
+  } else if (['aprobado_supervisor','despachado_ferrovial','completado'].includes(u.estado)) {
+    events.push({ date:null, icon:'✅', bg:'#FFFBE0', color:'#8A6E00',
+      title:'Aprobada por Supervisor BHP', detail: u.obs_supervisor || '' });
+  }
+
+  if (u.ost_numero || u.ferrovial_at) {
+    events.push({ date: u.ferrovial_at, icon:'🚛', bg:'#E8F0FF', color:'#2A5BA8',
+      title:'Despachado por Ferrovial',
+      detail:`OST N° ${u.ost_numero || '—'}${u.ost_tramo ? ' · ' + u.ost_tramo : ''}` });
+  }
+
+  if (u.kdm_completado_at) {
+    events.push({ date: u.kdm_completado_at, icon:'✅', bg:'#E8F5EE', color:'#1D6338',
+      title:'Rebaja completada en sistema',
+      detail:`SAP 261: ${u.sap_mov261 || '—'} · Guía: ${u.guia_despacho || '—'}` });
+  }
+
+  const html = events.map(ev => `
+    <div class="hist-event">
+      <div class="hist-dot" style="background:${ev.bg};color:${ev.color};">${ev.icon}</div>
+      ${ev.date ? `<div class="hist-date">${new Date(ev.date).toLocaleString('es-CL')}</div>` : ''}
+      <div class="hist-title">${ev.title}</div>
+      ${ev.detail ? `<div class="hist-detail">${ev.detail}</div>` : ''}
+    </div>`).join('');
+
+  return `
+    <div class="modal-section">
+      <div class="modal-section-title">Historial de movimientos</div>
+      <div class="historial">${html}</div>
+    </div>`;
 }
 
-async function completar(id) {
-  const sap  = document.getElementById('sap-'  + id)?.value?.trim() || '';
-  const guia = document.getElementById('guia-' + id)?.value?.trim() || '';
-  if (!sap)  { alert('Ingrese el N° de Movimiento SAP 261 antes de confirmar.'); return; }
-  if (!guia) { alert('Ingrese el N° de Guía de Despacho antes de confirmar.'); return; }
-  const respaldo = document.getElementById('respaldo-' + id)?.files[0];
-  if (!respaldo) { alert('Debe cargar el archivo de respaldo antes de confirmar.'); return; }
+function buildFooter() {
+  return `
+    <div class="modal-footer-title">Confirmar Rebaja en Sistema</div>
+    <div class="alerta-directa">
+      <strong>⚡ Entrega directa a cliente — sin paso por P3</strong>
+      Ferrovial entrega directamente al área solicitante. KDM solo realiza la rebaja sistémica y carga el archivo de respaldo.
+    </div>
+    <div class="action-grid">
+      <div class="field">
+        <label>N° Movimiento SAP 261 *</label>
+        <input type="text" id="modal_sap" placeholder="Ej: 4900012345" />
+      </div>
+      <div class="field">
+        <label>N° Guía de Despacho *</label>
+        <input type="text" id="modal_guia" placeholder="Guía del proveedor" />
+      </div>
+    </div>
+    <div class="drop-zone-sm" id="dropZoneRespaldo"
+      ondragover="event.preventDefault();this.classList.add('drag-over')"
+      ondragleave="this.classList.remove('drag-over')"
+      ondrop="onDropRespaldo(event)">
+      <div id="dropTextRespaldo"><div class="drop-txt">📎 Arrastra el archivo de respaldo o <span>haz clic para adjuntar</span> *</div></div>
+      <input type="file" accept=".pdf,image/*" onchange="onFileRespaldo(this)" />
+    </div>
+    <button class="btn-complete" onclick="completar()">✓ Confirmar Rebaja en Sistema</button>`;
+}
+
+function onDropRespaldo(e) {
+  e.preventDefault();
+  document.getElementById('dropZoneRespaldo').classList.remove('drag-over');
+  const f = e.dataTransfer.files[0];
+  if (f) setRespaldo(f);
+}
+function onFileRespaldo(input) { if (input.files[0]) setRespaldo(input.files[0]); }
+function setRespaldo(file) {
+  selectedFile = file;
+  const name = file.name.length > 50 ? file.name.slice(0, 48) + '…' : file.name;
+  document.getElementById('dropTextRespaldo').innerHTML = `<div class="file-ok">✓ ${name}</div>`;
+}
+
+// ── COMPLETAR ──────────────────────────────────────────────────────────
+async function completar() {
+  const sap  = document.getElementById('modal_sap')?.value?.trim()  || '';
+  const guia = document.getElementById('modal_guia')?.value?.trim() || '';
+  if (!sap)          { alert('Ingrese el N° de Movimiento SAP 261 antes de confirmar.'); return; }
+  if (!guia)         { alert('Ingrese el N° de Guía de Despacho antes de confirmar.'); return; }
+  if (!selectedFile) { alert('Debe cargar el archivo de respaldo antes de confirmar.'); return; }
+
+  const btn = document.querySelector('.btn-complete');
+  btn.disabled = true;
+  btn.textContent = 'Guardando...';
+
+  let respaldo_url = null;
+  try {
+    const ext  = selectedFile.name.split('.').pop();
+    const path = `${modalUrgId}/${Date.now()}.${ext}`;
+    const { error: upErr } = await sb.storage.from('sobred-respaldos').upload(path, selectedFile, { upsert: true });
+    if (!upErr) {
+      const { data: urlData } = sb.storage.from('sobred-respaldos').getPublicUrl(path);
+      respaldo_url = urlData?.publicUrl || null;
+    }
+  } catch (_) {}
 
   const { error } = await sb.from('urgencias').update({
-    estado: 'completado',
-    sap_mov261:       sap,
-    guia_despacho:    guia,
+    estado:            'completado',
+    sap_mov261:        sap,
+    guia_despacho:     guia,
+    respaldo_url,
     kdm_completado_at: new Date().toISOString()
-  }).eq('id', id);
+  }).eq('id', modalUrgId);
 
   if (!error) {
     await fetch(`${SUPABASE_URL}/functions/v1/send-email`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPABASE_KEY}` },
-      body: JSON.stringify({ urgencia_id: id, tipo: 'sobredimension', evento: 'completado' })
-    });
+      body: JSON.stringify({ urgencia_id: modalUrgId, tipo: 'sobredimension', evento: 'completado' })
+    }).catch(() => {});
+    closeModal();
     loadUrgencias();
   } else {
     alert('Error: ' + error.message);
+    btn.disabled = false;
+    btn.textContent = '✓ Confirmar Rebaja en Sistema';
   }
 }
 </script>
