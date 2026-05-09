@@ -191,14 +191,31 @@ Deno.serve(async (req) => {
 
     if (estadosNotificables[evento]) {
       const titulo = estadosNotificables[evento]
+      const comentario = u.comentario_supervisor || u.obs_supervisor || null
+
       const html = templateBase(`
         <h2 style="font-size:18px;margin:0 0 8px;">${titulo}</h2>
         <p style="color:#555;font-size:14px;">La urgencia <strong>${num}</strong> ha cambiado de estado: <strong>${titulo}</strong>.</p>
         ${filaDetalle('N° Urgencia', num)}
         ${filaDetalle('Proveedor', u.nombre_proveedor)}
         ${filaDetalle('Punto de entrega', u.up_punto_entrega)}
+        ${comentario ? filaDetalle('Comentario supervisor', comentario) : ''}
       `)
-      const destinatarios = [KDM_EMAIL, BHP_SUPER_EMAIL, OTROS_EMAIL]
+
+      // Destinatarios según el evento
+      let destinatarios: string[] = []
+
+      if (evento === 'en_correccion' || evento === 'rechazada' || evento === 'rechazado_supervisor') {
+        // Notificar al solicitante/SI para que tome acción
+        destinatarios = [OTROS_EMAIL]
+      } else if (evento === 'aprobada' || evento === 'aprobado_supervisor') {
+        // Notificar a KDM para que gestione la logística
+        destinatarios = [KDM_EMAIL]
+      } else {
+        // Cambios de estado operativos → KDM y BHP
+        destinatarios = [KDM_EMAIL, BHP_SUPER_EMAIL]
+      }
+
       resultados.push(await enviarCorreo(destinatarios, `[Urgencia ${num}] ${titulo}`, html))
     }
 
