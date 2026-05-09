@@ -145,8 +145,11 @@ textarea { resize: vertical; min-height: 90px; }
 .action-btns { display: flex; gap: 0.75rem; margin-top: 0.75rem; flex-wrap: wrap; }
 .btn-approve { background: var(--bhp-success); color: white; border: none; border-radius: 6px; padding: 0.65rem 1.25rem; font-family: 'DM Sans', sans-serif; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: background 0.15s; }
 .btn-approve:hover { background: #236234; }
+.btn-correction { background: transparent; color: var(--bhp-warning); border: 1.5px solid var(--bhp-warning); border-radius: 6px; padding: 0.65rem 1.25rem; font-family: 'DM Sans', sans-serif; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.15s; }
+.btn-correction:hover { background: #FFF8E8; }
 .btn-reject { background: transparent; color: var(--bhp-error); border: 1.5px solid var(--bhp-error); border-radius: 6px; padding: 0.65rem 1.25rem; font-family: 'DM Sans', sans-serif; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.15s; }
 .btn-reject:hover { background: #FEE; }
+.status-pill.en_correccion { background: #FFF8E8; color: var(--bhp-warning); border: 1px solid #F5DFA0; }
 
 .empty-state { text-align: center; padding: 4rem 2rem; }
 .empty-state p { color: var(--bhp-gray); font-size: 0.9rem; }
@@ -221,6 +224,10 @@ textarea { resize: vertical; min-height: 90px; }
         Rechazadas
         <span class="tab-badge gray" id="badge_rechazado_supervisor">0</span>
       </div>
+      <div class="tab" onclick="switchTab('en_correccion')" id="tab_en_correccion">
+        En corrección
+        <span class="tab-badge gray" id="badge_en_correccion">0</span>
+      </div>
     </div>
     <div id="loadingState" class="loading-state">Cargando urgencias...</div>
     <div id="listaUrgencias"></div>
@@ -282,6 +289,7 @@ function estadoLabel(s) {
     pendiente_supervisor: 'Pendiente revisión Supervisor',
     aprobado_supervisor:  'Aprobado por Supervisor',
     rechazado_supervisor: 'Rechazado por Supervisor',
+    en_correccion:        'En corrección',
     pendiente_mintral:    'En MINTRAL',
     aprobado_mintral:     'Completado',
   }[s] || s;
@@ -315,22 +323,25 @@ function updateBadges() {
     rechazada_si: 0,
     pendiente_aprobacion: 0,
     aprobado_supervisor: 0,
-    rechazado_supervisor: 0
+    rechazado_supervisor: 0,
+    en_correccion: 0,
   };
   allUrgencias.forEach(u => {
     if (u.estado === 'pendiente_si' || u.estado === 'rechazada_si') counts.pendiente_si++;
     else if (u.estado === 'pendiente_aprobacion' || u.estado === 'pendiente_supervisor') counts.pendiente_aprobacion++;
     else if (u.estado === 'aprobado_supervisor') counts.aprobado_supervisor++;
     else if (u.estado === 'rechazado_supervisor') counts.rechazado_supervisor++;
+    else if (u.estado === 'en_correccion') counts.en_correccion++;
   });
 
   document.getElementById('badge_pendiente_si').textContent = counts.pendiente_si;
   document.getElementById('badge_pendiente_aprobacion').textContent = counts.pendiente_aprobacion;
   document.getElementById('badge_aprobado_supervisor').textContent = counts.aprobado_supervisor;
   document.getElementById('badge_rechazado_supervisor').textContent = counts.rechazado_supervisor;
+  document.getElementById('badge_en_correccion').textContent = counts.en_correccion;
 
   // Badges gris/naranja según si tienen items
-  ['badge_pendiente_si','badge_aprobado_supervisor','badge_rechazado_supervisor'].forEach(id => {
+  ['badge_pendiente_si','badge_aprobado_supervisor','badge_rechazado_supervisor','badge_en_correccion'].forEach(id => {
     const el = document.getElementById(id);
     el.className = parseInt(el.textContent) > 0 ? 'tab-badge' : 'tab-badge gray';
   });
@@ -358,6 +369,8 @@ function renderTab() {
     filtered = allUrgencias.filter(u => u.estado === 'pendiente_si' || u.estado === 'rechazada_si');
   } else if (currentTab === 'pendiente_aprobacion') {
     filtered = allUrgencias.filter(u => u.estado === 'pendiente_aprobacion' || u.estado === 'pendiente_supervisor');
+  } else if (currentTab === 'en_correccion') {
+    filtered = allUrgencias.filter(u => u.estado === 'en_correccion');
   } else {
     filtered = allUrgencias.filter(u => u.estado === currentTab);
   }
@@ -386,11 +399,12 @@ function renderCard(u, container) {
 
   const acciones = puedeActuar ? `
     <div class="action-area">
-      <label>Observaciones del Supervisor BHP (opcional)</label>
-      <textarea id="obs-${u.id}" placeholder="Ingrese observaciones o comentarios..."></textarea>
+      <label>Comentario del Supervisor BHP <span style="font-weight:400;color:var(--bhp-gray);font-size:0.72rem;">(requerido al solicitar corrección)</span></label>
+      <textarea id="obs-${u.id}" placeholder="Ingrese comentarios u observaciones..."></textarea>
       <div class="action-btns">
-        <button class="btn-approve" onclick="accion('${u.id}','aprobar')">✓ Aprobar y enviar a MINTRAL</button>
-        <button class="btn-reject"  onclick="accion('${u.id}','rechazar')">✗ Rechazar</button>
+        <button class="btn-approve"    onclick="accion('${u.id}','aprobar')">✓ Aprobar y enviar a Ferrovial</button>
+        <button class="btn-correction" onclick="accion('${u.id}','corregir')">✎ Solicitar corrección</button>
+        <button class="btn-reject"     onclick="accion('${u.id}','rechazar')">✗ Rechazar</button>
       </div>
     </div>`
   : u.estado === 'pendiente_si' ? `
@@ -400,6 +414,10 @@ function renderCard(u, container) {
   : u.estado === 'rechazada_si' ? `
     <div style="background:#FEE;border:1px solid #F5C6C6;border-radius:6px;padding:0.85rem 1rem;font-size:0.82rem;color:#C0392B;">
       ✕ <strong>Solicitud rechazada por el/la Superintendente(a).</strong> No requiere acción.
+    </div>`
+  : u.estado === 'en_correccion' ? `
+    <div style="background:#FFF8E8;border:1px solid #F5DFA0;border-radius:6px;padding:0.85rem 1rem;font-size:0.82rem;color:#92610A;">
+      ✎ <strong>Corrección solicitada.</strong> Pendiente que el solicitante corrija y reenvíe.${u.obs_supervisor ? ` <em>"${u.obs_supervisor}"</em>` : ''}
     </div>`
   : `<p style="font-size:0.82rem;color:var(--bhp-gray)">Estado actual: <strong>${estadoLabel(u.estado)}</strong>${u.obs_supervisor ? ` · "${u.obs_supervisor}"` : ''}</p>`;
 
@@ -423,20 +441,27 @@ function renderCard(u, container) {
         ${u.requiere_escolta === 'si' ? ' &nbsp;<strong style="color:#92610A">🚨 REQUIERE ESCOLTA</strong>' : ''}
       </div>
       <div class="data-grid">
+        <div class="data-item"><label>Gerencia</label><span>${u.gerencia || '—'}</span></div>
         <div class="data-item"><label>Superintendencia</label><span>${u.superintendencia || '—'}</span></div>
         <div class="data-item"><label>Centro Costo/WBS</label><span>${u.centro_costo_wbs || '—'}</span></div>
         <div class="data-item"><label>Fecha Solicitud</label><span>${u.fecha_solicitud || '—'}</span></div>
+        <div class="data-item"><label>Superintendente(a) SI</label><span>${u.nombre_superintendente || u.si_nombre || '—'}</span></div>
+        <div class="data-item"><label>Correo SI</label><span>${u.email_super || u.si_correo || '—'}</span></div>
+        ${u.nombre_solicitante ? `<div class="data-item"><label>Solicitante</label><span>${u.nombre_solicitante}</span></div>` : ''}
+        ${u.correo_solicitante ? `<div class="data-item"><label>Correo Solicitante</label><span>${u.correo_solicitante}</span></div>` : ''}
+        ${u.telefono_solicitante ? `<div class="data-item"><label>Fono Solicitante</label><span>${u.telefono_solicitante}</span></div>` : ''}
         <div class="data-item"><label>Proveedor</label><span>${u.nombre_proveedor || '—'}</span></div>
         <div class="data-item"><label>Focal Proveedor</label><span>${u.focal_proveedor || '—'}</span></div>
-        <div class="data-item"><label>Contacto</label><span>${u.contacto_proveedor || '—'}</span></div>
+        <div class="data-item"><label>Contacto Proveedor</label><span>${u.contacto_proveedor || '—'}</span></div>
         <div class="data-item"><label>PO / Ítems</label><span>${u.po_items || '—'}</span></div>
         <div class="data-item"><label>Cód. Stock</label><span>${u.codigo_stock || '—'}</span></div>
         <div class="data-item"><label>N° Reserva</label><span>${u.numero_reserva || '—'}</span></div>
         <div class="data-item"><label>Supervisor MEL</label><span>${u.nombre_supervisor_mel || '—'}</span></div>
         <div class="data-item"><label>Contacto MEL</label><span>${u.contacto_supervisor_mel || '—'}</span></div>
         <div class="data-item"><label>UP Entrega</label><span>${u.up_punto_entrega || '—'}</span></div>
-        ${u.descripcion ? `<div class="data-item full"><label>Descripción</label><span>${u.descripcion}</span></div>` : ''}
-        ${u.justificacion ? `<div class="data-item full"><label>Justificación</label><span>${u.justificacion}</span></div>` : ''}
+        ${u.descripcion ? `<div class="data-item full"><label>Descripción del material</label><span>${u.descripcion}</span></div>` : ''}
+        ${u.justificacion ? `<div class="data-item full"><label>Justificación de la urgencia</label><span>${u.justificacion}</span></div>` : ''}
+        ${u.obs_supervisor ? `<div class="data-item full"><label>Comentario anterior del Supervisor</label><span style="color:var(--bhp-warning);">${u.obs_supervisor}</span></div>` : ''}
       </div>
       ${acciones}
     </div>`;
@@ -448,18 +473,38 @@ function toggleCard(id) {
 }
 
 async function accion(id, tipo) {
-  const obs = document.getElementById('obs-' + id)?.value || '';
-  const nuevoEstado = tipo === 'aprobar' ? 'aprobado_supervisor' : 'rechazado_supervisor';
+  const obs = document.getElementById('obs-' + id)?.value?.trim() || '';
+
+  if (tipo === 'corregir' && !obs) {
+    alert('Debe ingresar un comentario explicando qué debe corregir el solicitante.');
+    document.getElementById('obs-' + id)?.focus();
+    return;
+  }
+
+  let nuevoEstado, evento;
+  if (tipo === 'aprobar') {
+    nuevoEstado = 'aprobado_supervisor';
+    evento = 'aprobado_supervisor';
+  } else if (tipo === 'corregir') {
+    nuevoEstado = 'en_correccion';
+    evento = 'en_correccion';
+  } else {
+    nuevoEstado = 'rechazado_supervisor';
+    evento = 'rechazado_supervisor';
+  }
+
   const { error } = await sb.from('urgencias').update({
     estado: nuevoEstado,
     obs_supervisor: obs,
+    comentario_supervisor: obs,
     aprobado_supervisor_at: new Date().toISOString()
   }).eq('id', id);
+
   if (!error) {
     await fetch(`${SUPABASE_URL}/functions/v1/send-email`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPABASE_KEY}` },
-      body: JSON.stringify({ urgencia_id: id, tipo: 'sobredimension', evento: nuevoEstado })
+      body: JSON.stringify({ urgencia_id: id, tipo: 'sobredimension', evento })
     });
     loadUrgencias();
   }

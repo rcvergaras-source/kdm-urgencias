@@ -194,6 +194,10 @@ textarea { resize: vertical; min-height: 80px; }
         Completados
         <span class="tab-badge gray" id="badge_completado">0</span>
       </div>
+      <div class="tab" onclick="switchTab('resumen')" id="tab_resumen">
+        Resumen general
+        <span class="tab-badge gray" id="badge_resumen">0</span>
+      </div>
     </div>
     <div id="loadingState" class="loading-state">Cargando urgencias...</div>
     <div id="listaUrgencias"></div>
@@ -207,6 +211,7 @@ const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const VALID_USERS = {
   'analista@kdmindustrial.cl': 'kdm2024kdm',
+  'rvergara@kdmindustrial.cl': 'kdm2024',
   'supervisorbhpa@kdmindustrial.cl': 'kdm2024sup',
   'jarayaa@kdmindustrial.cl': 'kdm2024sup'
 };
@@ -251,7 +256,6 @@ async function loadUrgencias() {
 
   const { data } = await sb.from('urgencias').select('*')
     .eq('tipo', 'sobredimension')
-    .in('estado', ['despachado_ferrovial', 'completado'])
     .order('created_at', { ascending: false });
 
   document.getElementById('loadingState').style.display = 'none';
@@ -267,20 +271,102 @@ function updateBadges() {
 
   document.getElementById('badge_despachado_ferrovial').textContent = pendientes;
   document.getElementById('badge_completado').textContent = completados;
+  document.getElementById('badge_resumen').textContent = allUrgencias.length;
 
   const badgeComp = document.getElementById('badge_completado');
   badgeComp.className = completados > 0 ? 'tab-badge' : 'tab-badge gray';
+  const badgeRes = document.getElementById('badge_resumen');
+  badgeRes.className = allUrgencias.length > 0 ? 'tab-badge' : 'tab-badge gray';
+}
+
+function estadoLabel(s) {
+  return {
+    pendiente_si:         'Pend. aprobación SI',
+    rechazada_si:         'Rechazada por SI',
+    pendiente_aprobacion: 'Pend. Supervisor BHP',
+    en_correccion:        'En corrección',
+    aprobado_supervisor:  'Aprobado Supervisor',
+    rechazado_supervisor: 'Rechazado Supervisor',
+    despachado_ferrovial: 'Despachado Ferrovial',
+    completado:           'Rebaja completada',
+  }[s] || s;
 }
 
 function renderTab() {
   const lista = document.getElementById('listaUrgencias');
   lista.innerHTML = '';
+
+  if (currentTab === 'resumen') {
+    renderResumen(lista);
+    return;
+  }
+
   const filtered = allUrgencias.filter(u => u.estado === currentTab);
   if (!filtered.length) {
     lista.innerHTML = `<div class="empty-state"><p>📭 No hay urgencias en este estado.</p></div>`;
     return;
   }
   filtered.forEach(u => renderCard(u, lista));
+}
+
+function renderResumen(lista) {
+  if (!allUrgencias.length) {
+    lista.innerHTML = `<div class="empty-state"><p>📭 No hay urgencias registradas.</p></div>`;
+    return;
+  }
+
+  const estadoPill = (s) => {
+    const colores = {
+      pendiente_si:         'background:#F3F0FF;color:#5B21B6',
+      rechazada_si:         'background:#FEE;color:#C0392B',
+      pendiente_aprobacion: 'background:#FFF8E8;color:#92610A',
+      en_correccion:        'background:#FFF8E8;color:#B45309',
+      aprobado_supervisor:  'background:#E8F5EE;color:#1D6338',
+      rechazado_supervisor: 'background:#FEE;color:#C0392B',
+      despachado_ferrovial: 'background:#E8F0FF;color:#2A5BA8',
+      completado:           'background:#E8F5EE;color:#1D6338',
+    };
+    const css = colores[s] || 'background:#F0F0F0;color:#555';
+    return `<span style="font-size:0.65rem;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;padding:0.2rem 0.5rem;border-radius:12px;white-space:nowrap;${css}">${estadoLabel(s)}</span>`;
+  };
+
+  const table = document.createElement('div');
+  table.style.cssText = 'overflow-x:auto;';
+  table.innerHTML = `
+    <table style="width:100%;border-collapse:collapse;background:#fff;border:1px solid #E0DDD8;border-radius:10px;overflow:hidden;font-size:0.82rem;">
+      <thead>
+        <tr style="background:#1A1A1A;color:#fff;">
+          <th style="padding:0.75rem 1rem;text-align:left;font-size:0.65rem;text-transform:uppercase;letter-spacing:0.08em;white-space:nowrap;">N° Urgencia</th>
+          <th style="padding:0.75rem 1rem;text-align:left;font-size:0.65rem;text-transform:uppercase;letter-spacing:0.08em;white-space:nowrap;">Fecha</th>
+          <th style="padding:0.75rem 1rem;text-align:left;font-size:0.65rem;text-transform:uppercase;letter-spacing:0.08em;white-space:nowrap;">Gerencia</th>
+          <th style="padding:0.75rem 1rem;text-align:left;font-size:0.65rem;text-transform:uppercase;letter-spacing:0.08em;white-space:nowrap;">Proveedor</th>
+          <th style="padding:0.75rem 1rem;text-align:left;font-size:0.65rem;text-transform:uppercase;letter-spacing:0.08em;white-space:nowrap;">PO / Ítems</th>
+          <th style="padding:0.75rem 1rem;text-align:left;font-size:0.65rem;text-transform:uppercase;letter-spacing:0.08em;white-space:nowrap;">Escolta</th>
+          <th style="padding:0.75rem 1rem;text-align:left;font-size:0.65rem;text-transform:uppercase;letter-spacing:0.08em;white-space:nowrap;">Estado</th>
+          <th style="padding:0.75rem 1rem;text-align:left;font-size:0.65rem;text-transform:uppercase;letter-spacing:0.08em;white-space:nowrap;">OST N°</th>
+          <th style="padding:0.75rem 1rem;text-align:left;font-size:0.65rem;text-transform:uppercase;letter-spacing:0.08em;white-space:nowrap;">SAP 261</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${allUrgencias.map((u, i) => {
+          const num  = u.numero_urg || ('SOBRED-' + String(u.id).slice(0, 8));
+          const fecha = u.fecha_solicitud || new Date(u.created_at).toLocaleDateString('es-CL');
+          const bg = i % 2 === 0 ? '#fff' : '#FAFAF8';
+          return `<tr style="border-top:1px solid #E0DDD8;background:${bg};">
+            <td style="padding:0.65rem 1rem;font-family:'DM Mono',monospace;color:#1D6338;font-weight:500;">${num}</td>
+            <td style="padding:0.65rem 1rem;white-space:nowrap;">${fecha}</td>
+            <td style="padding:0.65rem 1rem;">${u.gerencia || '—'}</td>
+            <td style="padding:0.65rem 1rem;">${u.nombre_proveedor || '—'}</td>
+            <td style="padding:0.65rem 1rem;font-family:'DM Mono',monospace;font-size:0.78rem;">${u.po_items || '—'}</td>
+            <td style="padding:0.65rem 1rem;">${u.requiere_escolta === 'si' ? '🚨 Sí' : 'No'}</td>
+            <td style="padding:0.65rem 1rem;">${estadoPill(u.estado)}</td>
+            <td style="padding:0.65rem 1rem;font-family:'DM Mono',monospace;font-size:0.78rem;">${u.ost_numero || '—'}</td>
+            <td style="padding:0.65rem 1rem;font-family:'DM Mono',monospace;font-size:0.78rem;">${u.sap_mov261 || '—'}</td>
+          </tr>`;
+        }).join('')}
+      </tbody>
+    </table>`;
+  lista.appendChild(table);
 }
 
 function switchTab(tab) {
@@ -291,7 +377,7 @@ function switchTab(tab) {
 }
 
 function renderCard(u, container) {
-  const urgId = 'SOBRED-' + String(u.id).padStart(4, '0');
+  const num   = u.numero_urg || ('SOBRED-' + String(u.id).slice(0, 8));
   const fecha  = new Date(u.created_at).toLocaleString('es-CL');
   const escoltaBadge = u.requiere_escolta === 'si' ? `<span class="escolta-pill">🚨 Escolta</span>` : '';
   const estadoLabel  = u.estado === 'completado' ? 'Rebaja completada' : 'Despachado — pendiente rebaja';
@@ -314,7 +400,7 @@ function renderCard(u, container) {
       </div>
     </div>
     <div class="traz-box">
-      🔗 Trazabilidad: <strong>${u.ost_trazabilidad || urgId + ' → OST ' + (u.ost_numero || '—')}</strong>
+      🔗 Trazabilidad: <strong>${u.ost_trazabilidad || num + ' → OST ' + (u.ost_numero || '—')}</strong>
     </div>`;
 
   const accionesHTML = u.estado !== 'completado' ? `
@@ -349,19 +435,19 @@ function renderCard(u, container) {
   div.innerHTML = `
     <div class="urg-card-header" onclick="this.nextElementSibling.classList.toggle('open')">
       <div>
-        <div class="urg-id">${urgId}</div>
-        <div class="urg-meta">${u.gerencia || '—'} · ${u.nombre_super || '—'} · ${fecha}</div>
+        <div class="urg-id">${num}</div>
+        <div class="urg-meta">${u.gerencia || '—'} · ${u.nombre_superintendente || '—'} · ${fecha}</div>
       </div>
       <div class="urg-badges">${escoltaBadge}<span class="status-pill ${u.estado}">${estadoLabel}</span></div>
     </div>
     <div class="urg-card-body">
       ${ferrovialInfo}
       <div class="data-grid">
-        <div class="data-item"><label>Proveedor</label><span>${u.proveedor || '—'}</span></div>
+        <div class="data-item"><label>Proveedor</label><span>${u.nombre_proveedor || '—'}</span></div>
         <div class="data-item"><label>OC / Ítems</label><span>${u.po_items || '—'}</span></div>
-        <div class="data-item"><label>Supervisor MEL</label><span>${u.supervisor_mel || '—'}</span></div>
-        <div class="data-item"><label>UP Entrega</label><span>${u.up_entrega || '—'}</span></div>
-        <div class="data-item"><label>Contacto MEL</label><span>${u.contacto_mel || '—'}</span></div>
+        <div class="data-item"><label>Supervisor MEL</label><span>${u.nombre_supervisor_mel || '—'}</span></div>
+        <div class="data-item"><label>UP Entrega</label><span>${u.up_punto_entrega || '—'}</span></div>
+        <div class="data-item"><label>Contacto MEL</label><span>${u.contacto_supervisor_mel || '—'}</span></div>
         <div class="data-item"><label>Fecha Solicitud</label><span>${u.fecha_solicitud || '—'}</span></div>
         ${u.descripcion ? `<div class="data-item full"><label>Descripción Carga</label><span>${u.descripcion}</span></div>` : ''}
       </div>

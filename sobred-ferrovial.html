@@ -233,6 +233,7 @@ const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const VALID_USERS = {
   'ferrovial@kdmindustrial.cl': 'kdm2024ferrovial',
+  'rvergara@kdmindustrial.cl': 'kdm2024',
   'supervisorbhpa@kdmindustrial.cl': 'kdm2024sup',
   'jarayaa@kdmindustrial.cl': 'kdm2024sup'
 };
@@ -329,7 +330,7 @@ function switchTab(tab) {
 }
 
 function renderCard(u, container) {
-  const urgId = 'SOBRED-' + String(u.id).padStart(4, '0');
+  const num    = u.numero_urg || ('SOBRED-' + String(u.id).slice(0, 8));
   const fecha  = new Date(u.created_at).toLocaleString('es-CL');
   const escoltaBadge = u.requiere_escolta === 'si' ? `<span class="escolta-pill">🚨 Escolta</span>` : '';
   const estadoLabel  = u.estado === 'despachado_ferrovial' ? 'Despachado' : 'Pendiente despacho';
@@ -340,8 +341,8 @@ function renderCard(u, container) {
   div.innerHTML = `
     <div class="urg-card-header" onclick="toggleCard(${u.id})">
       <div>
-        <div class="urg-id">${urgId}</div>
-        <div class="urg-meta">${u.gerencia || '—'} · ${u.nombre_super || '—'} · ${fecha}</div>
+        <div class="urg-id">${num}</div>
+        <div class="urg-meta">${u.gerencia || '—'} · ${u.nombre_superintendente || '—'} · ${fecha}</div>
       </div>
       <div class="urg-badges">
         ${escoltaBadge}
@@ -358,12 +359,12 @@ function renderCard(u, container) {
       </div>
 
       <div class="data-grid">
-        <div class="data-item"><label>Proveedor</label><span>${u.proveedor || '—'}</span></div>
+        <div class="data-item"><label>Proveedor</label><span>${u.nombre_proveedor || '—'}</span></div>
         <div class="data-item"><label>OC / Ítems</label><span>${u.po_items || '—'}</span></div>
         <div class="data-item"><label>Contacto Proveedor</label><span>${u.contacto_proveedor || '—'}</span></div>
-        <div class="data-item"><label>Supervisor MEL</label><span>${u.supervisor_mel || '—'}</span></div>
-        <div class="data-item"><label>Contacto MEL</label><span>${u.contacto_mel || '—'}</span></div>
-        <div class="data-item"><label>UP Entrega</label><span>${u.up_entrega || '—'}</span></div>
+        <div class="data-item"><label>Supervisor MEL</label><span>${u.nombre_supervisor_mel || '—'}</span></div>
+        <div class="data-item"><label>Contacto MEL</label><span>${u.contacto_supervisor_mel || '—'}</span></div>
+        <div class="data-item"><label>UP Entrega</label><span>${u.up_punto_entrega || '—'}</span></div>
         ${u.descripcion ? `<div class="data-item full"><label>Descripción Carga</label><span>${u.descripcion}</span></div>` : ''}
         ${u.obs_supervisor ? `<div class="data-item full"><label>Obs. Supervisor BHP</label><span>${u.obs_supervisor}</span></div>` : ''}
       </div>
@@ -378,7 +379,7 @@ function renderCard(u, container) {
 }
 
 function renderOSTForm(u) {
-  const urgId = 'SOBRED-' + String(u.id).padStart(4, '0');
+  const urgId = u.numero_urg || ('SOBRED-' + String(u.id).slice(0, 8));
   return `
     <!-- TRAZABILIDAD -->
     <div class="trazabilidad-box">
@@ -585,7 +586,8 @@ async function confirmarDespacho(id) {
     return;
   }
 
-  const urgId = 'SOBRED-' + String(id).padStart(4, '0');
+  const urgRec = allUrgencias.find(u => u.id === id || String(u.id) === String(id));
+  const urgId = urgRec?.numero_urg || ('SOBRED-' + String(id).slice(0, 8));
 
   const payload = {
     estado: 'despachado_ferrovial',

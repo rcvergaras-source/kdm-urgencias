@@ -207,6 +207,24 @@ textarea { resize: vertical; min-height: 80px; }
             <input type="text" id="centro_costo" placeholder="Ej: CC-4500 o WBS-12345" required />
             <span class="field-error" id="err_centro_costo">Campo obligatorio</span>
           </div>
+          <div style="grid-column:1/-1;padding-top:0.25rem;border-top:1px solid var(--bhp-border);margin-top:0.25rem;">
+            <p style="font-size:0.72rem;font-weight:600;color:var(--bhp-gray);text-transform:uppercase;letter-spacing:0.08em;">Datos del Solicitante</p>
+          </div>
+          <div class="field">
+            <label for="nombre_solicitante">Nombre Solicitante</label>
+            <input type="text" id="nombre_solicitante" placeholder="Nombre completo" required />
+            <span class="field-error" id="err_nombre_solicitante">Campo obligatorio</span>
+          </div>
+          <div class="field">
+            <label for="correo_solicitante">Correo Solicitante</label>
+            <input type="email" id="correo_solicitante" placeholder="correo@empresa.cl" required />
+            <span class="field-error" id="err_correo_solicitante">Campo obligatorio</span>
+          </div>
+          <div class="field span-2">
+            <label for="telefono_solicitante">Teléfono Solicitante</label>
+            <input type="tel" id="telefono_solicitante" placeholder="+56 9 XXXX XXXX" required />
+            <span class="field-error" id="err_telefono_solicitante">Campo obligatorio</span>
+          </div>
         </div>
 
         <div class="firma-box">
@@ -360,7 +378,59 @@ const SUPABASE_URL = 'https://dnsijobpjnirbfrlkwfq.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_kUxJua1oS2c-YxCyHjhEbg_bItcFg6H';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-document.getElementById('fecha_solicitud').valueAsDate = new Date();
+// ── MODO CORRECCIÓN ──────────────────────────────────────────────────────
+let modoCorreccion = false;
+let urgIdCorreccion = null;
+let urgNumCorreccion = null;
+
+const _idParam = new URLSearchParams(location.search).get('id');
+
+if (!_idParam) {
+  document.getElementById('fecha_solicitud').valueAsDate = new Date();
+} else {
+  modoCorreccion = true;
+  (async () => {
+    const { data: uc } = await sb.from('urgencias').select('*').eq('numero_urg', _idParam).single();
+    if (!uc) { alert('No se encontró la urgencia ' + _idParam); return; }
+    urgIdCorreccion = uc.id;
+    urgNumCorreccion = uc.numero_urg;
+    const sv = (id, val) => { const e = document.getElementById(id); if (e && val != null) e.value = val; };
+    sv('fecha_solicitud', uc.fecha_solicitud);
+    sv('gerencia', uc.gerencia);
+    sv('superintendencia', uc.superintendencia);
+    sv('nombre_super', uc.nombre_superintendente);
+    sv('centro_costo', uc.centro_costo_wbs);
+    sv('nombre_solicitante', uc.nombre_solicitante);
+    sv('correo_solicitante', uc.correo_solicitante);
+    sv('telefono_solicitante', uc.telefono_solicitante);
+    sv('si_nombre', uc.si_nombre);
+    sv('email_super', uc.email_super);
+    sv('proveedor', uc.nombre_proveedor);
+    sv('focal_proveedor', uc.focal_proveedor);
+    sv('contacto_proveedor', uc.contacto_proveedor);
+    sv('po_items', uc.po_items);
+    sv('codigo_stock', uc.codigo_stock);
+    sv('n_reserva', uc.numero_reserva);
+    sv('medida_alto', uc.medida_alto);
+    sv('medida_ancho', uc.medida_ancho);
+    sv('medida_largo', uc.medida_largo);
+    sv('peso_carga', uc.peso_carga);
+    sv('descripcion', uc.descripcion);
+    sv('justificacion', uc.justificacion);
+    sv('supervisor_mel', uc.nombre_supervisor_mel);
+    sv('contacto_mel', uc.contacto_supervisor_mel);
+    sv('up_entrega', uc.up_punto_entrega);
+    evalEscolta();
+    document.querySelector('.page-title h1').textContent = 'Corrección de Solicitud Sobredimensión';
+    document.querySelector('.page-title p').textContent = `Corrija los datos necesarios y reenvíe la solicitud ${_idParam}.`;
+    document.getElementById('btnSubmit').querySelector('.btn-text').textContent = 'Reenviar Solicitud Corregida';
+    document.querySelector('.nota-box').insertAdjacentHTML('afterend', `
+      <div style="background:#FFF8F0;border:2px solid #E05E1B;border-radius:8px;padding:1rem 1.25rem;margin-bottom:1.5rem;font-size:0.85rem;color:#7A3010;">
+        <strong style="display:block;font-size:0.78rem;text-transform:uppercase;letter-spacing:0.06em;color:#E05E1B;margin-bottom:0.35rem;">✎ Modo Corrección — ${_idParam}</strong>
+        Está corrigiendo una solicitud existente. Realice los cambios necesarios y haga clic en "Reenviar".
+      </div>`);
+  })();
+}
 
 // Auto-detectar escolta
 function evalEscolta() {
@@ -381,6 +451,7 @@ function evalEscolta() {
 
 const requiredFields = [
   'fecha_solicitud','gerencia','superintendencia','nombre_super','centro_costo',
+  'nombre_solicitante','correo_solicitante','telefono_solicitante',
   'si_nombre','email_super',
   'proveedor','focal_proveedor','contacto_proveedor','po_items',
   'medida_alto','medida_ancho','medida_largo','peso_carga',
@@ -441,6 +512,9 @@ document.getElementById('urgForm').addEventListener('submit', async (e) => {
     superintendencia:      document.getElementById('superintendencia').value.trim(),
     nombre_superintendente: document.getElementById('nombre_super').value.trim(),
     centro_costo_wbs:      document.getElementById('centro_costo').value.trim(),
+    nombre_solicitante:    document.getElementById('nombre_solicitante').value.trim(),
+    correo_solicitante:    document.getElementById('correo_solicitante').value.trim(),
+    telefono_solicitante:  document.getElementById('telefono_solicitante').value.trim(),
     firma_nombre:          document.getElementById('si_nombre').value.trim(),
     firma_autoriza:        false,
     si_nombre:             document.getElementById('si_nombre').value.trim(),
@@ -467,19 +541,37 @@ document.getElementById('urgForm').addEventListener('submit', async (e) => {
   };
 
   try {
-    const { data, error } = await sb.from('urgencias').insert([payload]).select();
-    if (error) throw error;
-
-    const rec = data[0];
-    document.getElementById('successUrgNum').textContent = rec.numero_urg;
-    document.getElementById('urgForm').style.display = 'none';
-    document.getElementById('successScreen').classList.add('visible');
-
-    fetch(`${SUPABASE_URL}/functions/v1/send-email`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPABASE_KEY}` },
-      body: JSON.stringify({ urgencia_id: rec.id, tipo: 'sobredimension', evento: 'nueva_solicitud' })
-    }).catch(e => console.warn('Notificación de correo no enviada:', e));
+    if (modoCorreccion) {
+      const { error } = await sb.from('urgencias').update({
+        ...payload,
+        tipo: 'sobredimension',
+        estado: 'pendiente_aprobacion',
+        estado_si: 'aprobado_si',
+      }).eq('id', urgIdCorreccion);
+      if (error) throw error;
+      document.getElementById('successUrgNum').textContent = urgNumCorreccion;
+      document.querySelector('#successScreen h2').textContent = 'Corrección enviada correctamente';
+      document.querySelector('#successScreen p').textContent = 'Su solicitud corregida fue reenviada al Supervisor BHP para revisión.';
+      document.getElementById('urgForm').style.display = 'none';
+      document.getElementById('successScreen').classList.add('visible');
+      fetch(`${SUPABASE_URL}/functions/v1/send-email`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPABASE_KEY}` },
+        body: JSON.stringify({ urgencia_id: urgIdCorreccion, tipo: 'sobredimension', evento: 'correccion_enviada' })
+      }).catch(e => console.warn(e));
+    } else {
+      const { data, error } = await sb.from('urgencias').insert([payload]).select();
+      if (error) throw error;
+      const rec = data[0];
+      document.getElementById('successUrgNum').textContent = rec.numero_urg;
+      document.getElementById('urgForm').style.display = 'none';
+      document.getElementById('successScreen').classList.add('visible');
+      fetch(`${SUPABASE_URL}/functions/v1/send-email`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPABASE_KEY}` },
+        body: JSON.stringify({ urgencia_id: rec.id, tipo: 'sobredimension', evento: 'nueva_solicitud' })
+      }).catch(e => console.warn('Notificación de correo no enviada:', e));
+    }
   } catch(err) {
     console.error(err);
     alert('Error al enviar: ' + (err.message || 'Intente nuevamente'));

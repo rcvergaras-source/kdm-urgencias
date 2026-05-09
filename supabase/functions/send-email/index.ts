@@ -222,7 +222,8 @@ Deno.serve(async (req) => {
 
       if (evento === 'en_correccion') {
         // Correo al solicitante con link directo al formulario pre-llenado
-        const linkCorreccion = `${SITE_URL}/carga-general?id=${encodeURIComponent(num)}`
+        const formPath = u.tipo === 'sobredimension' ? '/sobredimension' : '/carga-general'
+        const linkCorreccion = `${SITE_URL}${formPath}?id=${encodeURIComponent(num)}`
         const htmlCorreccion = templateBase(`
           <h2 style="color:#E05E1B;font-size:18px;margin:0 0 8px;">Corrección Solicitada — Urgencia ${num}</h2>
           <p style="color:#555;font-size:14px;">El Supervisor BHP ha solicitado una corrección en su solicitud de urgencia <strong>${num}</strong>.</p>
