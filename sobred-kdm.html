@@ -420,11 +420,11 @@ function renderCard(u, container) {
         </div>
       </div>
       <div class="upload-respaldo">
-        <input type="file" id="respaldo-${u.id}" accept=".pdf,image/*" style="display:none" onchange="setFileName(${u.id})" />
+        <input type="file" id="respaldo-${u.id}" accept=".pdf,image/*" style="display:none" onchange="setFileName('${u.id}')" />
         <button class="upload-btn-green" onclick="document.getElementById('respaldo-${u.id}').click()">📎 Cargar archivo respaldo</button>
         <span class="file-name" id="fileName-${u.id}">Sin archivo seleccionado</span>
       </div>
-      <button class="btn-complete" onclick="completar(${u.id})">✓ Confirmar Rebaja en Sistema</button>
+      <button class="btn-complete" onclick="completar('${u.id}')">✓ Confirmar Rebaja en Sistema</button>
     </div>` :
     `<div style="background:#E8F5EE;border:1px solid #A8D8B8;border-radius:8px;padding:1rem;font-size:0.85rem;color:#1D6338;margin-top:0.5rem;">
       ✓ <strong>Rebaja completada</strong> · SAP 261: ${u.sap_mov261 || '—'} · Guía: ${u.guia_despacho || '—'}
