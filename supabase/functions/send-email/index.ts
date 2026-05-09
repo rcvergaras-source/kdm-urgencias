@@ -178,6 +178,21 @@ Deno.serve(async (req) => {
     }
 
     // ── OTROS ESTADOS (sobred-supervisor) ────────────────────────────
+    // ── CORRECCIÓN ENVIADA ───────────────────────────────────────────
+    if (evento === 'correccion_enviada') {
+      const html = templateBase(`
+        <h2 style="color:#2D7D46;font-size:18px;margin:0 0 8px;">Corrección Realizada — ${num}</h2>
+        <p style="color:#555;font-size:14px;">El solicitante ha corregido y reenviado la urgencia <strong>${num}</strong>. Está pendiente de su revisión nuevamente.</p>
+        ${filaDetalle('N° Urgencia', num)}
+        ${filaDetalle('Gerencia', u.gerencia)}
+        ${filaDetalle('Superintendencia', u.superintendencia)}
+        ${filaDetalle('Proveedor', u.nombre_proveedor)}
+        ${filaDetalle('PO / Ítems', u.po_items)}
+        ${filaDetalle('Solicitante', u.nombre_solicitante)}
+      `)
+      resultados.push(await enviarCorreo(BHP_SUPER_EMAIL, `[Urgencia ${num}] Corrección realizada — pendiente de revisión`, html))
+    }
+
     const estadosNotificables: Record<string, string> = {
       aprobada: 'Solicitud Aprobada por Supervisor BHP',
       rechazada: 'Solicitud Rechazada por Supervisor BHP',

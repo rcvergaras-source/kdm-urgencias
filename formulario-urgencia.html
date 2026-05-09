@@ -1029,7 +1029,7 @@
 
         if (modoCorreccion && urgenciaId) {
           // MODO CORRECCIÓN — actualizar urgencia existente
-          fetch(`${SUPABASE_URL}/rest/v1/urgencias?id=eq.${urgenciaId}`, {
+          await fetch(`${SUPABASE_URL}/rest/v1/urgencias?id=eq.${urgenciaId}`, {
             method: 'PATCH',
             headers: {
               'Content-Type': 'application/json',
@@ -1040,6 +1040,12 @@
             body: JSON.stringify({ ...payload, estado: 'pendiente_aprobacion', comentario_supervisor: null })
           });
           urgNum = urgenciaNum;
+
+          fetch(`${SUPABASE_URL}/functions/v1/send-email`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPABASE_ANON}` },
+            body: JSON.stringify({ urgencia_id: urgenciaId, tipo: 'carga_general', evento: 'correccion_enviada' })
+          }).catch(e => console.warn('Notificación de correo no enviada:', e));
 
         } else {
           // MODO NUEVO — crear urgencia y esperar solo el número
