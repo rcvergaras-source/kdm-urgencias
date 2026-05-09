@@ -48,6 +48,22 @@ textarea { resize: vertical; min-height: 80px; }
 .btn-logout { background: transparent; border: 1px solid var(--bhp-border); border-radius: 6px; padding: 0.35rem 0.75rem; font-family: 'DM Sans', sans-serif; font-size: 0.75rem; color: var(--bhp-gray); cursor: pointer; transition: all 0.15s; }
 .btn-logout:hover { border-color: var(--bhp-error); color: var(--bhp-error); }
 
+/* KPI BAR */
+.kpi-bar { background: var(--bhp-white); border-bottom: 1px solid var(--bhp-border); }
+.kpi-inner { max-width: 960px; margin: 0 auto; padding: 1.25rem 1.5rem; display: grid; grid-template-columns: repeat(6, 1fr); gap: 0.75rem; }
+.kpi-card { background: var(--bhp-light); border: 1px solid var(--bhp-border); border-radius: 10px; padding: 0.9rem 1rem; display: flex; flex-direction: column; gap: 0.25rem; }
+.kpi-card.highlight { background: #E8F5EE; border-color: #A8D8B8; }
+.kpi-card.warn { background: #FFF8E8; border-color: #F5DFA0; }
+.kpi-card.alert { background: #FFF3ED; border-color: #F5C6A0; }
+.kpi-label { font-size: 0.62rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--bhp-gray); }
+.kpi-value { font-family: 'DM Mono', monospace; font-size: 1.4rem; font-weight: 600; color: var(--bhp-dark); line-height: 1; }
+.kpi-card.highlight .kpi-value { color: var(--kdm-green); }
+.kpi-card.warn .kpi-value { color: #92610A; }
+.kpi-card.alert .kpi-value { color: #C05010; }
+.kpi-sub { font-size: 0.68rem; color: var(--bhp-gray); }
+@media (max-width: 700px) { .kpi-inner { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 420px) { .kpi-inner { grid-template-columns: repeat(2, 1fr); } }
+
 /* CONTAINER & TABS */
 .container { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem; }
 .tabs { display: flex; gap: 0.25rem; margin-bottom: 1.5rem; border-bottom: 2px solid var(--bhp-border); }
@@ -197,6 +213,8 @@ textarea { resize: vertical; min-height: 80px; }
     </div>
   </header>
 
+  <div class="kpi-bar"><div class="kpi-inner" id="kpiBar"></div></div>
+
   <div class="container">
     <div class="tabs">
       <div class="tab active" onclick="switchTab('despachado_ferrovial')" id="tab_despachado_ferrovial">
@@ -287,7 +305,78 @@ async function loadUrgencias() {
   document.getElementById('loadingState').style.display = 'none';
   allUrgencias = data || [];
   updateBadges();
+  renderKPIs();
   renderTab();
+}
+
+function fmtHoras(ms) {
+  if (ms == null || isNaN(ms) || ms < 0) return '—';
+  const h = ms / 3600000;
+  if (h < 24) return h.toFixed(1) + ' h';
+  return (h / 24).toFixed(1) + ' días';
+}
+
+function renderKPIs() {
+  const total     = allUrgencias.length;
+  const completadas = allUrgencias.filter(u => u.estado === 'completado');
+  const pendientes  = allUrgencias.filter(u => u.estado === 'despachado_ferrovial').length;
+  const conEscolta  = allUrgencias.filter(u => u.requiere_escolta === 'si').length;
+  const pctComp     = total > 0 ? Math.round(completadas.length / total * 100) : 0;
+
+  // Tiempo Despacho Ferrovial → Rebaja SAP (más fiable, ambas fechas existen)
+  const tiemposRebaja = completadas
+    .filter(u => u.ferrovial_at && u.kdm_completado_at)
+    .map(u => new Date(u.kdm_completado_at) - new Date(u.ferrovial_at));
+  const avgRebaja = tiemposRebaja.length
+    ? tiemposRebaja.reduce((a, b) => a + b, 0) / tiemposRebaja.length : null;
+
+  // Tiempo Total Ciclo: created_at → kdm_completado_at
+  const tiemposCiclo = completadas
+    .filter(u => u.kdm_completado_at)
+    .map(u => new Date(u.kdm_completado_at) - new Date(u.created_at));
+  const avgCiclo = tiemposCiclo.length
+    ? tiemposCiclo.reduce((a, b) => a + b, 0) / tiemposCiclo.length : null;
+
+  // Urgencia más reciente pendiente
+  const masAntigua = allUrgencias
+    .filter(u => u.estado === 'despachado_ferrovial' && u.ferrovial_at)
+    .map(u => Date.now() - new Date(u.ferrovial_at))
+    .sort((a, b) => b - a)[0] ?? null;
+
+  const warnRebaja  = avgRebaja  != null && avgRebaja  > 48 * 3600000; // > 48h
+  const warnPend    = masAntigua != null && masAntigua > 24 * 3600000; // > 24h en espera
+
+  document.getElementById('kpiBar').innerHTML = `
+    <div class="kpi-card${pctComp === 100 ? ' highlight' : ''}">
+      <div class="kpi-label">Total Urgencias</div>
+      <div class="kpi-value">${total}</div>
+      <div class="kpi-sub">${completadas.length} completadas</div>
+    </div>
+    <div class="kpi-card${pendientes > 0 ? (warnPend ? ' alert' : ' warn') : ' highlight'}">
+      <div class="kpi-label">Pendientes Rebaja</div>
+      <div class="kpi-value">${pendientes}</div>
+      <div class="kpi-sub">${pendientes === 0 ? 'Al día ✓' : 'Esperando cierre SAP'}</div>
+    </div>
+    <div class="kpi-card${pctComp >= 80 ? ' highlight' : pctComp >= 50 ? '' : ' warn'}">
+      <div class="kpi-label">% Completadas</div>
+      <div class="kpi-value">${pctComp}%</div>
+      <div class="kpi-sub">${completadas.length} de ${total}</div>
+    </div>
+    <div class="kpi-card${warnRebaja ? ' alert' : avgRebaja != null ? ' highlight' : ''}">
+      <div class="kpi-label">Tiempo Despacho → Rebaja</div>
+      <div class="kpi-value">${fmtHoras(avgRebaja)}</div>
+      <div class="kpi-sub">Promedio ${tiemposRebaja.length} urgencias</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Tiempo Total Ciclo</div>
+      <div class="kpi-value">${fmtHoras(avgCiclo)}</div>
+      <div class="kpi-sub">Solicitud → Rebaja SAP</div>
+    </div>
+    <div class="kpi-card${conEscolta > 0 ? ' warn' : ''}">
+      <div class="kpi-label">Con Escolta</div>
+      <div class="kpi-value">${conEscolta}</div>
+      <div class="kpi-sub">${total > 0 ? Math.round(conEscolta / total * 100) : 0}% del total</div>
+    </div>`;
 }
 
 function updateBadges() {
