@@ -443,8 +443,12 @@ function renderOSTForm(u) {
           <input type="datetime-local" id="ost_fecha_llegada-${u.id}" />
         </div>
         <div class="field">
-          <label>Tramo (Origen → Destino)</label>
-          <input type="text" id="ost_tramo-${u.id}" placeholder="Ej: LA NEGRA / MEL" />
+          <label>Origen</label>
+          <input type="text" id="ost_origen-${u.id}" placeholder="Ej: LA NEGRA" />
+        </div>
+        <div class="field">
+          <label>Destino</label>
+          <input type="text" id="ost_destino-${u.id}" placeholder="Ej: MEL" />
         </div>
         <div class="field">
           <label>Tipo de Equipo</label>
@@ -567,7 +571,12 @@ async function processOSTFile(urgId, file) {
     set('om',           parsed.ost_om);
     setDatetime('fecha_salida',  parsed.fecha_salida);
     setDatetime('fecha_llegada', parsed.fecha_llegada);
-    set('tramo',        parsed.tramo);
+    // Separa "LA NEGRA / MEL" en origen y destino
+    if (parsed.tramo) {
+      const parts = parsed.tramo.split('/').map(s => s.trim());
+      set('origen',  parts[0] || parsed.tramo);
+      set('destino', parts[1] || '');
+    }
     set('equipo',       parsed.tipo_equipo);
     set('solicitud',    parsed.n_solicitud);
     set('peso',         parsed.peso_total);
@@ -611,7 +620,7 @@ async function confirmarDespacho(id) {
     ost_om:            get('om'),
     ost_fecha_salida:  get('fecha_salida'),
     ost_fecha_llegada: get('fecha_llegada'),
-    ost_tramo:         get('tramo'),
+    ost_tramo:         [get('origen'), get('destino')].filter(Boolean).join(' / '),
     ost_equipo:        get('equipo'),
     ost_solicitud:     get('solicitud'),
     ost_peso:          get('peso'),
