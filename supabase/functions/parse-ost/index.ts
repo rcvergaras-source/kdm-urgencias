@@ -24,6 +24,8 @@ serve(async (req) => {
     }
 
     const isImage = mediaType.startsWith('image/')
+
+    // PDFs usan el bloque document; imágenes usan image
     const contentBlock = isImage
       ? { type: 'image', source: { type: 'base64', media_type: mediaType, data: base64 } }
       : { type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: base64 } }
@@ -34,9 +36,10 @@ serve(async (req) => {
         'Content-Type': 'application/json',
         'x-api-key': ANTHROPIC_API_KEY,
         'anthropic-version': '2023-06-01',
+        'anthropic-beta': 'pdfs-2024-09-25',
       },
       body: JSON.stringify({
-        model: 'claude-haiku-4-5-20251001',
+        model: 'claude-sonnet-4-6',
         max_tokens: 1024,
         messages: [{
           role: 'user',
@@ -44,20 +47,21 @@ serve(async (req) => {
             contentBlock,
             {
               type: 'text',
-              text: `Extrae los datos de esta Orden de Servicio de Transporte (OST) de Ferrovial y responde SOLO en JSON válido sin backticks ni explicaciones:
+              text: `Extrae los datos de esta Orden de Servicio de Transporte (OST) y responde ÚNICAMENTE con un objeto JSON válido, sin backticks, sin texto adicional, sin explicaciones. Si un campo no existe en el documento usa null.
+
 {
-  "ost_numero": "número de OST (solo el número, ej: 345009)",
-  "ost_om": "número de OM o Orden de Manifiesto (ej: 327240)",
+  "ost_numero": "número de OST",
+  "ost_om": "número de OM u Orden de Manifiesto",
   "fecha_salida": "fecha y hora de salida (ej: 01-02-2025 14:00)",
-  "fecha_llegada": "fecha y hora de llegada estimada (ej: 02-02-2025 10:00)",
+  "fecha_llegada": "fecha y hora de llegada estimada",
   "tramo": "origen y destino separados por / (ej: LA NEGRA / MEL)",
-  "tipo_equipo": "tipo de equipo de transporte (ej: CAMA BAJA hasta 20)",
-  "oc": "número de orden de compra u OC (ej: 4517288781)",
-  "n_solicitud": "número de solicitud interna Ferrovial (ej: 638576)",
-  "peso_total": "peso total (ej: 18.000)",
+  "tipo_equipo": "tipo de equipo de transporte",
+  "oc": "número de orden de compra",
+  "n_solicitud": "número de solicitud interna",
+  "peso_total": "peso total",
   "cantidad_total": "cantidad total de items",
   "conductor_titular": "nombre del conductor titular",
-  "conductor_adicional": "nombre del conductor adicional o null si no hay",
+  "conductor_adicional": "nombre del conductor adicional o null",
   "descripcion_carga": "descripción del material transportado"
 }`
             }
@@ -67,16 +71,31 @@ serve(async (req) => {
     })
 
     const aiData = await resp.json()
+
+    // Si Claude devuelve error de API
+    if (aiData.type === 'error') {
+      throw new Error(`Claude API error: ${aiData.error?.message || JSON.stringify(aiData.error)}`)
+    }
+
     const text = aiData.content?.find((b: { type: string }) => b.type === 'text')?.text || ''
-    const clean = text.replace(/```json|```/g, '').trim()
-    const parsed = JSON.parse(clean)
+    if (!text) {
+      throw new Error(`Claude no devolvió texto. stop_reason: ${aiData.stop_reason}, raw: ${JSON.stringify(aiData).slice(0, 200)}`)
+    }
+
+    // Extraer el JSON aunque venga con texto alrededor
+    const jsonMatch = text.match(/\{[\s\S]*\}/)
+    if (!jsonMatch) {
+      throw new Error(`No se encontró JSON en la respuesta: ${text.slice(0, 200)}`)
+    }
+
+    const parsed = JSON.parse(jsonMatch[0])
 
     return new Response(JSON.stringify({ ok: true, data: parsed }), {
       headers: { ...CORS, 'Content-Type': 'application/json' }
     })
 
   } catch (err) {
-    return new Response(JSON.stringify({ error: String(err) }), {
+    return new Response(JSON.stringify({ ok: false, error: String(err) }), {
       status: 500, headers: { ...CORS, 'Content-Type': 'application/json' }
     })
   }
