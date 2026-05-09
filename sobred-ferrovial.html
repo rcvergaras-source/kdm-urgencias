@@ -125,17 +125,34 @@ textarea { resize: vertical; min-height: 80px; }
 .medidas-box { background: #FFFBE0; border: 1px solid #F0D840; border-radius: 6px; padding: 0.85rem 1rem; margin-bottom: 1.25rem; font-size: 0.85rem; color: #5A4A00; }
 
 /* OST UPLOAD SECTION */
-.ost-section { border: 2px dashed var(--fv-border); border-radius: 10px; padding: 1.5rem; margin-bottom: 1.25rem; transition: border-color 0.2s; }
-.ost-section.has-data { border-style: solid; border-color: var(--fv-yellow-dark); background: #FFFDF0; }
+.ost-section { border: 1px solid var(--fv-border); border-radius: 10px; padding: 1.5rem; margin-bottom: 1.25rem; transition: border-color 0.2s, background 0.2s; }
+.ost-section.has-data { border-color: var(--fv-yellow-dark); background: #FFFDF0; }
 .ost-title { font-size: 0.78rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--fv-black); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; }
 .ost-badge { background: var(--fv-yellow); color: var(--fv-black); font-size: 0.65rem; padding: 0.15rem 0.5rem; border-radius: 3px; font-weight: 700; }
 
-.upload-area { display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem; flex-wrap: wrap; }
-.upload-btn { background: var(--fv-black); color: var(--fv-yellow); border: none; border-radius: 6px; padding: 0.6rem 1.1rem; font-family: 'DM Sans', sans-serif; font-size: 0.82rem; font-weight: 600; cursor: pointer; transition: background 0.15s; white-space: nowrap; }
-.upload-btn:hover { background: var(--fv-dark2); }
-.upload-hint { font-size: 0.78rem; color: var(--fv-gray); }
-.parsing-status { font-size: 0.78rem; color: var(--fv-gray); padding: 0.5rem 0.75rem; background: #F8F8F6; border-radius: 6px; display: none; }
-.parsing-status.visible { display: block; }
+.drop-zone {
+  border: 2px dashed var(--fv-border);
+  border-radius: 8px;
+  padding: 1.5rem 1rem;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+  margin-bottom: 1rem;
+  position: relative;
+}
+.drop-zone:hover, .drop-zone.drag-over {
+  border-color: var(--fv-yellow-dark);
+  background: #FFFDF0;
+}
+.drop-zone.drag-over { border-style: solid; }
+.drop-icon { font-size: 1.8rem; margin-bottom: 0.4rem; }
+.drop-main { font-size: 0.85rem; font-weight: 600; color: var(--fv-black); margin-bottom: 0.25rem; }
+.drop-main span { color: var(--fv-yellow-dark); text-decoration: underline; }
+.drop-hint { font-size: 0.72rem; color: var(--fv-gray); }
+.drop-zone input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+
+.parsing-status { font-size: 0.82rem; color: var(--fv-gray); padding: 0.6rem 0.85rem; background: #F8F8F6; border-radius: 6px; display: none; margin-bottom: 0.75rem; }
+.parsing-status.visible { display: flex; align-items: center; gap: 0.5rem; }
 .parsing-status.success { background: #E8F5EE; color: #1D6338; }
 .parsing-status.error { background: #FEE; color: var(--fv-error); }
 
@@ -397,14 +414,15 @@ function renderOSTForm(u) {
     <div class="ost-section" id="ostSection-${u.id}">
       <div class="ost-title">
         <span>Orden de Servicio de Transporte (OST)</span>
-        <span class="ost-badge">AUTO-LECTURA</span>
+        <span class="ost-badge">AUTO-LECTURA IA</span>
       </div>
-      <div class="upload-area">
-        <input type="file" id="ostFile-${u.id}" accept=".pdf,image/*" style="display:none" onchange="parseOST('${u.id}', this)" />
-        <button class="upload-btn" onclick="document.getElementById('ostFile-${u.id}').click()">&#x1F4CE; Subir OST (PDF o imagen)</button>
-        <span class="upload-hint">El sistema leerá automáticamente los datos del documento</span>
+      <div class="drop-zone" id="dropZone-${u.id}" ondragover="onDragOver(event,'${u.id}')" ondragleave="onDragLeave(event,'${u.id}')" ondrop="onDrop(event,'${u.id}')">
+        <div class="drop-icon">📄</div>
+        <div class="drop-main">Arrastra el PDF aquí o <span>haz clic para adjuntar</span></div>
+        <div class="drop-hint">PDF o imagen · El sistema leerá los datos automáticamente con IA</div>
+        <input type="file" accept=".pdf,image/*" onchange="parseOST('${u.id}', this)" />
       </div>
-      <div class="parsing-status" id="parseStatus-${u.id}">Procesando documento...</div>
+      <div class="parsing-status" id="parseStatus-${u.id}"></div>
 
       <!-- CAMPOS OST -->
       <div class="ost-fields" id="ostFields-${u.id}">
@@ -479,18 +497,38 @@ function toggleCard(id) {
   document.getElementById('body-' + id).classList.toggle('open');
 }
 
-// ── OST PARSING via Claude API ──────────────────────────────────────────
-async function parseOST(urgId, input) {
-  const file = input.files[0];
-  if (!file) return;
+// ── DRAG & DROP ──────────────────────────────────────────────────────────
+function onDragOver(e, urgId) {
+  e.preventDefault();
+  document.getElementById('dropZone-' + urgId).classList.add('drag-over');
+}
+function onDragLeave(e, urgId) {
+  document.getElementById('dropZone-' + urgId).classList.remove('drag-over');
+}
+function onDrop(e, urgId) {
+  e.preventDefault();
+  document.getElementById('dropZone-' + urgId).classList.remove('drag-over');
+  const file = e.dataTransfer.files[0];
+  if (file) processOSTFile(urgId, file);
+}
 
-  const statusEl = document.getElementById('parseStatus-' + urgId);
-  const sectionEl = document.getElementById('ostSection-' + urgId);
-  statusEl.textContent = '⏳ Leyendo documento OST...';
+// ── OST PARSING via Edge Function ────────────────────────────────────────
+function parseOST(urgId, input) {
+  const file = input.files[0];
+  if (file) processOSTFile(urgId, file);
+}
+
+async function processOSTFile(urgId, file) {
+  const statusEl  = document.getElementById('parseStatus-' + urgId);
+  const sectionEl = document.getElementById('ostSection-'  + urgId);
+  const dropEl    = document.getElementById('dropZone-'    + urgId);
+
+  const name = file.name.length > 40 ? file.name.slice(0, 38) + '…' : file.name;
+  statusEl.innerHTML = `<span>⏳</span> Leyendo <strong>${name}</strong> con IA…`;
   statusEl.className = 'parsing-status visible';
+  dropEl.style.borderColor = 'var(--fv-yellow-dark)';
 
   try {
-    // Convert file to base64
     const base64 = await new Promise((res, rej) => {
       const r = new FileReader();
       r.onload = () => res(r.result.split(',')[1]);
@@ -498,81 +536,51 @@ async function parseOST(urgId, input) {
       r.readAsDataURL(file);
     });
 
-    const isImage = file.type.startsWith('image/');
-    const mediaType = isImage ? file.type : 'application/pdf';
+    const mediaType = file.type.startsWith('image/') ? file.type : 'application/pdf';
 
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
+    const resp = await fetch(`${SUPABASE_URL}/functions/v1/parse-ost`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 1000,
-        messages: [{
-          role: 'user',
-          content: [
-            {
-              type: isImage ? 'image' : 'document',
-              source: { type: 'base64', media_type: mediaType, data: base64 }
-            },
-            {
-              type: 'text',
-              text: `Extrae los datos de esta Orden de Servicio de Transporte (OST) de Ferrovial y responde SOLO en JSON válido sin backticks ni explicaciones:
-{
-  "ost_numero": "número de OST (solo el número, ej: 345009)",
-  "ost_om": "número de OM o Orden de Manifiesto (ej: 327240)",
-  "fecha_salida": "fecha y hora de salida (ej: 01-02-2025 14:00)",
-  "fecha_llegada": "fecha y hora de llegada estimada (ej: 02-02-2025 10:00)",
-  "tramo": "origen y destino separados por / (ej: LA NEGRA / MEL)",
-  "tipo_equipo": "tipo de equipo de transporte (ej: CAMA BAJA hasta 20)",
-  "oc": "número de orden de compra u OC (ej: 4517288781)",
-  "n_solicitud": "número de solicitud interna Ferrovial (ej: 638576)",
-  "peso_total": "peso total (ej: 18.000)",
-  "cantidad_total": "cantidad total de items",
-  "conductor_titular": "nombre del conductor titular",
-  "conductor_adicional": "nombre del conductor adicional o null si no hay",
-  "descripcion_carga": "descripción del material transportado"
-}`
-            }
-          ]
-        }]
-      })
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${SUPABASE_KEY}`
+      },
+      body: JSON.stringify({ base64, mediaType })
     });
 
-    const data = await response.json();
-    const text = data.content?.find(b => b.type === 'text')?.text || '';
-    const clean = text.replace(/```json|```/g, '').trim();
-    const parsed = JSON.parse(clean);
+    const result = await resp.json();
+    if (!result.ok) throw new Error(result.error || 'Error en servidor');
 
-    // Fill fields
+    const parsed = result.data;
     const set = (field, val) => {
       const el = document.getElementById(`ost_${field}-${urgId}`);
       if (el && val && val !== 'null') el.value = val;
     };
-    set('numero',     parsed.ost_numero);
-    set('om',         parsed.ost_om);
+    set('numero',       parsed.ost_numero);
+    set('om',           parsed.ost_om);
     set('fecha_salida', parsed.fecha_salida);
-    set('fecha_llegada', parsed.fecha_llegada);
-    set('tramo',      parsed.tramo);
-    set('equipo',     parsed.tipo_equipo);
-    set('solicitud',  parsed.n_solicitud);
-    set('peso',       parsed.peso_total);
-    set('cantidad',   parsed.cantidad_total);
-    set('conductor1', parsed.conductor_titular);
-    set('conductor2', parsed.conductor_adicional);
-    set('carga',      parsed.descripcion_carga);
+    set('fecha_llegada',parsed.fecha_llegada);
+    set('tramo',        parsed.tramo);
+    set('equipo',       parsed.tipo_equipo);
+    set('solicitud',    parsed.n_solicitud);
+    set('peso',         parsed.peso_total);
+    set('cantidad',     parsed.cantidad_total);
+    set('conductor1',   parsed.conductor_titular);
+    set('conductor2',   parsed.conductor_adicional);
+    set('carga',        parsed.descripcion_carga);
 
-    // Update trazabilidad
     if (parsed.ost_numero) {
       document.getElementById('trazOst-' + urgId).textContent = 'OST N° ' + parsed.ost_numero;
     }
 
     sectionEl.classList.add('has-data');
-    statusEl.textContent = '✓ Datos extraídos automáticamente. Revise y corrija si es necesario.';
+    dropEl.style.borderColor = '';
+    statusEl.innerHTML = `<span>✓</span> Datos extraídos de <strong>${name}</strong>. Revise y corrija si es necesario.`;
     statusEl.className = 'parsing-status visible success';
 
   } catch (err) {
     console.error(err);
-    statusEl.textContent = '⚠️ No se pudo leer automáticamente. Complete los campos manualmente.';
+    dropEl.style.borderColor = 'var(--fv-error)';
+    statusEl.innerHTML = `<span>⚠️</span> No se pudo leer automáticamente. Complete los campos manualmente. <em style="font-size:0.7rem;opacity:0.7">${err.message}</em>`;
     statusEl.className = 'parsing-status visible error';
   }
 }
