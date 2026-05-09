@@ -339,7 +339,7 @@ function renderCard(u, container) {
   div.className = 'urg-card';
   div.id = 'card-' + u.id;
   div.innerHTML = `
-    <div class="urg-card-header" onclick="toggleCard(${u.id})">
+    <div class="urg-card-header" onclick="toggleCard('${u.id}')">
       <div>
         <div class="urg-id">${num}</div>
         <div class="urg-meta">${u.gerencia || '—'} · ${u.nombre_superintendente || '—'} · ${fecha}</div>
@@ -400,8 +400,8 @@ function renderOSTForm(u) {
         <span class="ost-badge">AUTO-LECTURA</span>
       </div>
       <div class="upload-area">
-        <input type="file" id="ostFile-${u.id}" accept=".pdf,image/*" style="display:none" onchange="parseOST(${u.id}, this)" />
-        <button class="upload-btn" onclick="document.getElementById('ostFile-${u.id}').click()">📎 Subir OST (PDF o imagen)</button>
+        <input type="file" id="ostFile-${u.id}" accept=".pdf,image/*" style="display:none" onchange="parseOST('${u.id}', this)" />
+        <button class="upload-btn" onclick="document.getElementById('ostFile-${u.id}').click()">&#x1F4CE; Subir OST (PDF o imagen)</button>
         <span class="upload-hint">El sistema leerá automáticamente los datos del documento</span>
       </div>
       <div class="parsing-status" id="parseStatus-${u.id}">Procesando documento...</div>
@@ -471,7 +471,7 @@ function renderOSTForm(u) {
       <div style="background:#FFFBE0;border:1px solid #F0D840;border-radius:6px;padding:0.75rem 1rem;font-size:0.78rem;color:#5A4A00;margin-bottom:1rem;">
         ⚠️ Al confirmar el despacho, KDM será notificado automáticamente para proceder con la rebaja en sistema.
       </div>
-      <button class="btn-despacho" onclick="confirmarDespacho(${u.id})">✓ Confirmar Despacho</button>
+      <button class="btn-despacho" onclick="confirmarDespacho('${u.id}')">✓ Confirmar Despacho</button>
     </div>`;
 }
 
