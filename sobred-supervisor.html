@@ -34,16 +34,10 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bhp-light); color: 
 .login-role-badge { display: inline-block; background: #FFF0E8; color: var(--bhp-orange); font-size: 0.7rem; font-weight: 600; padding: 0.2rem 0.7rem; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 0.75rem; border: 1px solid #F5C8A8; }
 .field { display: flex; flex-direction: column; gap: 0.35rem; margin-bottom: 1rem; }
 label { font-size: 0.78rem; font-weight: 500; color: var(--bhp-dark); }
-input[type="email"], input[type="password"], input[type="text"], textarea, select {
-  width: 100%; padding: 0.65rem 0.85rem; border: 1.5px solid var(--bhp-border); border-radius: 6px;
-  font-family: 'DM Sans', sans-serif; font-size: 0.875rem; color: var(--bhp-dark); background: var(--bhp-white);
-  transition: border-color 0.15s, box-shadow 0.15s;
-}
-input:focus, textarea:focus, select:focus { outline: none; border-color: var(--bhp-orange); box-shadow: 0 0 0 3px rgba(224,94,27,0.1); }
-textarea { resize: vertical; min-height: 90px; }
+input[type="email"], input[type="password"] { width: 100%; padding: 0.65rem 0.85rem; border: 1.5px solid var(--bhp-border); border-radius: 6px; font-family: 'DM Sans', sans-serif; font-size: 0.875rem; color: var(--bhp-dark); background: var(--bhp-white); transition: border-color 0.15s; }
+input:focus { outline: none; border-color: var(--bhp-orange); box-shadow: 0 0 0 3px rgba(224,94,27,0.1); }
 .btn-primary { width: 100%; background: var(--bhp-orange); color: white; border: none; border-radius: 8px; padding: 0.85rem; font-family: 'DM Sans', sans-serif; font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: background 0.15s; margin-top: 0.5rem; }
 .btn-primary:hover { background: #C94E10; }
-.btn-primary:disabled { background: #C4B8B0; cursor: not-allowed; }
 .login-error { background: #FEE; border: 1px solid #F5C6C6; border-radius: 6px; padding: 0.65rem 0.85rem; font-size: 0.8rem; color: var(--bhp-error); margin-bottom: 1rem; display: none; }
 .login-error.visible { display: block; }
 
@@ -56,7 +50,7 @@ textarea { resize: vertical; min-height: 90px; }
 .header-divider { width: 1px; height: 24px; background: var(--bhp-border); }
 .header-section { font-size: 0.78rem; font-weight: 500; color: var(--bhp-gray); text-transform: uppercase; letter-spacing: 0.06em; }
 .header-right { margin-left: auto; display: flex; align-items: center; gap: 1rem; }
-.role-pill { background: #FFF0E8; color: var(--bhp-orange); font-size: 0.7rem; font-weight: 600; padding: 0.25rem 0.75rem; border-radius: 20px; border: 1px solid #F5C8A8; text-transform: uppercase; letter-spacing: 0.05em; }
+.role-pill { background: #FFF0E8; color: var(--bhp-orange); font-size: 0.7rem; font-weight: 600; padding: 0.25rem 0.75rem; border-radius: 20px; border: 1px solid #F5C8A8; text-transform: uppercase; }
 .btn-logout { background: transparent; border: 1px solid var(--bhp-border); border-radius: 6px; padding: 0.35rem 0.75rem; font-family: 'DM Sans', sans-serif; font-size: 0.75rem; color: var(--bhp-gray); cursor: pointer; transition: all 0.15s; }
 .btn-logout:hover { border-color: var(--bhp-error); color: var(--bhp-error); }
 
@@ -66,94 +60,102 @@ textarea { resize: vertical; min-height: 90px; }
 
 .container { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem; }
 
-.section-title-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 0.75rem; }
-.section-title-bar h2 { font-size: 1.1rem; font-weight: 600; color: var(--bhp-dark); }
-.count-badge { background: var(--bhp-orange); color: white; font-family: 'DM Mono', monospace; font-size: 0.75rem; padding: 0.2rem 0.6rem; border-radius: 4px; }
-
 /* TABS */
-.tabs {
-  display: flex;
-  gap: 0.25rem;
-  margin-bottom: 1.5rem;
-  border-bottom: 2px solid var(--bhp-border);
-}
-.tab {
-  padding: 0.6rem 1.1rem;
-  font-size: 0.82rem;
-  font-weight: 500;
-  color: var(--bhp-gray);
-  cursor: pointer;
-  border-bottom: 2px solid transparent;
-  margin-bottom: -2px;
-  transition: all 0.15s;
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-}
+.tabs { display: flex; gap: 0.25rem; margin-bottom: 1.5rem; border-bottom: 2px solid var(--bhp-border); flex-wrap: wrap; }
+.tab { padding: 0.6rem 1.1rem; font-size: 0.82rem; font-weight: 500; color: var(--bhp-gray); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all 0.15s; display: flex; align-items: center; gap: 0.4rem; }
 .tab:hover { color: var(--bhp-dark); }
 .tab.active { color: var(--bhp-orange); border-bottom-color: var(--bhp-orange); }
-.tab-badge {
-  background: var(--bhp-orange);
-  color: white;
-  font-size: 0.65rem;
-  font-weight: 700;
-  padding: 0.1rem 0.45rem;
-  border-radius: 20px;
-  min-width: 18px;
-  text-align: center;
-}
+.tab-badge { background: var(--bhp-orange); color: white; font-size: 0.65rem; font-weight: 700; padding: 0.1rem 0.45rem; border-radius: 20px; min-width: 18px; text-align: center; }
 .tab-badge.gray { background: var(--bhp-border); color: var(--bhp-gray); }
 
-/* URGENCIA CARD */
-.urg-card { background: var(--bhp-white); border: 1px solid var(--bhp-border); border-radius: 10px; margin-bottom: 1rem; overflow: hidden; transition: box-shadow 0.15s; }
-.urg-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.08); }
-.urg-card-header { padding: 1rem 1.25rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; cursor: pointer; flex-wrap: wrap; }
-.urg-card-header:hover { background: #FAFAF8; }
-.urg-id { font-family: 'DM Mono', monospace; font-size: 0.9rem; font-weight: 500; color: var(--bhp-orange); }
-.urg-meta { font-size: 0.78rem; color: var(--bhp-gray); margin-top: 0.2rem; }
-.urg-badges { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+/* URGENCIA CARDS (list style) */
+.urgencia-card { background: var(--bhp-white); border: 1.5px solid var(--bhp-border); border-radius: 10px; padding: 1.1rem 1.25rem; cursor: pointer; transition: border-color 0.15s, box-shadow 0.15s; display: flex; align-items: center; gap: 1.25rem; margin-bottom: 0.75rem; }
+.urgencia-card:hover { border-color: var(--bhp-orange); box-shadow: 0 2px 12px rgba(224,94,27,0.1); }
+.urgencia-card.pendiente_aprobacion { border-left: 4px solid var(--bhp-orange); }
+.urgencia-card.en_correccion { border-left: 4px solid var(--bhp-warning); }
+.urgencia-card.aprobado_supervisor { border-left: 4px solid var(--bhp-success); }
+.urgencia-card.rechazado_supervisor { border-left: 4px solid var(--bhp-error); }
+.urgencia-card.pendiente_si { border-left: 4px solid #6D28D9; }
+.urgencia-card.rechazada_si { border-left: 4px solid var(--bhp-error); }
+.urg-num { font-family: 'DM Mono', monospace; font-size: 0.85rem; font-weight: 500; color: var(--bhp-dark); white-space: nowrap; }
+.urg-info { flex: 1; min-width: 0; }
+.urg-proveedor { font-size: 0.9rem; font-weight: 600; color: var(--bhp-dark); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.urg-meta { font-size: 0.75rem; color: var(--bhp-gray); margin-top: 0.2rem; }
+.urg-badges { display: flex; align-items: center; gap: 0.5rem; flex-shrink: 0; }
+.urg-arrow { color: var(--bhp-border); font-size: 1.1rem; flex-shrink: 0; }
 
-.status-pill { font-size: 0.65rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; padding: 0.25rem 0.65rem; border-radius: 20px; }
-.status-pill.pendiente_si         { background: #F3F0FF; color: #5B21B6; border: 1px solid #C4B5FD; }
-.status-pill.rechazada_si         { background: #FEE; color: var(--bhp-error); border: 1px solid #F5C6C6; }
-.status-pill.pendiente_aprobacion { background: #FFF8E8; color: #92610A; border: 1px solid #F5DFA0; }
-.status-pill.pendiente_supervisor { background: #FFF8E8; color: #92610A; border: 1px solid #F5DFA0; }
-.status-pill.aprobado_supervisor  { background: #E8F5EE; color: #1D6338; border: 1px solid #A8D8B8; }
-.status-pill.rechazado_supervisor { background: #FEE; color: var(--bhp-error); border: 1px solid #F5C6C6; }
-.status-pill.pendiente_mintral    { background: #EEF4FF; color: #2A5BA8; border: 1px solid #B0C8F0; }
-.status-pill.aprobado_mintral     { background: #E8F5EE; color: #1D6338; border: 1px solid #A8D8B8; }
+/* STATUS PILLS */
+.status-pill { display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.68rem; font-weight: 600; padding: 0.25rem 0.65rem; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.04em; white-space: nowrap; }
+.status-pill.pendiente_si         { background: #F5F0FF; color: #6D28D9; }
+.status-pill.rechazada_si         { background: #FEE; color: var(--bhp-error); }
+.status-pill.pendiente_aprobacion { background: #FFF0E8; color: var(--bhp-orange); }
+.status-pill.en_correccion        { background: #FFFBEB; color: var(--bhp-warning); }
+.status-pill.aprobado_supervisor  { background: #EDFAF3; color: var(--bhp-success); }
+.status-pill.rechazado_supervisor { background: #FEE; color: var(--bhp-error); }
 
 .escolta-pill { background: #FFF8E8; color: #92610A; border: 1px solid #F5DFA0; font-size: 0.65rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; padding: 0.25rem 0.65rem; border-radius: 20px; }
 
-.urg-card-body { display: none; border-top: 1px solid var(--bhp-border); padding: 1.25rem; }
-.urg-card-body.open { display: block; }
-
-.medidas-box { background: #FFFBF0; border: 1px solid #F5DFA0; border-radius: 6px; padding: 0.85rem 1rem; margin-bottom: 1.25rem; font-size: 0.85rem; color: #7A5010; }
-.medidas-box strong { color: #92610A; }
-
-.data-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.85rem; margin-bottom: 1.25rem; }
-.data-item label { font-size: 0.65rem; color: var(--bhp-gray); text-transform: uppercase; letter-spacing: 0.08em; display: block; margin-bottom: 0.2rem; }
-.data-item span { font-size: 0.85rem; color: var(--bhp-dark); }
-.full { grid-column: 1 / -1; }
-
-.obs-prev { background: #F8F8F8; border: 1px solid var(--bhp-border); border-radius: 6px; padding: 0.75rem 1rem; font-size: 0.82rem; color: var(--bhp-gray); margin-bottom: 1.25rem; font-style: italic; }
-
-.action-area { border-top: 1px solid var(--bhp-border); padding-top: 1.25rem; }
-.action-area label { font-size: 0.75rem; font-weight: 500; color: var(--bhp-dark); display: block; margin-bottom: 0.4rem; }
-.action-area textarea { width: 100%; padding: 0.65rem 0.85rem; border: 1.5px solid var(--bhp-border); border-radius: 6px; font-family: 'DM Sans', sans-serif; font-size: 0.85rem; color: var(--bhp-dark); resize: vertical; min-height: 80px; }
-.action-area textarea:focus { outline: none; border-color: var(--bhp-orange); box-shadow: 0 0 0 3px rgba(224,94,27,0.1); }
-.action-btns { display: flex; gap: 0.75rem; margin-top: 0.75rem; flex-wrap: wrap; }
-.btn-approve { background: var(--bhp-success); color: white; border: none; border-radius: 6px; padding: 0.65rem 1.25rem; font-family: 'DM Sans', sans-serif; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: background 0.15s; }
-.btn-approve:hover { background: #236234; }
-.btn-correction { background: transparent; color: var(--bhp-warning); border: 1.5px solid var(--bhp-warning); border-radius: 6px; padding: 0.65rem 1.25rem; font-family: 'DM Sans', sans-serif; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.15s; }
-.btn-correction:hover { background: #FFF8E8; }
-.btn-reject { background: transparent; color: var(--bhp-error); border: 1.5px solid var(--bhp-error); border-radius: 6px; padding: 0.65rem 1.25rem; font-family: 'DM Sans', sans-serif; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.15s; }
-.btn-reject:hover { background: #FEE; }
-.status-pill.en_correccion { background: #FFF8E8; color: var(--bhp-warning); border: 1px solid #F5DFA0; }
-
-.empty-state { text-align: center; padding: 4rem 2rem; }
-.empty-state p { color: var(--bhp-gray); font-size: 0.9rem; }
+.empty-state { text-align: center; padding: 3rem 1rem; color: var(--bhp-gray); }
+.empty-state .icon { font-size: 2rem; margin-bottom: 0.75rem; }
+.empty-state p { font-size: 0.9rem; }
 .loading-state { text-align: center; padding: 3rem; color: var(--bhp-gray); font-size: 0.9rem; }
+
+/* MODAL */
+.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 200; align-items: flex-start; justify-content: center; padding: 1.5rem; overflow-y: auto; }
+.modal-overlay.visible { display: flex; }
+.modal { background: var(--bhp-white); border-radius: 12px; width: 100%; max-width: 700px; margin: auto; box-shadow: 0 8px 40px rgba(0,0,0,0.18); overflow: hidden; }
+.modal-header { background: var(--bhp-dark); padding: 1.1rem 1.5rem; display: flex; align-items: center; justify-content: space-between; }
+.modal-header-left { display: flex; align-items: center; gap: 0.75rem; }
+.modal-urg-num { font-family: 'DM Mono', monospace; font-size: 0.9rem; color: white; font-weight: 500; }
+.modal-close { background: transparent; border: none; color: rgba(255,255,255,0.6); font-size: 1.3rem; cursor: pointer; line-height: 1; padding: 0.2rem; transition: color 0.15s; }
+.modal-close:hover { color: white; }
+.modal-body { padding: 1.5rem; max-height: 65vh; overflow-y: auto; }
+
+/* MODAL DETAIL SECTIONS */
+.detail-section { margin-bottom: 1.5rem; }
+.detail-section-title { font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--bhp-gray); margin-bottom: 0.85rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--bhp-border); }
+.detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+.detail-grid.cols3 { grid-template-columns: 1fr 1fr 1fr; }
+.detail-field { display: flex; flex-direction: column; gap: 0.2rem; }
+.detail-field.full { grid-column: 1 / -1; }
+.detail-label { font-size: 0.7rem; color: var(--bhp-gray); font-weight: 500; }
+.detail-value { font-size: 0.875rem; color: var(--bhp-dark); }
+.detail-value.mono { font-family: 'DM Mono', monospace; font-size: 0.8rem; }
+.detail-value.empty { color: var(--bhp-border); font-style: italic; }
+
+/* MEDIDAS ALERT */
+.medidas-alert { background: #FFFBF0; border: 1px solid #F5DFA0; border-radius: 6px; padding: 0.85rem 1rem; margin-bottom: 1rem; font-size: 0.85rem; color: #7A5010; }
+.escolta-alert { background: #FFF8E8; border: 1px solid #F5DFA0; border-left: 4px solid #E05E1B; border-radius: 6px; padding: 0.75rem 1rem; margin-bottom: 1rem; font-size: 0.85rem; color: #7A3010; font-weight: 500; }
+
+/* MODAL ACTIONS */
+.modal-actions { border-top: 1px solid var(--bhp-border); padding: 1.25rem 1.5rem; background: #FAFAF8; }
+.actions-title { font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--bhp-gray); margin-bottom: 1rem; }
+.action-buttons { display: flex; gap: 0.75rem; flex-wrap: wrap; }
+
+.btn-aprobar { background: var(--bhp-success); color: white; border: none; border-radius: 7px; padding: 0.7rem 1.25rem; font-family: 'DM Sans', sans-serif; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: background 0.15s; }
+.btn-aprobar:hover { background: #236037; }
+.btn-correccion { background: #FFFBEB; color: var(--bhp-warning); border: 1.5px solid #FCD34D; border-radius: 7px; padding: 0.7rem 1.25rem; font-family: 'DM Sans', sans-serif; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.15s; }
+.btn-correccion:hover { background: #FEF3C7; }
+.btn-rechazar { background: #FEE; color: var(--bhp-error); border: 1.5px solid #F5C6C6; border-radius: 7px; padding: 0.7rem 1.25rem; font-family: 'DM Sans', sans-serif; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.15s; }
+.btn-rechazar:hover { background: #FECACA; }
+
+/* COMMENT BOX */
+.comment-box { display: none; margin-top: 1rem; padding: 1rem; background: var(--bhp-white); border: 1.5px solid var(--bhp-border); border-radius: 8px; }
+.comment-box.visible { display: block; }
+.comment-box label { font-size: 0.78rem; font-weight: 500; color: var(--bhp-dark); display: block; margin-bottom: 0.4rem; }
+.comment-box textarea { width: 100%; padding: 0.65rem 0.85rem; border: 1.5px solid var(--bhp-border); border-radius: 6px; font-family: 'DM Sans', sans-serif; font-size: 0.85rem; color: var(--bhp-dark); resize: vertical; min-height: 90px; }
+.comment-box textarea:focus { outline: none; border-color: var(--bhp-orange); box-shadow: 0 0 0 3px rgba(224,94,27,0.1); }
+.comment-actions { display: flex; gap: 0.5rem; margin-top: 0.75rem; justify-content: flex-end; }
+.btn-cancelar { background: transparent; border: 1px solid var(--bhp-border); border-radius: 6px; padding: 0.55rem 1rem; font-family: 'DM Sans', sans-serif; font-size: 0.82rem; color: var(--bhp-gray); cursor: pointer; }
+.btn-confirmar { background: var(--bhp-dark); color: white; border: none; border-radius: 6px; padding: 0.55rem 1rem; font-family: 'DM Sans', sans-serif; font-size: 0.82rem; font-weight: 600; cursor: pointer; transition: background 0.15s; }
+.btn-confirmar:hover { background: #333; }
+
+@media (max-width: 600px) {
+  .detail-grid, .detail-grid.cols3 { grid-template-columns: 1fr; }
+  .detail-field.full { grid-column: span 1; }
+  .action-buttons { flex-direction: column; }
+  .urgencia-card { flex-wrap: wrap; }
+}
 </style>
 </head>
 <body>
@@ -188,9 +190,9 @@ textarea { resize: vertical; min-height: 90px; }
 <div class="app" id="appScreen">
   <header class="header">
     <div class="header-logo">
-      <span class="logo-escondida" style="font-weight:600;font-size:1rem;color:#1A1A1A;letter-spacing:-0.02em;">ESCONDIDA</span>
-      <div class="logo-sep"></div>
-      <span class="logo-bhp" style="font-weight:600;font-size:1rem;color:#E05E1B;letter-spacing:0.05em;">BHP</span>
+      <span style="font-weight:600;font-size:1rem;color:#1A1A1A;letter-spacing:-0.02em;">ESCONDIDA</span>
+      <div style="width:1px;height:20px;background:var(--bhp-border);"></div>
+      <span style="font-weight:600;font-size:1rem;color:#E05E1B;letter-spacing:0.05em;">BHP</span>
     </div>
     <div class="header-divider"></div>
     <span class="header-section">Urgencias Sobredimensión</span>
@@ -202,35 +204,55 @@ textarea { resize: vertical; min-height: 90px; }
 
   <div class="notif-banner hidden" id="notifBanner">
     <div class="notif-dot" id="notifCount">0</div>
-    <span id="notifText">urgencia(s) de sobredimensión pendientes de revisión</span>
+    <span id="notifText">urgencia(s) pendientes de revisión</span>
   </div>
 
   <div class="container">
-    <!-- TABS -->
     <div class="tabs">
       <div class="tab" onclick="switchTab('pendiente_si')" id="tab_pendiente_si">
-        Pend. aprobación SI
-        <span class="tab-badge gray" id="badge_pendiente_si">0</span>
+        Pend. aprobación SI <span class="tab-badge gray" id="badge_pendiente_si">0</span>
       </div>
       <div class="tab active" onclick="switchTab('pendiente_aprobacion')" id="tab_pendiente_aprobacion">
-        Pendiente revisión
-        <span class="tab-badge" id="badge_pendiente_aprobacion">0</span>
-      </div>
-      <div class="tab" onclick="switchTab('aprobado_supervisor')" id="tab_aprobado_supervisor">
-        Aprobadas
-        <span class="tab-badge gray" id="badge_aprobado_supervisor">0</span>
-      </div>
-      <div class="tab" onclick="switchTab('rechazado_supervisor')" id="tab_rechazado_supervisor">
-        Rechazadas
-        <span class="tab-badge gray" id="badge_rechazado_supervisor">0</span>
+        Pendiente revisión <span class="tab-badge" id="badge_pendiente_aprobacion">0</span>
       </div>
       <div class="tab" onclick="switchTab('en_correccion')" id="tab_en_correccion">
-        En corrección
-        <span class="tab-badge gray" id="badge_en_correccion">0</span>
+        En corrección <span class="tab-badge gray" id="badge_en_correccion">0</span>
+      </div>
+      <div class="tab" onclick="switchTab('aprobado_supervisor')" id="tab_aprobado_supervisor">
+        Aprobadas <span class="tab-badge gray" id="badge_aprobado_supervisor">0</span>
+      </div>
+      <div class="tab" onclick="switchTab('rechazado_supervisor')" id="tab_rechazado_supervisor">
+        Rechazadas <span class="tab-badge gray" id="badge_rechazado_supervisor">0</span>
       </div>
     </div>
     <div id="loadingState" class="loading-state">Cargando urgencias...</div>
     <div id="listaUrgencias"></div>
+  </div>
+</div>
+
+<!-- MODAL DETALLE -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModalOutside(event)">
+  <div class="modal" id="modal">
+    <div class="modal-header">
+      <div class="modal-header-left">
+        <span class="modal-urg-num" id="modalUrgNum">SOBRED-0000</span>
+        <span class="status-pill" id="modalStatus"></span>
+      </div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+    <div class="modal-actions" id="modalActions">
+      <div class="actions-title">Acciones</div>
+      <div class="action-buttons" id="actionButtons"></div>
+      <div class="comment-box" id="commentBox">
+        <label id="commentLabel">Comentario</label>
+        <textarea id="commentText" placeholder="Escriba el motivo..."></textarea>
+        <div class="comment-actions">
+          <button class="btn-cancelar" onclick="cancelComment()">Cancelar</button>
+          <button class="btn-confirmar" id="btnConfirmar" onclick="confirmAction()">Confirmar</button>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -241,12 +263,16 @@ const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const VALID_USERS = {
   'supervisorbhpa@kdmindustrial.cl': 'kdm2024sup',
-  'jarayaa@kdmindustrial.cl': 'kdm2024sup'
+  'jarayaa@kdmindustrial.cl': 'kdm2024sup',
+  'rvergara@kdmindustrial.cl': 'kdm2024'
 };
 
 let currentTab = 'pendiente_aprobacion';
 let allUrgencias = [];
+let currentUrgencia = null;
+let pendingAction = null;
 
+// ── AUTH ─────────────────────────────────────────────────────────────────
 function doLogin() {
   const email = document.getElementById('loginEmail').value.trim();
   const pass  = document.getElementById('loginPass').value;
@@ -271,7 +297,6 @@ function doLogout() {
   document.getElementById('appScreen').classList.remove('visible');
 }
 
-// Restaurar sesión al cargar
 window.addEventListener('load', () => {
   const saved = sessionStorage.getItem('sobred_bhp_session');
   if (saved) {
@@ -281,20 +306,7 @@ window.addEventListener('load', () => {
   }
 });
 
-function estadoLabel(s) {
-  return {
-    pendiente_si:         'Pendiente aprobación SI',
-    rechazada_si:         'Rechazada por SI',
-    pendiente_aprobacion: 'Pendiente revisión Supervisor',
-    pendiente_supervisor: 'Pendiente revisión Supervisor',
-    aprobado_supervisor:  'Aprobado por Supervisor',
-    rechazado_supervisor: 'Rechazado por Supervisor',
-    en_correccion:        'En corrección',
-    pendiente_mintral:    'En MINTRAL',
-    aprobado_mintral:     'Completado',
-  }[s] || s;
-}
-
+// ── DATA ─────────────────────────────────────────────────────────────────
 async function loadUrgencias() {
   document.getElementById('loadingState').style.display = 'block';
   document.getElementById('listaUrgencias').innerHTML = '';
@@ -305,49 +317,34 @@ async function loadUrgencias() {
 
   document.getElementById('loadingState').style.display = 'none';
 
-  if (error || !data?.length) {
-    allUrgencias = [];
-    updateBadges();
-    renderTab();
-    return;
-  }
-
+  if (error || !data?.length) { allUrgencias = []; updateBadges(); renderTab(); return; }
   allUrgencias = data;
   updateBadges();
   renderTab();
 }
 
 function updateBadges() {
-  const counts = {
-    pendiente_si: 0,
-    rechazada_si: 0,
-    pendiente_aprobacion: 0,
-    aprobado_supervisor: 0,
-    rechazado_supervisor: 0,
-    en_correccion: 0,
-  };
+  const c = { pendiente_si: 0, pendiente_aprobacion: 0, en_correccion: 0, aprobado_supervisor: 0, rechazado_supervisor: 0 };
   allUrgencias.forEach(u => {
-    if (u.estado === 'pendiente_si' || u.estado === 'rechazada_si') counts.pendiente_si++;
-    else if (u.estado === 'pendiente_aprobacion' || u.estado === 'pendiente_supervisor') counts.pendiente_aprobacion++;
-    else if (u.estado === 'aprobado_supervisor') counts.aprobado_supervisor++;
-    else if (u.estado === 'rechazado_supervisor') counts.rechazado_supervisor++;
-    else if (u.estado === 'en_correccion') counts.en_correccion++;
+    if      (u.estado === 'pendiente_si' || u.estado === 'rechazada_si') c.pendiente_si++;
+    else if (u.estado === 'pendiente_aprobacion' || u.estado === 'pendiente_supervisor') c.pendiente_aprobacion++;
+    else if (u.estado === 'en_correccion')   c.en_correccion++;
+    else if (u.estado === 'aprobado_supervisor') c.aprobado_supervisor++;
+    else if (u.estado === 'rechazado_supervisor') c.rechazado_supervisor++;
   });
 
-  document.getElementById('badge_pendiente_si').textContent = counts.pendiente_si;
-  document.getElementById('badge_pendiente_aprobacion').textContent = counts.pendiente_aprobacion;
-  document.getElementById('badge_aprobado_supervisor').textContent = counts.aprobado_supervisor;
-  document.getElementById('badge_rechazado_supervisor').textContent = counts.rechazado_supervisor;
-  document.getElementById('badge_en_correccion').textContent = counts.en_correccion;
-
-  // Badges gris/naranja según si tienen items
-  ['badge_pendiente_si','badge_aprobado_supervisor','badge_rechazado_supervisor','badge_en_correccion'].forEach(id => {
+  const set = (id, n) => {
     const el = document.getElementById(id);
-    el.className = parseInt(el.textContent) > 0 ? 'tab-badge' : 'tab-badge gray';
-  });
+    el.textContent = n;
+    el.className = n > 0 ? 'tab-badge' : 'tab-badge gray';
+  };
+  set('badge_pendiente_si', c.pendiente_si);
+  set('badge_pendiente_aprobacion', c.pendiente_aprobacion);
+  set('badge_en_correccion', c.en_correccion);
+  set('badge_aprobado_supervisor', c.aprobado_supervisor);
+  set('badge_rechazado_supervisor', c.rechazado_supervisor);
 
-  // Notif banner: muestra conteo de pendiente_aprobacion
-  const pending = counts.pendiente_aprobacion;
+  const pending = c.pendiente_aprobacion;
   const banner = document.getElementById('notifBanner');
   if (pending > 0) {
     banner.classList.remove('hidden');
@@ -365,22 +362,37 @@ function renderTab() {
   lista.innerHTML = '';
 
   let filtered;
-  if (currentTab === 'pendiente_si') {
-    filtered = allUrgencias.filter(u => u.estado === 'pendiente_si' || u.estado === 'rechazada_si');
-  } else if (currentTab === 'pendiente_aprobacion') {
-    filtered = allUrgencias.filter(u => u.estado === 'pendiente_aprobacion' || u.estado === 'pendiente_supervisor');
-  } else if (currentTab === 'en_correccion') {
-    filtered = allUrgencias.filter(u => u.estado === 'en_correccion');
-  } else {
-    filtered = allUrgencias.filter(u => u.estado === currentTab);
-  }
+  if      (currentTab === 'pendiente_si')         filtered = allUrgencias.filter(u => u.estado === 'pendiente_si' || u.estado === 'rechazada_si');
+  else if (currentTab === 'pendiente_aprobacion') filtered = allUrgencias.filter(u => u.estado === 'pendiente_aprobacion' || u.estado === 'pendiente_supervisor');
+  else if (currentTab === 'en_correccion')        filtered = allUrgencias.filter(u => u.estado === 'en_correccion');
+  else                                            filtered = allUrgencias.filter(u => u.estado === currentTab);
 
   if (!filtered.length) {
-    lista.innerHTML = `<div class="empty-state"><p>📭 No hay solicitudes en este estado.</p></div>`;
+    lista.innerHTML = `<div class="empty-state"><div class="icon">📋</div><p>No hay solicitudes en este estado.</p></div>`;
     return;
   }
 
-  filtered.forEach(u => renderCard(u, lista));
+  filtered.forEach(u => {
+    const num  = u.numero_urg || ('SOBRED-' + String(u.id).slice(0, 8));
+    const fecha = u.fecha_solicitud || new Date(u.created_at).toLocaleDateString('es-CL');
+    const escoltaBadge = u.requiere_escolta === 'si' ? `<span class="escolta-pill">🚨 Escolta</span>` : '';
+
+    const card = document.createElement('div');
+    card.className = `urgencia-card ${u.estado}`;
+    card.onclick = () => openModal(u.id);
+    card.innerHTML = `
+      <span class="urg-num">${num}</span>
+      <div class="urg-info">
+        <div class="urg-proveedor">${u.nombre_proveedor || '—'}</div>
+        <div class="urg-meta">${u.gerencia || '—'} · ${u.superintendencia || '—'} · ${fecha}</div>
+      </div>
+      <div class="urg-badges">
+        ${escoltaBadge}
+        <span class="status-pill ${u.estado}">${estadoLabel(u.estado)}</span>
+      </div>
+      <span class="urg-arrow">›</span>`;
+    lista.appendChild(card);
+  });
 }
 
 function switchTab(tab) {
@@ -390,123 +402,215 @@ function switchTab(tab) {
   renderTab();
 }
 
-function renderCard(u, container) {
-  const num = u.numero_urg || ('SOBRED-' + String(u.id).slice(0,8));
-  const fecha = new Date(u.created_at).toLocaleString('es-CL');
-  const escoltaBadge = u.requiere_escolta === 'si' ? `<span class="escolta-pill">🚨 Escolta</span>` : '';
+function estadoLabel(s) {
+  return {
+    pendiente_si:         'Pend. aprobación SI',
+    rechazada_si:         'Rechazada por SI',
+    pendiente_aprobacion: 'Pendiente revisión',
+    pendiente_supervisor: 'Pendiente revisión',
+    en_correccion:        'En corrección',
+    aprobado_supervisor:  'Aprobado',
+    rechazado_supervisor: 'Rechazado',
+  }[s] || s;
+}
 
-  const puedeActuar = u.estado === 'pendiente_aprobacion' || u.estado === 'pendiente_supervisor';
+// ── MODAL ─────────────────────────────────────────────────────────────────
+function openModal(id) {
+  currentUrgencia = allUrgencias.find(u => u.id === id);
+  if (!currentUrgencia) return;
 
-  const acciones = puedeActuar ? `
-    <div class="action-area">
-      <label>Comentario del Supervisor BHP <span style="font-weight:400;color:var(--bhp-gray);font-size:0.72rem;">(requerido al solicitar corrección)</span></label>
-      <textarea id="obs-${u.id}" placeholder="Ingrese comentarios u observaciones..."></textarea>
-      <div class="action-btns">
-        <button class="btn-approve"    onclick="accion('${u.id}','aprobar')">✓ Aprobar y enviar a Ferrovial</button>
-        <button class="btn-correction" onclick="accion('${u.id}','corregir')">✎ Solicitar corrección</button>
-        <button class="btn-reject"     onclick="accion('${u.id}','rechazar')">✗ Rechazar</button>
-      </div>
-    </div>`
-  : u.estado === 'pendiente_si' ? `
-    <div style="background:#F3F0FF;border:1px solid #C4B5FD;border-radius:6px;padding:0.85rem 1rem;font-size:0.82rem;color:#5B21B6;">
-      ⏳ <strong>Esperando aprobación del Superintendente(a)</strong> — Las acciones estarán disponibles una vez que el/la SI apruebe la solicitud.
-    </div>`
-  : u.estado === 'rechazada_si' ? `
-    <div style="background:#FEE;border:1px solid #F5C6C6;border-radius:6px;padding:0.85rem 1rem;font-size:0.82rem;color:#C0392B;">
-      ✕ <strong>Solicitud rechazada por el/la Superintendente(a).</strong> No requiere acción.
-    </div>`
-  : u.estado === 'en_correccion' ? `
-    <div style="background:#FFF8E8;border:1px solid #F5DFA0;border-radius:6px;padding:0.85rem 1rem;font-size:0.82rem;color:#92610A;">
-      ✎ <strong>Corrección solicitada.</strong> Pendiente que el solicitante corrija y reenvíe.${u.obs_supervisor ? ` <em>"${u.obs_supervisor}"</em>` : ''}
-    </div>`
-  : `<p style="font-size:0.82rem;color:var(--bhp-gray)">Estado actual: <strong>${estadoLabel(u.estado)}</strong>${u.obs_supervisor ? ` · "${u.obs_supervisor}"` : ''}</p>`;
+  pendingAction = null;
+  document.getElementById('commentBox').classList.remove('visible');
+  document.getElementById('commentText').value = '';
+  document.getElementById('commentText').style.borderColor = '';
+  document.getElementById('btnConfirmar').disabled = false;
+  document.getElementById('btnConfirmar').textContent = 'Confirmar';
 
-  const div = document.createElement('div');
-  div.className = 'urg-card';
-  div.id = 'card-' + u.id;
-  div.innerHTML = `
-    <div class="urg-card-header" onclick="toggleCard('${u.id}')">
-      <div>
-        <div class="urg-id">${num}</div>
-        <div class="urg-meta">${u.gerencia || '—'} · ${u.nombre_superintendente || '—'} · ${fecha}</div>
-      </div>
-      <div class="urg-badges">
-        ${escoltaBadge}
-        <span class="status-pill ${u.estado}">${estadoLabel(u.estado)}</span>
+  const u = currentUrgencia;
+  const num = u.numero_urg || ('SOBRED-' + String(u.id).slice(0, 8));
+
+  document.getElementById('modalUrgNum').textContent = num;
+  const statusEl = document.getElementById('modalStatus');
+  statusEl.textContent = estadoLabel(u.estado);
+  statusEl.className = `status-pill ${u.estado}`;
+
+  const v = (val) => val || '—';
+
+  // Alerta de dimensiones
+  const hayEscolta = u.requiere_escolta === 'si';
+  const medAlerta = `
+    <div class="medidas-alert">
+      📐 <strong>Dimensiones:</strong> Alto ${v(u.medida_alto)}m · Ancho ${v(u.medida_ancho)}m · Largo ${v(u.medida_largo)}m &nbsp;|&nbsp; <strong>Peso: ${v(u.peso_carga)} TON</strong>
+    </div>
+    ${hayEscolta ? `<div class="escolta-alert">🚨 REQUIERE ESCOLTA — Las dimensiones o peso superan los límites estándar.</div>` : ''}`;
+
+  // Comentario supervisor anterior
+  const obsAnterior = u.comentario_supervisor || u.obs_supervisor;
+
+  document.getElementById('modalBody').innerHTML = `
+
+    <!-- SECCIÓN 1: Datos de la SI / Solicitante -->
+    <div class="detail-section">
+      <div class="detail-section-title">1 · Datos de la SI que activa la Urgencia</div>
+      <div class="detail-grid">
+        <div class="detail-field"><span class="detail-label">Fecha Solicitud</span><span class="detail-value">${v(u.fecha_solicitud)}</span></div>
+        <div class="detail-field"><span class="detail-label">Gerencia</span><span class="detail-value">${v(u.gerencia)}</span></div>
+        <div class="detail-field"><span class="detail-label">Superintendencia</span><span class="detail-value">${v(u.superintendencia)}</span></div>
+        <div class="detail-field"><span class="detail-label">Nombre Superintendente(a)</span><span class="detail-value">${v(u.nombre_superintendente)}</span></div>
+        <div class="detail-field full"><span class="detail-label">Centro de Costo / WBS</span><span class="detail-value mono">${v(u.centro_costo_wbs)}</span></div>
+        <div class="detail-field"><span class="detail-label">Nombre Solicitante</span><span class="detail-value">${v(u.nombre_solicitante)}</span></div>
+        <div class="detail-field"><span class="detail-label">Correo Solicitante</span><span class="detail-value">${v(u.correo_solicitante)}</span></div>
+        <div class="detail-field"><span class="detail-label">Teléfono Solicitante</span><span class="detail-value">${v(u.telefono_solicitante)}</span></div>
+        <div class="detail-field"><span class="detail-label">Superintendente(a) SI (aprobación)</span><span class="detail-value">${v(u.si_nombre || u.nombre_superintendente)}</span></div>
+        <div class="detail-field"><span class="detail-label">Correo SI</span><span class="detail-value">${v(u.email_super || u.si_correo)}</span></div>
       </div>
     </div>
-    <div class="urg-card-body" id="body-${u.id}">
-      <div class="medidas-box">
-        📐 <strong>Dimensiones:</strong> Alto: ${u.medida_alto}m · Ancho: ${u.medida_ancho}m · Largo: ${u.medida_largo}m &nbsp;|&nbsp; <strong>Peso: ${u.peso_carga} TON</strong>
-        ${u.requiere_escolta === 'si' ? ' &nbsp;<strong style="color:#92610A">🚨 REQUIERE ESCOLTA</strong>' : ''}
+
+    <!-- SECCIÓN 2: Datos de la Urgencia -->
+    <div class="detail-section">
+      <div class="detail-section-title">2 · Datos de la Urgencia</div>
+      ${medAlerta}
+      <div class="detail-grid">
+        <div class="detail-field"><span class="detail-label">Proveedor</span><span class="detail-value">${v(u.nombre_proveedor)}</span></div>
+        <div class="detail-field"><span class="detail-label">Focal Proveedor</span><span class="detail-value">${v(u.focal_proveedor)}</span></div>
+        <div class="detail-field"><span class="detail-label">Contacto Proveedor</span><span class="detail-value">${v(u.contacto_proveedor)}</span></div>
+        <div class="detail-field"><span class="detail-label">PO / Ítems</span><span class="detail-value mono">${v(u.po_items)}</span></div>
+        <div class="detail-field"><span class="detail-label">Código Stock</span><span class="detail-value ${u.codigo_stock ? '' : 'empty'}">${u.codigo_stock || 'No aplica'}</span></div>
+        <div class="detail-field"><span class="detail-label">N° Reserva</span><span class="detail-value ${u.numero_reserva ? '' : 'empty'}">${u.numero_reserva || 'No aplica'}</span></div>
+        <div class="detail-field"><span class="detail-label">Medida Alto (m)</span><span class="detail-value mono">${v(u.medida_alto)}</span></div>
+        <div class="detail-field"><span class="detail-label">Medida Ancho (m)</span><span class="detail-value mono">${v(u.medida_ancho)}</span></div>
+        <div class="detail-field"><span class="detail-label">Medida Largo (m)</span><span class="detail-value mono">${v(u.medida_largo)}</span></div>
+        <div class="detail-field"><span class="detail-label">Peso (TON)</span><span class="detail-value mono">${v(u.peso_carga)}</span></div>
+        <div class="detail-field"><span class="detail-label">Requiere Escolta</span><span class="detail-value">${u.requiere_escolta === 'si' ? '🚨 Sí' : 'No'}</span></div>
+        <div class="detail-field full"><span class="detail-label">Descripción del Material</span><span class="detail-value">${v(u.descripcion)}</span></div>
+        <div class="detail-field full"><span class="detail-label">Justificación de la Urgencia</span><span class="detail-value">${v(u.justificacion)}</span></div>
       </div>
-      <div class="data-grid">
-        <div class="data-item"><label>Gerencia</label><span>${u.gerencia || '—'}</span></div>
-        <div class="data-item"><label>Superintendencia</label><span>${u.superintendencia || '—'}</span></div>
-        <div class="data-item"><label>Centro Costo/WBS</label><span>${u.centro_costo_wbs || '—'}</span></div>
-        <div class="data-item"><label>Fecha Solicitud</label><span>${u.fecha_solicitud || '—'}</span></div>
-        <div class="data-item"><label>Superintendente(a) SI</label><span>${u.nombre_superintendente || u.si_nombre || '—'}</span></div>
-        <div class="data-item"><label>Correo SI</label><span>${u.email_super || u.si_correo || '—'}</span></div>
-        ${u.nombre_solicitante ? `<div class="data-item"><label>Solicitante</label><span>${u.nombre_solicitante}</span></div>` : ''}
-        ${u.correo_solicitante ? `<div class="data-item"><label>Correo Solicitante</label><span>${u.correo_solicitante}</span></div>` : ''}
-        ${u.telefono_solicitante ? `<div class="data-item"><label>Fono Solicitante</label><span>${u.telefono_solicitante}</span></div>` : ''}
-        <div class="data-item"><label>Proveedor</label><span>${u.nombre_proveedor || '—'}</span></div>
-        <div class="data-item"><label>Focal Proveedor</label><span>${u.focal_proveedor || '—'}</span></div>
-        <div class="data-item"><label>Contacto Proveedor</label><span>${u.contacto_proveedor || '—'}</span></div>
-        <div class="data-item"><label>PO / Ítems</label><span>${u.po_items || '—'}</span></div>
-        <div class="data-item"><label>Cód. Stock</label><span>${u.codigo_stock || '—'}</span></div>
-        <div class="data-item"><label>N° Reserva</label><span>${u.numero_reserva || '—'}</span></div>
-        <div class="data-item"><label>Supervisor MEL</label><span>${u.nombre_supervisor_mel || '—'}</span></div>
-        <div class="data-item"><label>Contacto MEL</label><span>${u.contacto_supervisor_mel || '—'}</span></div>
-        <div class="data-item"><label>UP Entrega</label><span>${u.up_punto_entrega || '—'}</span></div>
-        ${u.descripcion ? `<div class="data-item full"><label>Descripción del material</label><span>${u.descripcion}</span></div>` : ''}
-        ${u.justificacion ? `<div class="data-item full"><label>Justificación de la urgencia</label><span>${u.justificacion}</span></div>` : ''}
-        ${u.obs_supervisor ? `<div class="data-item full"><label>Comentario anterior del Supervisor</label><span style="color:var(--bhp-warning);">${u.obs_supervisor}</span></div>` : ''}
+    </div>
+
+    <!-- SECCIÓN 3: Datos para Entrega -->
+    <div class="detail-section">
+      <div class="detail-section-title">3 · Datos para Entrega en el Sitio</div>
+      <div class="detail-grid">
+        <div class="detail-field"><span class="detail-label">Supervisor MEL</span><span class="detail-value">${v(u.nombre_supervisor_mel)}</span></div>
+        <div class="detail-field"><span class="detail-label">Contacto MEL</span><span class="detail-value">${v(u.contacto_supervisor_mel)}</span></div>
+        <div class="detail-field full"><span class="detail-label">UP — Punto de Entrega</span><span class="detail-value mono">${v(u.up_punto_entrega)}</span></div>
       </div>
-      ${acciones}
-    </div>`;
-  container.appendChild(div);
+    </div>
+
+    ${obsAnterior ? `
+    <div class="detail-section">
+      <div class="detail-section-title">Comentario del Supervisor BHP</div>
+      <div style="background:#FFFBEB;border:1px solid #FCD34D;border-radius:6px;padding:0.85rem 1rem;font-size:0.85rem;color:#92400E;line-height:1.5;">${obsAnterior}</div>
+    </div>` : ''}
+  `;
+
+  // Acciones según estado
+  const actEl = document.getElementById('actionButtons');
+  const modalActEl = document.getElementById('modalActions');
+
+  if (u.estado === 'pendiente_si') {
+    actEl.innerHTML = '';
+    modalActEl.querySelector('.actions-title').textContent = 'Estado';
+    actEl.innerHTML = `<div style="background:#F5F0FF;border:1px solid #C4B5FD;border-radius:8px;padding:0.85rem 1rem;font-size:0.82rem;color:#6D28D9;width:100%;">⏳ <strong>Esperando aprobación del Superintendente(a)</strong> — Las acciones estarán disponibles una vez que el/la SI apruebe.</div>`;
+    modalActEl.style.display = 'block';
+  } else if (u.estado === 'rechazada_si') {
+    actEl.innerHTML = `<div style="background:#FEE;border:1px solid #F5C6C6;border-radius:8px;padding:0.85rem 1rem;font-size:0.82rem;color:#C0392B;width:100%;">✕ <strong>Solicitud rechazada por el/la Superintendente(a).</strong> No requiere acción.</div>`;
+    modalActEl.style.display = 'block';
+  } else if (u.estado === 'pendiente_aprobacion' || u.estado === 'pendiente_supervisor' || u.estado === 'en_correccion') {
+    modalActEl.querySelector('.actions-title').textContent = 'Acciones';
+    actEl.innerHTML = `
+      <button class="btn-aprobar"    onclick="doAction('aprobar')">✓ Aprobar y enviar a Ferrovial</button>
+      <button class="btn-correccion" onclick="doAction('corregir')">✎ Solicitar corrección</button>
+      <button class="btn-rechazar"   onclick="doAction('rechazar')">✕ Rechazar</button>`;
+    modalActEl.style.display = 'block';
+  } else {
+    modalActEl.style.display = 'none';
+  }
+
+  document.getElementById('commentBox').classList.remove('visible');
+  document.getElementById('modalOverlay').classList.add('visible');
 }
 
-function toggleCard(id) {
-  document.getElementById('body-' + id)?.classList.toggle('open');
+function closeModalOutside(e) {
+  if (e.target === document.getElementById('modalOverlay')) closeModal();
 }
 
-async function accion(id, tipo) {
-  const obs = document.getElementById('obs-' + id)?.value?.trim() || '';
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('visible');
+  document.getElementById('commentBox').classList.remove('visible');
+  document.getElementById('commentText').value = '';
+  document.getElementById('commentText').style.borderColor = '';
+  currentUrgencia = null;
+  pendingAction = null;
+}
 
-  if (tipo === 'corregir' && !obs) {
-    alert('Debe ingresar un comentario explicando qué debe corregir el solicitante.');
-    document.getElementById('obs-' + id)?.focus();
+// ── ACCIONES ─────────────────────────────────────────────────────────────
+function doAction(action) {
+  pendingAction = action;
+  const commentBox = document.getElementById('commentBox');
+  commentBox.classList.add('visible');
+
+  if (action === 'aprobar') {
+    document.getElementById('commentLabel').textContent = 'Comentario (opcional)';
+    document.getElementById('commentText').placeholder = 'Puede agregar una nota o dejarlo en blanco...';
+    document.getElementById('btnConfirmar').textContent = 'Confirmar aprobación';
+  } else if (action === 'corregir') {
+    document.getElementById('commentLabel').textContent = 'Indique qué debe corregir el solicitante (obligatorio)';
+    document.getElementById('commentText').placeholder = 'Escriba el motivo de la corrección...';
+    document.getElementById('btnConfirmar').textContent = 'Solicitar corrección';
+  } else {
+    document.getElementById('commentLabel').textContent = 'Indique el motivo del rechazo (obligatorio)';
+    document.getElementById('commentText').placeholder = 'Escriba el motivo del rechazo...';
+    document.getElementById('btnConfirmar').textContent = 'Confirmar rechazo';
+  }
+  document.getElementById('commentText').focus();
+}
+
+function cancelComment() {
+  document.getElementById('commentBox').classList.remove('visible');
+  document.getElementById('commentText').value = '';
+  pendingAction = null;
+}
+
+async function confirmAction() {
+  const comment = document.getElementById('commentText').value.trim();
+
+  if (!comment && (pendingAction === 'corregir' || pendingAction === 'rechazar')) {
+    document.getElementById('commentText').style.borderColor = 'var(--bhp-error)';
+    setTimeout(() => document.getElementById('commentText').style.borderColor = '', 1500);
     return;
   }
 
+  const btn = document.getElementById('btnConfirmar');
+  btn.disabled = true;
+
   let nuevoEstado, evento;
-  if (tipo === 'aprobar') {
-    nuevoEstado = 'aprobado_supervisor';
-    evento = 'aprobado_supervisor';
-  } else if (tipo === 'corregir') {
-    nuevoEstado = 'en_correccion';
-    evento = 'en_correccion';
+  if (pendingAction === 'aprobar') {
+    nuevoEstado = 'aprobado_supervisor'; evento = 'aprobado_supervisor';
+  } else if (pendingAction === 'corregir') {
+    nuevoEstado = 'en_correccion'; evento = 'en_correccion';
   } else {
-    nuevoEstado = 'rechazado_supervisor';
-    evento = 'rechazado_supervisor';
+    nuevoEstado = 'rechazado_supervisor'; evento = 'rechazado_supervisor';
   }
 
   const { error } = await sb.from('urgencias').update({
     estado: nuevoEstado,
-    obs_supervisor: obs,
-    comentario_supervisor: obs,
+    obs_supervisor: comment || null,
+    comentario_supervisor: comment || null,
     aprobado_supervisor_at: new Date().toISOString()
-  }).eq('id', id);
+  }).eq('id', currentUrgencia.id);
 
   if (!error) {
     await fetch(`${SUPABASE_URL}/functions/v1/send-email`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPABASE_KEY}` },
-      body: JSON.stringify({ urgencia_id: id, tipo: 'sobredimension', evento })
+      body: JSON.stringify({ urgencia_id: currentUrgencia.id, tipo: 'sobredimension', evento })
     });
+    closeModal();
     loadUrgencias();
+  } else {
+    alert('Error al actualizar. Intente nuevamente.');
+    btn.disabled = false;
   }
 }
 </script>
