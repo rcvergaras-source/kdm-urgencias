@@ -109,15 +109,12 @@ Deno.serve(async (req) => {
 
       // Email al Superintendente para aprobación
       if (nombreSuperEmail && u.token_aprobacion) {
-        const linkAprobar = `${SITE_URL}/aprobar-si?token=${u.token_aprobacion}&decision=aprobada`
-        const linkRechazar = `${SITE_URL}/aprobar-si?token=${u.token_aprobacion}&decision=rechazada`
         const linkVer = `${SITE_URL}/aprobar-si?token=${u.token_aprobacion}`
         const botonesAprobacion = `
           <div style="margin:24px 0;text-align:center;">
-            <a href="${linkAprobar}" style="display:inline-block;background:#2D7D46;color:#fff;text-decoration:none;padding:12px 28px;border-radius:8px;font-weight:600;font-size:15px;margin-right:12px;">✓ Aprobar solicitud</a>
-            <a href="${linkRechazar}" style="display:inline-block;background:#fff;color:#C0392B;text-decoration:none;padding:11px 28px;border-radius:8px;font-weight:600;font-size:15px;border:1.5px solid #F5C6C6;">✕ Rechazar solicitud</a>
+            <a href="${linkVer}" style="display:inline-block;background:#E05E1B;color:#fff;text-decoration:none;padding:14px 36px;border-radius:8px;font-weight:600;font-size:15px;">Revisar y aprobar/rechazar solicitud</a>
           </div>
-          <p style="text-align:center;font-size:12px;color:#999;">O haz clic aquí para <a href="${linkVer}" style="color:#E05E1B;">ver el detalle completo</a> antes de decidir.</p>
+          <p style="text-align:center;font-size:12px;color:#999;">Al hacer clic podrá revisar el detalle completo y confirmar su decisión.</p>
         `
         const html = templateBase(`
           <h2 style="color:#E05E1B;font-size:18px;margin:0 0 8px;">Nueva Solicitud de Urgencia — ${tipoLabel}</h2>
