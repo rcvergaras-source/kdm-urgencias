@@ -205,18 +205,34 @@ Deno.serve(async (req) => {
       // Destinatarios según el evento
       let destinatarios: string[] = []
 
-      if (evento === 'en_correccion' || evento === 'rechazada' || evento === 'rechazado_supervisor') {
-        // Notificar al solicitante/SI para que tome acción
-        destinatarios = [OTROS_EMAIL]
-      } else if (evento === 'aprobada' || evento === 'aprobado_supervisor') {
-        // Notificar a KDM para que gestione la logística
-        destinatarios = [KDM_EMAIL]
+      if (evento === 'en_correccion') {
+        // Correo al solicitante con link directo al formulario pre-llenado
+        const linkCorreccion = `${SITE_URL}/carga-general?id=${encodeURIComponent(num)}`
+        const htmlCorreccion = templateBase(`
+          <h2 style="color:#E05E1B;font-size:18px;margin:0 0 8px;">Corrección Solicitada — Urgencia ${num}</h2>
+          <p style="color:#555;font-size:14px;">El Supervisor BHP ha solicitado una corrección en su solicitud de urgencia <strong>${num}</strong>.</p>
+          ${comentario ? `
+          <div style="background:#FFF8F0;border-left:4px solid #E05E1B;border-radius:4px;padding:12px 16px;margin:16px 0;">
+            <p style="font-size:12px;font-weight:600;color:#E05E1B;margin:0 0 4px;text-transform:uppercase;letter-spacing:0.05em;">Motivo indicado por el Supervisor</p>
+            <p style="font-size:14px;color:#333;margin:0;">${comentario}</p>
+          </div>` : ''}
+          <p style="color:#555;font-size:14px;">Haga clic en el botón para abrir el formulario con sus datos pre-cargados, realice las correcciones necesarias y envíe nuevamente.</p>
+          <div style="margin:24px 0;text-align:center;">
+            <a href="${linkCorreccion}" style="display:inline-block;background:#E05E1B;color:#fff;text-decoration:none;padding:14px 36px;border-radius:8px;font-weight:600;font-size:15px;">Corregir solicitud ${num}</a>
+          </div>
+          <p style="text-align:center;font-size:12px;color:#999;">El formulario se abrirá con todos sus datos anteriores pre-cargados para que solo corrija lo necesario.</p>
+        `)
+        resultados.push(await enviarCorreo(OTROS_EMAIL, `[Urgencia ${num}] Corrección solicitada por Supervisor BHP`, htmlCorreccion))
       } else {
-        // Cambios de estado operativos → KDM y BHP
-        destinatarios = [KDM_EMAIL, BHP_SUPER_EMAIL]
+        if (evento === 'rechazada' || evento === 'rechazado_supervisor') {
+          destinatarios = [OTROS_EMAIL]
+        } else if (evento === 'aprobada' || evento === 'aprobado_supervisor') {
+          destinatarios = [KDM_EMAIL]
+        } else {
+          destinatarios = [KDM_EMAIL, BHP_SUPER_EMAIL]
+        }
+        resultados.push(await enviarCorreo(destinatarios, `[Urgencia ${num}] ${titulo}`, html))
       }
-
-      resultados.push(await enviarCorreo(destinatarios, `[Urgencia ${num}] ${titulo}`, html))
     }
 
     return new Response(JSON.stringify({ ok: true, evento, resultados }), {
